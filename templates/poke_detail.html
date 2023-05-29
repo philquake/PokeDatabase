@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>PokeDetail</title>
+{% endblock %}
+
+{% block body %}
+<hr>Pokemon Details<hr>
+<table>
+  <table>
+    <tr>
+      <th>{{obj.name}}</th>
+      <br>
+      <th>{{obj.height}}</th>
+      <br>
+      <th>{{obj.id}}</th>
+      <br>
+    </tr>
+  </table>
+</table>
+{% endblock %}
+
