@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 import pokebase as pb
+import logging
 
 app = Flask(__name__)
 
@@ -23,12 +24,19 @@ def poke():
 
 @app.route('/poke_detail/<poke_name>', methods=['GET', 'POST'])
 def poke_detail(poke_name):
-    name = pb.pokemon(poke_name)
-    id = name.id
-    height = name.height
-    pname = name.name
-    obj = PokeObj(pname,id,height)
-    return render_template('poke_detail.html', obj=obj)
+    error = None
+    try:
+        name = pb.pokemon(poke_name)
+        app.logger.info(name)    
+        id = name.id
+        height = name.height
+        pname = name.name
+        obj = PokeObj(pname,id,height)
+        return render_template('poke_detail.html', obj=obj)
+    except:
+        error = "Please check your spelling, no such pokemon."
+        return render_template('index.html',error=error)
+
 
 if __name__ =="__main__":
     app.run(debug=True)
