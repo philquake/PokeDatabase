@@ -26,13 +26,15 @@ def poke():
 def poke_detail(poke_name):
     error = None
     try:
-        name = pb.pokemon(poke_name)
-        app.logger.info(name)    
-        id = name.id
-        height = name.height
-        pname = name.name
+        poke = pb.pokemon(poke_name)
+        app.logger.info(poke)   #Concsole log for pokemon name entered    
+        id = poke.id
+        height = poke.height
+        pname = poke.name
+        app.logger.info(poke.types)
+        types = poke.types
         obj = PokeObj(pname,id,height)
-        return render_template('poke_detail.html', obj=obj)
+        return render_template('poke_detail.html', obj=obj, types = types)
     except:
         error = "Please check your spelling, no such pokemon."
         return render_template('index.html',error=error)
