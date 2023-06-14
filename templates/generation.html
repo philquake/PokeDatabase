@@ -1,19 +1,15 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<title>G</title>
+<title>Generation Pokemon</title>
 {% endblock %}
 
 {% block body %}
 <hr>Generation<hr>
-<table>
-  <table>
-    <tr>
-        {% for name in obj %}
-        <th>{{ obj.name }}</th>
-        {% endfor %}
-    </tr>
-  </table>
-</table>
+
+{% for name in list %}
+  <p>{{ GenObj[name].name }}</p>
+{% endfor %}
+
 {% endblock %}
 

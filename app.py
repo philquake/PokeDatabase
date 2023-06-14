@@ -11,10 +11,10 @@ class PokeObj:
         self.height = height
 
 class GenObj:
-    def __init__(self,name, gen):
-        self.name = name
+    def __init__(self, gen, name):
         self.gen = gen
-
+        self.name = name
+        
 @app.route('/')
 def index():
 
@@ -55,12 +55,22 @@ def gen():
 @app.route('/generation/<gen>', methods=['GET', 'POST'])
 def generation(gen):
     error = None
+    list = []
     # try:
-    gen_search = pb.generation(gen)
-    for pokemon in gen_search.pokemon_species:
-        obj = GenObj[pokemon] = pokemon.name.title()
-        app.logger.info('Type',(pokemon.name.title()))
-    return render_template('generation.html', obj=obj)
+    match gen:
+        case "1":
+            GENERATION = 1
+        case "2":
+            GENERATION = 2
+        case _:
+            print("asad")
+    gen_resource = pb.generation(GENERATION)     # Get API data associated with that particular generation.
+    for pokemon in gen_resource.pokemon_species:     # Iterate through the list of Pokemon introduced in that generation.
+        # print(pokemon.name.title())
+        list.append(GenObj(GENERATION,pokemon.name.title()))
+    for x in list:
+        print(GenObj[x])
+    return render_template('generation.html', GenObj=GenObj)
     # except:
     #     error = "No such generation."
     #     return render_template('index.html',error=error)
