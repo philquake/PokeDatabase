@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>G</title>
+{% endblock %}
+
+{% block body %}
+<hr>Generation<hr>
+<table>
+  <table>
+    <tr>
+        {% for name in obj %}
+        <th>{{ obj.name }}</th>
+        {% endfor %}
+    </tr>
+  </table>
+</table>
+{% endblock %}
+
