@@ -7,8 +7,8 @@
 {% block body %}
 <hr>Generation<hr>
 
-{% for name in list %}
-  <p>{{ GenObj[name].name }}</p>
+{% for i in range (0, len) %}
+  <p>{{ genlist[i].name }}</p>
 {% endfor %}
 
 {% endblock %}
