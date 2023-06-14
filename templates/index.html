@@ -14,5 +14,11 @@
     <input type="text" id="poke_name" name="poke_name"><br>
     <input type="submit" value="Submit"></a>
   </form>
+
+  <form action = "{{ url_for('gen') }}" method = "post">
+    <label for="gen">Generation:</label><br>
+    <input type="text" id="gen" name="gen"><br>
+    <input type="submit" value="Submit"></a>
+  </form>
 {% endblock %}
 

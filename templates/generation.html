@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Generation Pokemon</title>
+{% endblock %}
+
+{% block body %}
+<hr>Generation<hr>
+
+{% for i in range (0, len) %}
+  <p>{{ genlist[i].name }}</p>
+{% endfor %}
+
+{% endblock %}
+
