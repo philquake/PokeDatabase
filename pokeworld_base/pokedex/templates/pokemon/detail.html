@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ pokemon.name|title }}
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    {% if pokemon %}
+
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <div class="row">
+                <div class="col-md-3 text-center">
+                    <img
+                        src="{{ pokemon.sprites.other.official-artwork.front_default }}"
+                        alt="{{ pokemon.name }}"
+                        class="img-fluid"
+                    >
+                </div>
+                <div class="col-md-9">
+                    <h1>
+                        #{{ pokemon.id }}
+                        {{ pokemon.name|title }}
+                    </h1>
+                    <h5>
+                        {% for type in pokemon.types %}
+                            <span class="badge bg-success">
+                                {{ type.type.name|title }}
+                            </span>
+                        {% endfor %}
+                    </h5>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Basic Information -->
+                <div class="col-md-6">
+                    <h3>Basic Information</h3>
+                    <table class="table table-striped">
+                        <tr>
+                            <th>Height</th>
+                            <td>{{ pokemon.height }}</td>
+                        </tr>
+                        <tr>
+                            <th>Weight</th>
+                            <td>{{ pokemon.weight }}</td>
+                        </tr>
+                        <tr>
+                            <th>Base Experience</th>
+                            <td>{{ pokemon.base_experience }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <!-- Abilities -->
+                <div class="col-md-6">
+                    <h3>Abilities</h3>
+                    <ul class="list-group">
+                        {% for ability in pokemon.abilities %}
+                        <li class="list-group-item">
+                            {{ ability.ability.name|title }}
+                            {% if ability.is_hidden %}
+                                <span class="badge bg-warning">
+                                    Hidden
+                                </span>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            <hr>
+            <!-- Base Stats -->
+            <h3>Base Stats</h3>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Stat</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat in pokemon.stats %}
+                    <tr>
+                        <td>
+                            {{ stat.stat.name|title }}
+                        </td>
+                        <td>
+                            {{ stat.base_stat }}
+                            <div class="progress mt-2">
+                                <div
+                                    class="progress-bar"
+                                    role="progressbar"
+                                    style="width: {{ stat.base_stat|min:100 }}%;"
+                                >
+                                    {{ stat.base_stat }}
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+            <hr>
+
+            <!-- Moves -->
+
+            <h3>Moves</h3>
+
+            <div class="row">
+
+                {% for move in pokemon.moves|slice:":20" %}
+
+                <div class="col-md-3 mb-2">
+
+                    <span class="badge bg-secondary w-100 p-2">
+
+                        {{ move.move.name|title }}
+
+                    </span>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            <hr>
+
+            <!-- Sprites -->
+
+            <h3>Sprites</h3>
+
+            <div class="row text-center">
+
+                <div class="col">
+
+                    <img
+                        src="{{ pokemon.sprites.front_default }}"
+                        alt="Front"
+                    >
+
+                    <p>Front</p>
+
+                </div>
+
+                <div class="col">
+
+                    <img
+                        src="{{ pokemon.sprites.back_default }}"
+                        alt="Back"
+                    >
+
+                    <p>Back</p>
+
+                </div>
+
+                <div class="col">
+
+                    <img
+                        src="{{ pokemon.sprites.front_shiny }}"
+                        alt="Shiny Front"
+                    >
+
+                    <p>Shiny Front</p>
+
+                </div>
+
+                <div class="col">
+
+                    <img
+                        src="{{ pokemon.sprites.back_shiny }}"
+                        alt="Shiny Back"
+                    >
+
+                    <p>Shiny Back</p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% else %}
+
+    <div class="alert alert-danger">
+
+        <h3>Pokémon Not Found</h3>
+
+        <p>No Pokémon data could be retrieved.</p>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
