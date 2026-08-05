@@ -1,0 +1,32 @@
+# Virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Environment variables
+.env
+
+# SQLite database
+db.sqlite3
+
+# Django collected static files
+staticfiles/
+
+# IDE
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
+
+# Test and coverage
+.pytest_cache/
+.coverage
+/static/
+src/db.sqlite3
+src/static
+
+# Old files
+/OLD
