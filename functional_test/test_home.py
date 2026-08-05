@@ -40,7 +40,6 @@ class NavigationBarTest(LiveServerTestCase):
         expected_links = ["Home", "Pokédex", "Types", "Abilities", "Moves", "Regions"]
         self.assertEqual(link_texts, expected_links)
 
-
 class searchBarTest(LiveServerTestCase):
     def setUp(self):
         super().setUp()
