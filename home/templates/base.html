@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+    <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home</title>
+  </head>
+  <body>
+    <div class="container">
+      <header class="topbar">
+        <div class="brand">PokeDatabase</div>
+        <nav class="nav" aria-label="Main navigation">
+          <a href="#">Home</a>
+          <a href="#">Pokédex</a>
+          <a href="#">Types</a>
+          <a href="#">Regions</a>
+        </nav>
+      </header>
+    </div>
+    <h1>{% block header_text %}{% endblock%}</h1>
+  <body>
+
+    <main>
+      <form method="GET" action="{% url 'search' %}">
+        <input type="text" name="search" placeholder="Search Pokemon">
+        <button type="submit">Search</button>
+      </form>
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+      <p>© 2025 PokeDatabase</p>
+    </footer>
+  </body>
+</html>
