@@ -21,8 +21,8 @@ class TemplateTest(LiveServerTestCase):
     def test_correct_template(self):
         self.driver.get(self.live_server_url)
         self.assertIn("Home", self.driver.title)
-        header_text = self.driver.find_element(By.TAG_NAME, "h1").text
-        self.assertIn("Search Pokemon", header_text)
+        paragraph = self.driver.find_element(By.CLASS_NAME, "text-base")
+        self.assertIn("Search Pokémon", paragraph.text)
 
 class NavigationBarTest(LiveServerTestCase):
     def setUp(self):
