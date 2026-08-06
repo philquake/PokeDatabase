@@ -1,28 +1,35 @@
 <!DOCTYPE html>
+    {% load static %}
     <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="{% static 'css/styles.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet" />
     <title>Home</title>
   </head>
+  <script src="{% static 'bootstrap/bootstrap-5.3.5-dist/js/bootstrap.bundle.min.js' %}">
+</script>
   <body>
     <div class="container">
       <header class="topbar">
-        <div class="brand">PokeDatabase</div>
         <nav class="nav" aria-label="Main navigation">
+          <img class="logo-icon" src="{% static 'img/pokemon_logo.png' %}" alt="Pokemon Logo" />
+          <text class="logo-text">PokeDatabase</text>
           <a href="#">Home</a>
-          <a href="#">Pokédex</a>
+          <a href="#">Pokémon</a>
           <a href="#">Types</a>
+          <a href="#">Region</a>
           <a href="#">Abilities</a>
           <a href="#">Moves</a>
-          <a href="#">Regions</a>
+          <a href="#">Competitive</a>
         </nav>
       </header>
     </div>
-    <h1>{% block header_text %}{% endblock%}</h1>
+    
   <body>
-
     <main>
+      <h1>{% block header_text %}{% endblock%}</h1>
       <form method="GET" action="{% url 'search' %}">
         <input type="text" name="search" placeholder="Search Pokemon">
         <button type="submit">Search</button>
