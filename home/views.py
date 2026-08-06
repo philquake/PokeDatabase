@@ -8,4 +8,28 @@ def home(request):
 
 def search(request):
     return render(request, 'search.html')
+
+
+def pokedex(request):
+    return HttpResponse("Pokédex")
+
+
+def types(request):
+    return HttpResponse("Types")
+
+
+def region(request):
+    return HttpResponse("Region")
+
+
+def abilities(request):
+    return HttpResponse("Abilities")
+
+
+def moves(request):
+    return HttpResponse("Moves")
+
+
+def competitive(request):
+    return HttpResponse("Competitive")
     
