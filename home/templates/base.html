@@ -35,21 +35,9 @@
     </div>
     
     <main>
-      <h1 class="hero-title">
-        Explore the <span class="hero-title-highlight">Complete</span><br>Pokémon Database
-      </h1>
-      <h1>{% block header_text %}{% endblock%}</h1>
-      <p class="text-base">
-        Search Pokémon, discover abilities, compare stats, and analyze competitive data — all in one professional platform.
-      </p>
-      <form class="search-form" method="GET" action="{% url 'search' %}">
-        <div class="search-field">
-          <span class="search-icon">🔍</span>
-          <input class="search-input" type="text" name="search" placeholder="Search Pokémon by name, type, ability...">
-          <button class="search-button" type="submit">Search</button>
-        </div>
-      </form>
-      {% block content %}{% endblock %}
+      {% block content %}
+        <h1>{% block header_text %}{% endblock %}</h1>
+      {% endblock %}
     </main>
 
     <footer>

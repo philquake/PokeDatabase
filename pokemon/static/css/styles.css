@@ -5,6 +5,7 @@
   --text-base: 1rem;
   --text-lg: 1.125rem;
   --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
   --text-3xl: 2rem;
   --text-4xl: 2.25rem;
   --text-5xl: 3rem;
@@ -156,13 +157,33 @@ main {
   min-height: calc(100vh - 4rem);
 }
 
+/* Home page 2-column layout */
+.home-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+.home-left {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.home-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Hero title styling for the main landing message */
 .hero-title {
   font-family: 'Nunito', sans-serif;
   letter-spacing: -0.02em;
   color: #ffffff;
   line-height: var(--text-4xl--line-height);
-  margin-bottom: 1rem;
+  margin-bottom: 0.1rem;
   font-weight: 900;
   font-size: var(--text-4xl);
 
@@ -275,19 +296,19 @@ button {
 .text-base{
   color: rgba(255, 255, 255, 0.6);
   max-width: 460px;
-  font-size: var(--text-xl);
+  font-size: var(--text-lg);
 }
 
 /* Medium screens (md: 768px+) */
 @media (min-width: 768px) {
     .text-base {
-        font-size: var(--text-2xl);
+        font-size: var(--text-xl);
     }
 }
 
 /* Large screens (lg: 1024px+) */
 @media (min-width: 1024px) {
     .text-base {
-        font-size: var(--text-3xl);
+        font-size: var(--text-2xl);
     }
 }
