@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="{% static 'css/styles.css' %}" rel="stylesheet" />
     <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet" />
-    <title>Home</title>
+    <title>{% block title %}Home{% endblock %}</title>
   </head>
   <script src="{% static 'bootstrap/bootstrap-5.3.5-dist/js/bootstrap.bundle.min.js' %}">
 </script>
@@ -16,23 +16,38 @@
         <nav class="nav" aria-label="Main navigation">
           <img class="logo-icon" src="{% static 'img/pokemon_logo.png' %}" alt="Pokemon Logo" />
           <text class="logo-text">PokeDatabase</text>
-          <a href="#">Home</a>
-          <a href="#">Pokémon</a>
-          <a href="#">Types</a>
-          <a href="#">Region</a>
-          <a href="#">Abilities</a>
-          <a href="#">Moves</a>
-          <a href="#">Competitive</a>
+          <a href="{% url 'home' %}"
+            class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
+          <a href="{% url 'pokedex' %}"
+            class="{% if request.resolver_match.url_name == 'pokedex' %}active{% endif %}">Pokémon</a>
+          <a href="{% url 'types' %}"
+            class="{% if request.resolver_match.url_name == 'types' %}active{% endif %}">Types</a>
+          <a href="{% url 'region' %}"
+            class="{% if request.resolver_match.url_name == 'region' %}active{% endif %}">Region</a>
+          <a href="{% url 'abilities' %}"
+            class="{% if request.resolver_match.url_name == 'abilities' %}active{% endif %}">Abilities</a>
+          <a href="{% url 'moves' %}"
+            class="{% if request.resolver_match.url_name == 'moves' %}active{% endif %}">Moves</a>
+          <a href="{% url 'competitive' %}"
+            class="{% if request.resolver_match.url_name == 'competitive' %}active{% endif %}">Competitive</a>
         </nav>
       </header>
     </div>
     
-  <body>
     <main>
+      <h1 class="hero-title">
+        Explore the <span class="hero-title-highlight">Complete</span><br>Pokémon Database
+      </h1>
       <h1>{% block header_text %}{% endblock%}</h1>
-      <form method="GET" action="{% url 'search' %}">
-        <input type="text" name="search" placeholder="Search Pokemon">
-        <button type="submit">Search</button>
+      <p class="text-base">
+        Search Pokémon, discover abilities, compare stats, and analyze competitive data — all in one professional platform.
+      </p>
+      <form class="search-form" method="GET" action="{% url 'search' %}">
+        <div class="search-field">
+          <span class="search-icon">🔍</span>
+          <input class="search-input" type="text" name="search" placeholder="Search Pokémon by name, type, ability...">
+          <button class="search-button" type="submit">Search</button>
+        </div>
       </form>
       {% block content %}{% endblock %}
     </main>
