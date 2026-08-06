@@ -1,5 +1,20 @@
 {% extends 'base.html' %}
 
-{% block header_text %}Search Pokemon{% endblock %}
+{% block title %}Home{% endblock %}
+
+<main>
+      <h1 class="hero-title">
+        Explore the <span class="hero-title-highlight">Complete</span><br>Pokémon Database
+      </h1>
+      <h1>{% block header_text %}{% endblock%}</h1>
+      <p class="text-base">
+        Search Pokémon, discover abilities, compare stats, and analyze competitive data — all in one professional platform.
+      </p>
+      <form method="GET" action="{% url 'search' %}">
+        <input type="text" name="search" placeholder="Search Pokemon">
+        <button type="submit">Search</button>
+      </form>
+      {% block content %}{% endblock %}
+    </main>
 
 {% block form_action %}/search/{% endblock %}
