@@ -20,7 +20,16 @@
         </form>
       </div>
       <aside class="home-right">
-        
+        <div class="featured-types">{{ pokemon.types|join:" / " }}</div>
+        <img src="{{ pokemon.image.official_artwork }}"
+            alt="{{ pokemon.name }}"
+            class="featured-img">
+        <ul>
+        <p>#{{ pokemon.pokedex_number }}</p>
+        {% for stat in pokemon.stats.highest %}
+            <li>{{ stat.name }}: {{ stat.value }}</li>
+        {% endfor %}
+        </ul>
       </aside>
     </div>
 {% endblock %}
