@@ -10,6 +10,6 @@ class HomePageTest(TestCase):
 
 class PokemonDetailPageTest(TestCase):
     def test_pokemon_detail_page_template(self):
-        response = self.client.get("/pokemon/94/")
+        response = self.client.get("/pokemon/Gengar/")
         self.assertTemplateUsed(response, 'pokemon_detail.html')
         
