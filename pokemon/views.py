@@ -1,4 +1,4 @@
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, response
 from django.shortcuts import redirect, render
 from django.views.generic import TemplateView
 import json
@@ -37,8 +37,10 @@ def pokemon_detail(request, name):
 
     raise Http404("Pokemon not found")
 
-def search(request):
-    return HttpResponse("Search functionality is not implemented yet.")
+def search(request,):
+    pokemon_name = request.GET.get("search")
+    return redirect("pokemon_detail", "Gengar")
+    
 
 def types(request):
     return HttpResponse("Types page is not implemented yet.")
