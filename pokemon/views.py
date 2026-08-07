@@ -38,23 +38,7 @@ def pokemon_detail(request, name):
     raise Http404("Pokemon not found")
 
 def search(request):
-    name =request.GET.get("search")
-
-    if not name: 
-        raise Http404("Pokemon name required")
-    
-    # Load the JSON data from the file
-    json_file_path = Path(__file__).resolve().parent.parent / "assets" / "static" / "fixtures" / "pokemon.json"
-    
-    with open(json_file_path, "r") as f:
-        pokemon_data = json.load(f)
-
-    for pokemon in pokemon_data:
-        if pokemon["name"].lower() == name.lower():
-            return redirect("pokemon_detail", name=pokemon["name"])
-
-    raise Http404("Pokemon not found")
-    
+    return HttpResponse("Search functionality is not implemented yet.")
 
 def types(request):
     return HttpResponse("Types page is not implemented yet.")
