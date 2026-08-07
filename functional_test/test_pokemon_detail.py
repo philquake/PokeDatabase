@@ -1,21 +1,37 @@
 from urllib import response
 
 from django.test import LiveServerTestCase
-from pathlib import Path
-import json
+from selenium.webdriver.common.by import By
+from selenium import webdriver
+
+
 
 class ID_Test(LiveServerTestCase):
 
+    def setUp(self):
+        self.browser = webdriver.Chrome()
+
+    def tearDown(self):
+        self.browser.quit()
+
     def test_valid_pokemon(self):
-        response = self.client.get("/pokemon/Gengar/")
-        self.assertEqual(response.status_code, 200)
-        pokemon = response.context["pokemon"]
-        self.assertEqual(pokemon["pokedex_number"], 94)
-        self.assertEqual(pokemon["name"], "Gengar")
+        self.browser.get(self.live_server_url + "/pokemon/Gengar/")
+        self.assertIn("Gengar", self.browser.page_source)
 
     def test_invalid_pokemon(self):
         # A name in the URL that shouldn't match
-        response = self.client.get("/pokemon/not-a-pokemon/")
-        self.assertEqual(response.status_code, 404)
+        self.browser.get(self.live_server_url + "/pokemon/not_a_pokemon/")
+        self.assertIn("Not Found", self.browser.page_source)
+
+    def test_user_can_view_img(self):
+        self.browser.get(self.live_server_url + "/pokemon/Gengar/")
+        image = self.browser.find_element(By.CLASS_NAME, "pokemon-detail-img")
+        self.assertTrue(image.is_displayed())
+
+    def test_user_can_view_details(self):
+        self.browser.get(self.live_server_url + "/pokemon/Gengar")
+        self.assertIn("Ghost", self.browser.page_source)
+        self.assertIn("Poison", self.browser.page_source)
+
 
     # if pokemon["name"].lower() == name.lower():
