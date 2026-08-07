@@ -21,13 +21,16 @@
       </div>
       <aside class="home-right">
         <div class="featured-types">{{ pokemon.types|join:" / " }}</div>
-        {% for stat in pokemon.stats.highest %}
-            <li>{{ stat.name }}: {{ stat.value }}</li>
-        {% endfor %}
-        <img src="{{ pokemon.image.official_artwork }}"
-            alt="{{ pokemon.name }}"
-            class="featured-img">
+        <ul class="stats">
+          {% for stat in pokemon.stats.highest %}
+              <li><span class="stat-name">{{ stat.name }}</span><span class="stat-separator">•</span><span class="stat-value">{{ stat.value }}</span></li>
+          {% endfor %}
+        </ul>
+        <img class="featured-img" src="{{ pokemon.image.official_artwork }}"
+            alt="{{ pokemon.img }}">
         <div class="pokedex-num">#{{ pokemon.pokedex_number }}</div>
       </aside>
     </div>
+
+    <div class="home-divider"></div>
 {% endblock %}
