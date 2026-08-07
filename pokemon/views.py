@@ -1,5 +1,5 @@
 from django.http import Http404, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.views.generic import TemplateView
 import json
 from pathlib import Path
@@ -8,24 +8,23 @@ from django.shortcuts import render
 # Create your views here.
 def home(request):
 
-    featured = {
-        "name": "Charizard",
-        "pokedex_number": 6,
-        "types": ["Fire", "Flying"],
-        "image": {
-            "official_artwork": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png"
-        },
-        "stats": {
-            "highest": [
-                {"name": "Sp.ATK", "value": 109},
-                {"name": "SPD", "value": 100},
-            ]
-        },
-    }
+    # Load the JSON data from the file
+    json_file_path = Path(__file__).resolve().parent.parent / "assets" / "static" / "fixtures" / "pokemon.json"
+    
+    with open(json_file_path, "r") as f:
+        pokemon_data = json.load(f)
+    
+    for pokemon in pokemon_data:
+        if pokemon["name"] == "Charizard":
+            return render(request, 'home.html', {"pokemon": pokemon})
 
-    return render(request, "home.html", {"pokemon": featured})
+    return render(request, "home.html", {"pokemon": pokemon})
 
 def pokemon_detail(request, name):
+
+    if not name: 
+        raise Http404("Pokemon name required")
+    
     # Load the JSON data from the file
     json_file_path = Path(__file__).resolve().parent.parent / "assets" / "static" / "fixtures" / "pokemon.json"
 
@@ -39,7 +38,23 @@ def pokemon_detail(request, name):
     raise Http404("Pokemon not found")
 
 def search(request):
-    return HttpResponse("Search functionality is not implemented yet.")
+    name =request.GET.get("search")
+
+    if not name: 
+        raise Http404("Pokemon name required")
+    
+    # Load the JSON data from the file
+    json_file_path = Path(__file__).resolve().parent.parent / "assets" / "static" / "fixtures" / "pokemon.json"
+    
+    with open(json_file_path, "r") as f:
+        pokemon_data = json.load(f)
+
+    for pokemon in pokemon_data:
+        if pokemon["name"].lower() == name.lower():
+            return redirect("pokemon_detail", name=pokemon["name"])
+
+    raise Http404("Pokemon not found")
+    
 
 def types(request):
     return HttpResponse("Types page is not implemented yet.")
