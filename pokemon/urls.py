@@ -4,7 +4,7 @@ from pokemon import views
 
 urlpatterns = [
     path("", views.home, name="home"),
-    path("<int:pokedex_number>/", views.pokemon_detail, name="pokemon_detail"),
+    path("<str:name>/", views.pokemon_detail, name="pokemon_detail"),
 
     path("pokedex/", views.pokedex, name="pokedex"),
     path("types/", views.types, name="types"),

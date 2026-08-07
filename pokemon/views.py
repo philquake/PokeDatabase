@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse
 from django.shortcuts import render
 from django.views.generic import TemplateView
 import json
@@ -25,8 +25,18 @@ def home(request):
 
     return render(request, "home.html", {"pokemon": featured})
 
-def pokemon_detail(request, pokedex_number):
-    return render(request, 'pokemon_detail.html', {"pokedex_number": pokedex_number})
+def pokemon_detail(request, name):
+    # Load the JSON data from the file
+    json_file_path = Path(__file__).resolve().parent.parent / "assets" / "static" / "fixtures" / "pokemon.json"
+
+    with open(json_file_path, "r") as f:
+        pokemon_data = json.load(f)
+
+    for pokemon in pokemon_data:
+        if pokemon["name"] == name:
+            return render(request, 'pokemon_detail.html', {"pokemon": pokemon})
+
+    raise Http404("Pokemon not found")
 
 def search(request):
     return HttpResponse("Search functionality is not implemented yet.")
