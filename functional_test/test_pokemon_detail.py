@@ -6,7 +6,7 @@ from selenium import webdriver
 
 
 
-class ID_Test(LiveServerTestCase):
+class Pokemon_Detail(LiveServerTestCase):
 
     def setUp(self):
         self.browser = webdriver.Chrome()
@@ -28,7 +28,7 @@ class ID_Test(LiveServerTestCase):
         image = self.browser.find_element(By.CLASS_NAME, "pokemon-detail-img")
         self.assertTrue(image.is_displayed())
 
-    def test_user_can_view_details(self):
+    def test_user_loads_correct_data(self):
         self.browser.get(self.live_server_url + "/pokemon/Gengar")
         self.assertIn("Ghost", self.browser.page_source)
         self.assertIn("Poison", self.browser.page_source)
