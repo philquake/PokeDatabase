@@ -1,92 +1,92 @@
 [
-{
-    "pokedex_number": 6,
-    "name": "Charizard",
-    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png",
-    "types": ["Fire", "Flying"],
-    "top_stats": {
-        "Special Attack": 109,
-        "Speed": 100
+    {
+        "pokedex_number": 6,
+        "name": "Charizard",
+        "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png",
+        "types": ["Fire", "Flying"],
+        "top_stats": {
+            "Special Attack": 109,
+            "Speed": 100
+        }
+    },
+    {
+        "pokedex_number": 94,
+        "name": "Gengar",
+        "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/94.png",
+        "types": ["Ghost", "Poison"],
+        "top_stats": {
+            "Special Attack": 130,
+            "Speed": 110
+        }
+    },
+    {
+        "pokedex_number": 130,
+        "name": "Gyarados",
+        "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/130.png",
+        "types": ["Water", "Flying"],
+        "top_stats": {
+            "Attack": 125,
+            "Special Defense": 100
+        }
+    },
+    {
+        "pokedex_number": 149,
+        "name": "Dragonite",
+        "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/149.png",
+        "types": ["Dragon", "Flying"],
+        "top_stats": {
+            "Attack": 134,
+            "HP": 91
+        }
+    },
+    {
+        "pokedex_number": 212,
+        "name": "Scizor",
+        "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/212.png",
+        "types": ["Bug", "Steel"],
+        "top_stats": {
+            "Attack": 130,
+            "Defense": 100
+        }
+    },
+    {
+        "pokedex_number": 248,
+        "name": "Tyranitar",
+        "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/248.png",
+        "types": ["Rock", "Dark"],
+        "top_stats": {
+            "Attack": 134,
+            "Defense": 110
+        }
+    },
+    {
+        "pokedex_number": 472,
+        "name": "Gliscor",
+        "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/472.png",
+        "types": ["Ground", "Flying"],
+        "top_stats": {
+            "Defense": 125,
+            "Speed": 95
+        }
+    },
+    {
+        "pokedex_number": 448,
+        "name": "Lucario",
+        "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/448.png",
+        "types": ["Fighting", "Steel"],
+        "top_stats": {
+            "Special Attack": 115,
+            "Attack": 110
+        }
+    },
+    {
+        "pokedex_number": 445,
+        "name": "Garchomp",
+        "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/445.png",
+        "types": ["Dragon", "Ground"],
+        "top_stats": {
+            "Attack": 130,
+            "Speed": 102
+        }
     }
-},
-{
-    "pokedex_number": 94,
-    "name": "Gengar",
-    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/94.png",
-    "types": ["Ghost", "Poison"],
-    "top_stats": {
-        "Special Attack": 130,
-        "Speed": 110
-    }
-},
-{
-    "pokedex_number": 130,
-    "name": "Gyarados",
-    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/130.png",
-    "types": ["Water", "Flying"],
-    "top_stats": {
-        "Attack": 125,
-        "Special Defense": 100
-    }
-},
-{
-    "pokedex_number": 149,
-    "name": "Dragonite",
-    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/149.png",
-    "types": ["Dragon", "Flying"],
-    "top_stats": {
-        "Attack": 134,
-        "HP": 91
-    }
-},
-{
-    "pokedex_number": 212,
-    "name": "Scizor",
-    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/212.png",
-    "types": ["Bug", "Steel"],
-    "top_stats": {
-        "Attack": 130,
-        "Defense": 100
-    }
-},
-{
-    "pokedex_number": 248,
-    "name": "Tyranitar",
-    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/248.png",
-    "types": ["Rock", "Dark"],
-    "top_stats": {
-        "Attack": 134,
-        "Defense": 110
-    }
-},
-{
-    "pokedex_number": 472,
-    "name": "Gliscor",
-    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/472.png",
-    "types": ["Ground", "Flying"],
-    "top_stats": {
-        "Defense": 125,
-        "Speed": 95
-    }
-},
-{
-    "pokedex_number": 448,
-    "name": "Lucario",
-    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/448.png",
-    "types": ["Fighting", "Steel"],
-    "top_stats": {
-        "Special Attack": 115,
-        "Attack": 110
-    }
-},
-{
-    "pokedex_number": 445,
-    "name": "Garchomp",
-    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/445.png",
-    "types": ["Dragon", "Ground"],
-    "top_stats": {
-        "Attack": 130,
-        "Speed": 102
-    }
-}
 ]
