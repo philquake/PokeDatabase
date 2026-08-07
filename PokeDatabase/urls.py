@@ -16,10 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
-from home import views
+from pokemon import views
 
 urlpatterns = [
     # path('admin/', admin.site.urls),
-    path("", views.home, name="home"),  # Include the URLs from the home app
-    path('search/', include('home.urls')),  # Include the URLs from the home app for search
+    path("", views.home, name="home"),  # Include the URLs from the pokemon app
+    path('search/', include('pokemon.urls')),  # Include the URLs from the pokemon app for search
 ]
