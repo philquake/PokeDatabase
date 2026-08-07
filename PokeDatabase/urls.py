@@ -21,5 +21,5 @@ from pokemon import views
 urlpatterns = [
     # path('admin/', admin.site.urls),
     path("", views.home, name="home"),  # Include the URLs from the pokemon app
-    path('search/', include('pokemon.urls')),  # Include the URLs from the pokemon app for search
+    path('pokemon/', include('pokemon.urls')),  # Include the URLs from the pokemon app for pokemon_detail
 ]
