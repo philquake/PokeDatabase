@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block header_text %}{{pokemon.id}}, {{pokemon.name}}{% endblock %}
+
+{% block content %}
+  <div class="pokemon-detail">
+    <div class="pokemon-detail-left">
+      <img class="pokemon-detail-img" src="{{ pokemon.image.official_artwork }}" alt="{{ pokemon.name }}">
+      <div class="pokemon-detail-name">{{ pokemon.name }}</div>
+      <div class="pokemon-detail-types">
+        {% for type in pokemon.types %}
+          <span class="pokemon-type">{{ type }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="pokemon-detail-right">
+      <h2>Stats</h2>
+      <ul class="pokemon-stats">
+        {% for stat in pokemon.stats.all %}
+          <li><span class="stat-name">{{ stat.name }}</span>: <span class="stat-value">{{ stat.value }}</span></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+{% endblock %}
