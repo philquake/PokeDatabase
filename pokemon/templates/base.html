@@ -19,7 +19,7 @@
           <a href="{% url 'home' %}"
             class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
           <a href="{% url 'pokedex' %}"
-            class="{% if request.resolver_match.url_name == 'pokedex' %}active{% endif %}">Pokémon</a>
+            class="{% if request.resolver_match.url_name == 'pokedex' %}active{% endif %}">Pokédex</a>
           <a href="{% url 'types' %}"
             class="{% if request.resolver_match.url_name == 'types' %}active{% endif %}">Types</a>
           <a href="{% url 'region' %}"
