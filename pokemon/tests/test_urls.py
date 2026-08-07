@@ -6,6 +6,10 @@ from pokemon import views
 
 class PokemonURLTests(SimpleTestCase):
 
+    def test_home_url(self):
+        resolver = resolve("/")
+        self.assertEqual(resolver.func, views.home)
+
     def test_pokemon_detail_url_resolves(self):
         resolver = resolve("/pokemon/Gengar/")
         self.assertEqual(resolver.func, views.pokemon_detail)
