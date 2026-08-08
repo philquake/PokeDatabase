@@ -37,9 +37,31 @@ def pokemon_detail(request, name):
 
     raise Http404("Pokemon not found")
 
-def search(request,):
+def search(request):
     pokemon_name = request.GET.get("search")
-    return redirect("pokemon_detail", "Gengar")
+
+    if not pokemon_name: 
+            return render(
+                request,
+                "home.html",
+                {"error": "Pokemon name required"},
+                status=400)
+        
+    # Load the JSON data from the file
+    json_file_path = Path(__file__).resolve().parent.parent / "assets" / "static" / "fixtures" / "pokemon.json"
+
+    with open(json_file_path, "r") as f:
+        pokemon_data = json.load(f)
+
+    for pokemon in pokemon_data:
+        if pokemon["name"] == pokemon_name:
+            return redirect("pokemon_detail", name=pokemon_name)
+        
+    return render(
+            request,
+            "home.html",
+            {"error": "Pokemon not found"},
+            status=404)
     
 
 def types(request):
