@@ -17,19 +17,19 @@
           <img class="logo-icon" src="{% static 'img/pokemon_logo.png' %}" alt="Pokemon Logo" />
           <text class="logo-text">PokeDatabase</text>
           <a href="{% url 'home' %}"
-            class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
+            class=" home {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
           <a href="{% url 'pokedex' %}"
-            class="{% if request.resolver_match.url_name == 'pokedex' %}active{% endif %}">Pokédex</a>
+            class=" pokedex{% if request.resolver_match.url_name == 'pokedex' %}active{% endif %}">Pokédex</a>
           <a href="{% url 'types' %}"
-            class="{% if request.resolver_match.url_name == 'types' %}active{% endif %}">Types</a>
+            class=" types {% if request.resolver_match.url_name == 'types' %}active{% endif %}">Types</a>
           <a href="{% url 'region' %}"
-            class="{% if request.resolver_match.url_name == 'region' %}active{% endif %}">Region</a>
+            class=" region {% if request.resolver_match.url_name == 'region' %}active{% endif %}">Region</a>
           <a href="{% url 'abilities' %}"
-            class="{% if request.resolver_match.url_name == 'abilities' %}active{% endif %}">Abilities</a>
+            class="abilities {% if request.resolver_match.url_name == 'abilities' %}active{% endif %}">Abilities</a>
           <a href="{% url 'moves' %}"
-            class="{% if request.resolver_match.url_name == 'moves' %}active{% endif %}">Moves</a>
+            class="moves {% if request.resolver_match.url_name == 'moves' %}active{% endif %}">Moves</a>
           <a href="{% url 'competitive' %}"
-            class="{% if request.resolver_match.url_name == 'competitive' %}active{% endif %}">Competitive</a>
+            class="competitive {% if request.resolver_match.url_name == 'competitive' %}active{% endif %}">Competitive</a>
         </nav>
       </header>
     </div>
@@ -42,6 +42,10 @@
 
     <footer>
       <p>© 2025 PokeDatabase</p>
+      {% comment %} TODO get a section for error messages {% endcomment %}
+    {% if error %}
+      <p>{{ error }}</p>
+    {% endif %}
     </footer>
   </body>
 </html>
