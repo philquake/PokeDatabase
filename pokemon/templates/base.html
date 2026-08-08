@@ -14,8 +14,10 @@
     <div class="container">
       <header class="topbar">
         <nav class="nav" aria-label="Main navigation">
-          <img class="logo-icon" src="{% static 'img/pokemon_logo.png' %}" alt="Pokemon Logo" />
-          <text class="logo-text">PokeDatabase</text>
+          <a href="{% url 'home' %}">
+            <img class="logo-icon" src="{% static 'img/pokemon_logo.png' %}" alt="Pokemon Logo" /> 
+            <text class="logo-text">PokeDatabase</text>
+          </a>
           <a href="{% url 'home' %}"
             class=" home {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
           <a href="{% url 'pokedex' %}"
