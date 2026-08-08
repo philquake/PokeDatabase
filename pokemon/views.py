@@ -63,12 +63,17 @@ def search(request):
             {"error": "Pokemon not found"},
             status=404)
     
-
 def types(request):
     return HttpResponse("Types page is not implemented yet.")
 
 def pokedex(request):
-    return HttpResponse("Pokedex page is not implemented yet.")
+    # Load the JSON data from the file
+    json_file_path = Path(__file__).resolve().parent.parent / "assets" / "static" / "fixtures" / "pokemon.json"
+    
+    with open(json_file_path, "r") as f:
+        pokemon_data = json.load(f)
+            
+    return render(request, "pokedex.html", {"pokemon_data": pokemon_data})
 
 def region(request):
     return HttpResponse("Region page is not implemented yet.")
