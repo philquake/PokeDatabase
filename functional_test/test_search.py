@@ -16,7 +16,7 @@ class SearchLoadsTest (LiveServerTestCase):
         search_box.send_keys("Gengar")
         search_box.submit()
 
-        self.assertEqual(self.browser.current_url, self.live_server_url + "/pokemon/Gengar/")
+        self.assertEqual(self.browser.current_url, self.live_server_url + "/pokemon/pokedex/Gengar/")
 
     def test_user_search_not_a_pokemon(self):
         self.browser.get(self.live_server_url)
