@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% for pokemon in pokemon_data %}
+    <div>
+        <h2>{{ pokemon.name }}</h2>
+        <p>Type: {{ pokemon.type }}</p>
+    </div>
+{% endfor %}
+{% endblock %}
