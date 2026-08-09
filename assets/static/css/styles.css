@@ -246,18 +246,6 @@ img {
     flex-wrap: wrap;
   }
 
-  .navbar-toggler {
-    order: 2;
-    margin-left: auto;
-    border: none;
-    background: transparent;
-    padding: 6px 10px;
-  }
-
-  .navbar-toggler:focus {
-    box-shadow: none;
-  }
-
   .site-navbar .navbar-collapse {
     order: 4;
     width: 100%;
