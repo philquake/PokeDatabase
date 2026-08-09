@@ -17,7 +17,7 @@ class Pokemon_Detail(LiveServerTestCase):
     def test_invalid_pokemon(self):
         # A name in the URL that shouldn't match
         self.browser.get(self.live_server_url + "/pokemon/pokedex/not_a_pokemon/")
-        self.assertIn("Not Found", self.browser.page_source)
+        self.assertIn("Pokemon not found", self.browser.page_source)
 
     def test_user_can_view_img(self):
         self.browser.get(self.live_server_url + "/pokemon/pokedex/Gengar/")
