@@ -53,3 +53,17 @@ class searchBarTest(LiveServerTestCase):
         self.driver.get(self.live_server_url + "/")
         search_bar = self.driver.find_element(By.CSS_SELECTOR, "form[method='GET']")
         self.assertIsNotNone(search_bar)
+
+class HomeLinkActive(LiveServerTestCase):
+    def setUp(self):
+        super().setUp()
+        self.driver = webdriver.Chrome()
+        
+    def tearDown(self):
+        self.driver.quit()
+        super().tearDown()
+        
+    def test_active_hmtl(self):
+        self.driver.get(self.live_server_url + "/")
+        link = self.driver.find_element(By.CSS_SELECTOR, "a")
+        assert link.get_attribute("class").find("active") != -1

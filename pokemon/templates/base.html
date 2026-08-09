@@ -19,6 +19,11 @@
         <span class="logo-text">PokeDatabase</span>
         </a>
 
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarLinks" aria-controls="navbarLinks"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
         <div class="collapse navbar-collapse" id="navbarLinks">
           <a href="{% url 'home' %}"
           class=" home {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
