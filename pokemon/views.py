@@ -34,11 +34,13 @@ def home(request):
     hero["top_stats"] = top_stats
 
     featured_pokemon = random.sample(pokemon_data, min(8, len(pokemon_data)))
+    explore_pokemon  = random.choice(pokemon_data)["name"] 
 
     context = {
         "pokemon_count": len(pokemon_data),
         "featured": hero,
         "featured_pokemon": featured_pokemon,
+        "explore_pokemon" : explore_pokemon
     }
     return render(request, "home.html", context)
 
