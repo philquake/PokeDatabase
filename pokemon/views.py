@@ -4,26 +4,40 @@ from django.views.generic import TemplateView
 import json
 from pathlib import Path
 from django.shortcuts import render
+import random
 
 # Create your views here.
+TYPE_EMOJI = {
+    "Fire": "🔥", "Water": "💧", "Grass": "🌿", "Electric": "⚡",
+    "Flying": "🌪️", "Psychic": "🔮", "Ice": "❄️", "Dragon": "🐉",
+    "Dark": "🌑", "Fairy": "✨", "Normal": "⭐", "Fighting": "🥊",
+    "Poison": "☠️", "Ground": "⛰️", "Rock": "🪨", "Bug": "🐛",
+    "Ghost": "👻", "Steel": "⚙️",
+}
+
 def home(request):
 
-    # Load the JSON data from the file
-    json_file_path = Path(__file__).resolve().parent.parent / "assets" / "static" / "fixtures" / "pokemon.json"
-    
-    with open(json_file_path, "r") as f:
+    fixture_path = Path(__file__).resolve().parent.parent / "assets" / "static" / "fixtures" / "pokemon.json"
+    with open(fixture_path, encoding="utf-8") as f:
         pokemon_data = json.load(f)
-    
-    for pokemon in pokemon_data:
-        if pokemon["name"] == "Charizard":
-            return render(request, 'home.html', {"pokemon": pokemon})
 
-    return render(request, "home.html", {"pokemon": pokemon})
+    featured = random.choice(pokemon_data)
+    featured["type_emoji"] = TYPE_EMOJI.get(featured["types"][0], "🐾")
+
+    context = {
+        "pokemon_count": len(pokemon_data),
+        "featured": featured,
+    }
+    return render(request, "home.html", context)
 
 def pokemon_detail(request, name):
 
     if not name: 
-        raise Http404("Pokemon name required")
+        return render(
+            request,
+            "home.html",
+            {"error": "Pokemon name required"},
+            status=400)
     
     # Load the JSON data from the file
     json_file_path = Path(__file__).resolve().parent.parent / "assets" / "static" / "fixtures" / "pokemon.json"
@@ -35,7 +49,11 @@ def pokemon_detail(request, name):
         if pokemon["name"] == name:
             return render(request, 'pokemon_detail.html', {"pokemon": pokemon})
 
-    raise Http404("Pokemon not found")
+    return render(
+                request,
+                "home.html",
+                {"error": "Pokemon not found"},
+                status=404)
 
 def search(request):
     pokemon_name = request.GET.get("search")
@@ -54,8 +72,8 @@ def search(request):
         pokemon_data = json.load(f)
 
     for pokemon in pokemon_data:
-        if pokemon["name"] == pokemon_name:
-            return redirect("pokemon_detail", name=pokemon_name)
+        if pokemon["name"].lower() == pokemon_name.lower():
+            return redirect("pokemon_detail", name=pokemon["name"])
         
     return render(
             request,
