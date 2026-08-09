@@ -24,12 +24,21 @@ def home(request):
     hero = random.choice(pokemon_data)
     hero["type_emoji"] = TYPE_EMOJI.get(hero["types"][0], "🐾")
 
+    # Get the two highest stats
+    top_stats = sorted(
+        hero["base_stats"].items(),
+        key=lambda stat: stat[1],
+        reverse=True
+    )[:2]
+
+    hero["top_stats"] = top_stats
+
     featured_pokemon = random.sample(pokemon_data, min(8, len(pokemon_data)))
 
     context = {
         "pokemon_count": len(pokemon_data),
         "featured": hero,
-         "featured_pokemon": featured_pokemon,
+        "featured_pokemon": featured_pokemon,
     }
     return render(request, "home.html", context)
 

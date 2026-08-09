@@ -77,7 +77,7 @@
         </div>
  
         <div class="pokemon-tag pokemon-tag-stats">
-          {% for stat_name, stat_value in featured.base_stats.items %}{% if not forloop.first %} · {% endif %}{{ stat_name }} {{ stat_value }}{% endfor %}
+          {% for stat_name, stat_value in featured.top_stats %}{% if not forloop.first %} · {% endif %}{{ stat_name }} {{ stat_value }}{% endfor %}
         </div>
       {% else %}
 
