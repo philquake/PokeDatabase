@@ -1,6 +1,10 @@
 from django.test import LiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+
 
 class SearchLoadsTest (LiveServerTestCase):
 
@@ -23,7 +27,9 @@ class SearchLoadsTest (LiveServerTestCase):
         search_box = self.browser.find_element(By.NAME, "search")
         search_box.send_keys("NotAPokemon")
         search_box.submit()
-
+        WebDriverWait(self.browser, 5).until(
+            EC.text_to_be_present_in_element((By.TAG_NAME, "footer"), "Pokemon not found")
+        )
         self.assertIn("Pokemon not found", self.browser.page_source )
 
     def test_user_search_empty(self):
@@ -31,5 +37,7 @@ class SearchLoadsTest (LiveServerTestCase):
 
         search_box = self.browser.find_element(By.NAME, "search")
         search_box.submit()
-
+        WebDriverWait(self.browser, 5).until(
+            EC.text_to_be_present_in_element((By.TAG_NAME, "footer"), "Pokemon name required")
+        )
         self.assertIn("Pokemon name required", self.browser.page_source)
