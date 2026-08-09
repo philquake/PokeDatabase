@@ -114,9 +114,13 @@ img {
 .topbar {
   background: var(--color-bg-header);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  position: sticky;
-  top: 0;
   z-index: 100;
+}
+
+.sticky {
+  position: fixed;
+  top: 0;
+  width: 100%;
 }
 
 .nav {
@@ -126,6 +130,7 @@ img {
   display: flex;
   align-items: center;
   gap: 8px;
+
 }
 
 /* logo is the first <a> in .nav, holding the icon + text */
