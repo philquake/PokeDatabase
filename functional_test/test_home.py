@@ -21,7 +21,7 @@ class TemplateTest(LiveServerTestCase):
     def test_correct_template(self):
         self.driver.get(self.live_server_url)
         self.assertIn("Home", self.driver.title)
-        paragraph = self.driver.find_element(By.CLASS_NAME, "text-base")
+        paragraph = self.driver.find_element(By.CLASS_NAME, "hero-subtitle")
         self.assertIn("Search Pokémon", paragraph.text)
 
 class NavigationBarTest(LiveServerTestCase):
@@ -37,7 +37,7 @@ class NavigationBarTest(LiveServerTestCase):
         self.driver.get(self.live_server_url + "/")
         nav_links = self.driver.find_elements(By.CSS_SELECTOR, "nav a")
         link_texts = [link.text for link in nav_links]
-        expected_links = ["Home", "Pokédex", "Types", "Region", "Abilities", "Moves", "Competitive"]
+        expected_links = ["PokeDatabase", "Home", "Pokédex", "Types", "Region", "Abilities", "Moves", "Competitive"]
         self.assertEqual(link_texts, expected_links)
 
 class searchBarTest(LiveServerTestCase):
