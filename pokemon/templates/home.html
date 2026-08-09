@@ -1,36 +1,139 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Home{% endblock %}
 
 {% block content %}
-    <div class="home-grid">
-      <div class="home-left">
-        <h1 class="hero-title">
-          Explore the <span class="hero-title-highlight">Complete</span><br>Pokémon Database
-        </h1>
-        <p class="text-base">
-          Search Pokémon, discover abilities, compare stats, and analyze competitive data — all in one professional platform.
-        </p>
-        <form class="search-form" method="GET" action="{% url 'search' %}">
-          <div class="search-field">
-            <span class="search-icon">🔍</span>
-            <input class="search-input" type="text" name="search" placeholder="Search Pokémon by name, type, ability...">
-            <button class="search-button" type="submit">Search</button>
-          </div>
-        </form>
+<section class="hero">
+  <div class="hero-inner">
+
+    <div class="hero-content">
+      <div class="badge">
+        <span class="badge-icon">⚡</span>
+        Over {{ pokemon_count|default:"1,025" }} Pokémon catalogued
       </div>
-      <aside class="home-right">
-        <div class="featured-types">{{ pokemon.types|join:" / " }}</div>
-        <ul class="stats">
-          {% for stat in pokemon.stats.highest %}
-              <li><span class="stat-name">{{ stat.name }}</span><span class="stat-separator">•</span><span class="stat-value">{{ stat.value }}</span></li>
-          {% endfor %}
-        </ul>
-        <img class="featured-img" src="{{ pokemon.image.official_artwork }}"
-            alt="{{ pokemon.img }}">
-        <div class="pokedex-num">#{{ pokemon.pokedex_number }}</div>
-      </aside>
+
+      <h1 class="hero-title">
+        Explore the<br>
+        <span class="hero-title-accent">Complete</span><br>
+        Pokémon Database
+      </h1>
+
+      <p class="hero-subtitle">
+        Search Pokémon, discover abilities, compare stats, and analyze
+        competitive data — all in one professional platform.
+      </p>
+
+      <form class="search-form" method="GET" action="{% url 'search' %}">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          name="search"
+          class="search-input"
+          placeholder="Search Pokémon by name, type, ability…"
+          aria-label="Search Pokémon by name, type, ability"
+        >
+        <button type="submit" class="search-button btn btn-primary">Search</button>
+      </form>
+
+      <div class="hero-ctas">
+        <a href="{% url 'pokedex' %}" class="btn btn-primary btn-lg">Explore Pokémon <span class="arrow">→</span></a>
+        <a href="{% url 'competitive' %}" class="btn btn-outline btn-lg">View Rankings</a>
+      </div>
+
+      <dl class="stats-row">
+        <div class="stat">
+          <dt class="stat-value">{{ pokemon_count|default:"1,025" }}</dt>
+          <dd class="stat-label">Pokémon</dd>
+        </div>
+        <div class="stat">
+          <dt class="stat-value">{{ move_count|default:"898" }}</dt>
+          <dd class="stat-label">Moves</dd>
+        </div>
+        <div class="stat">
+          <dt class="stat-value">{{ ability_count|default:"305" }}</dt>
+          <dd class="stat-label">Abilities</dd>
+        </div>
+      </dl>
     </div>
 
-    <div class="home-divider"></div>
+    <div class="hero-visual">
+      {% if featured %}
+        <div class="pokemon-tag pokemon-tag-type">
+          <span class="type-emoji">{{ featured.type_emoji|default:"🐾" }}</span>
+          {{ featured.types|join:" / " }}
+        </div>
+        <div class="pokemon-tag pokemon-tag-id">#{{ featured.pokedex_number|stringformat:"03d" }}</div>
+ 
+        <div class="pokemon-image-wrap">
+          <img
+            src="{{ featured.image }}"
+            alt="{{ featured.name }} official artwork"
+            class="pokemon-image"
+            width="800"
+            height="800"
+            loading="eager"
+          >
+        </div>
+ 
+        <div class="pokemon-tag pokemon-tag-stats">
+          {% for stat_name, stat_value in featured.base_stats.items %}{% if not forloop.first %} · {% endif %}{{ stat_name }} {{ stat_value }}{% endfor %}
+        </div>
+      {% else %}
+
+        <div class="pokemon-image-wrap"></div>
+      {% endif %}
+    </div>
+ 
+  </div>
+</section>
+<div class="home-divider"></div>
+
+<section class="featured">
+  <div class="featured-inner">
+
+    <div class="featured-header">
+      <div>
+        <p class="eyebrow"><span class="eyebrow-icon">✦</span> Discover</p>
+        <h2 class="featured-title">Featured Pokémon</h2>
+        <p class="featured-subtitle">Discover popular Pokémon and their essential statistics.</p>
+      </div>
+      <a href="{% url 'pokedex' %}" class="btn btn-dark">View All <span class="arrow">→</span></a>
+    </div>
+
+    <div class="featured-grid">
+      {% for pokemon in featured_pokemon %}
+        <article class="poke-card">
+          <div class="poke-card-art">
+            <div class="poke-card-glow"></div>
+            <img src="{{ pokemon.image }}" alt="{{ pokemon.name }}" class="poke-card-img" loading="lazy">
+            <div class="poke-card-types">
+              {% for t in pokemon.types %}
+                <span class="type-badge type-{{ t|lower }}">{{ t|upper }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="poke-card-body">
+            <div class="poke-card-heading">
+              <h3 class="poke-card-name">{{ pokemon.name }}</h3>
+              <span class="poke-card-id">#{{ pokemon.pokedex_number|stringformat:"03d" }}</span>
+            </div>
+            <dl class="poke-card-stats">
+              {% for stat_name, stat_value in pokemon.stats.items %}
+                <div class="poke-stat">
+                  <dt>{{ stat_name }}</dt>
+                  <dd>{{ stat_value }}</dd>
+                </div>
+              {% endfor %}
+            </dl>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+
+  </div>
+
+  <button class="help-fab" type="button" aria-label="Help" aria-expanded="false">?</button>
+</section>
 {% endblock %}
+ 
