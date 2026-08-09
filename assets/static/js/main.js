@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initFloatingArt();
   initVisualParallax();
   initCardEntrance();
-  stickyNavBar();
+  SearchIconCollapse();
 });
 
 /* -----------------------------------------------------------
@@ -151,24 +151,13 @@ function initCardEntrance() {
   cards.forEach((card) => observer.observe(card));
 }
 
-/* -----------------------------------------------------------
-   6. Makes the top bar sticky on scrolling
------------------------------------------------------------ */
-function stickyNavBar(){
-  window.onscroll = function() {myFunction()};
-  
-  var navlist = document.querySelector(".topbar");
-  var sticky = navlist.offsetTop;
-  
-  /* Function to stick the nav bar */
-  function myFunction() {
-      if (window.pageYOffset >= sticky) {
-          navlist.classList.add("sticky")
-      } 
-        else {
-            navlist.classList.remove("sticky");
-        }
-  }
-
+function SearchIconCollapse() {
+  document.getElementById('searchToggle').addEventListener('click', function () {
+      const form = this.closest('.search-form-nav');
+      form.classList.toggle('search-open');
+      if (form.classList.contains('search-open')) {
+          form.querySelector('.search-input-nav').focus();
+      }
+  });
 }
 
