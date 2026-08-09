@@ -6,7 +6,7 @@ urlpatterns = [
     # Static URLS
     path("", views.home, name="home"),
     path("search/", views.search, name="search"),
-    path("pokedex/", views.pokedex, name="pokedex"), ##TODO Add to a grid of all pokemon entries
+    path("pokedex/", views.pokedex, name="pokedex"), 
     path("types/", views.types, name="types"),
     path("region/", views.region, name="region"),
     path("abilities/", views.abilities, name="abilities"),
