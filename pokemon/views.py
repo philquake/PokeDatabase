@@ -21,12 +21,15 @@ def home(request):
     with open(fixture_path, encoding="utf-8") as f:
         pokemon_data = json.load(f)
 
-    featured = random.choice(pokemon_data)
-    featured["type_emoji"] = TYPE_EMOJI.get(featured["types"][0], "🐾")
+    hero = random.choice(pokemon_data)
+    hero["type_emoji"] = TYPE_EMOJI.get(hero["types"][0], "🐾")
+
+    featured_pokemon = random.sample(pokemon_data, min(8, len(pokemon_data)))
 
     context = {
         "pokemon_count": len(pokemon_data),
-        "featured": featured,
+        "featured": hero,
+         "featured_pokemon": featured_pokemon,
     }
     return render(request, "home.html", context)
 
