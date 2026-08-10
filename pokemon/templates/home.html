@@ -119,14 +119,6 @@
                 <h3 class="poke-card-name">{{ pokemon.name }}</h3>
                 <span class="poke-card-id">#{{ pokemon.pokedex_number|stringformat:"03d" }}</span>
               </div>
-              <dl class="poke-card-stats">
-                {% for stat_name, stat_value in pokemon.stats.items %}
-                  <div class="poke-stat">
-                    <dt>{{ stat_name }}</dt>
-                    <dd>{{ stat_value }}</dd>
-                  </div>
-                {% endfor %}
-              </dl>
             </div>
           </a>
         </article>
