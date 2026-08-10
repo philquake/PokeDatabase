@@ -6,11 +6,11 @@ from selenium.webdriver.common.by import By
 class HomePageTest(LiveServerTestCase):
     
     def setUp(self):
-            super().setUp()
-            self.driver = webdriver.Chrome()
+        super().setUp()
+        self.browser = webdriver.Chrome()
     
     def tearDown(self):
-        self.driver.quit()
+        self.browser.quit()
         super().tearDown()
             
     def test_home_page_returns_200(self):
@@ -19,16 +19,27 @@ class HomePageTest(LiveServerTestCase):
         self.assertTemplateUsed(response, "base.html")
     
     def test_search_bar_present(self):
-        self.driver.get(self.live_server_url + "/")
-        search_bar = self.driver.find_element(By.CSS_SELECTOR, "form[method='GET']")
+        self.browser.get(self.live_server_url + "/")
+        search_bar = self.browser.find_element(By.CSS_SELECTOR, "form[method='GET']")
         self.assertIsNotNone(search_bar)
         
     def test_hero_pokemon(self):
-        self.driver.get(self.live_server_url + "/")
-        image = self.driver.find_element(By.CLASS_NAME, "pokemon-image")
+        self.browser.get(self.live_server_url + "/")
+        image = self.browser.find_element(By.CLASS_NAME, "pokemon-image")
         self.assertEqual(image.is_displayed(), True)
         
-    # def test_featured_pokemon(self):
-    #     self.driver.get(self.live_server_url + "/")
-    #     image = self.driver.find_element(By.CLASS_NAME, "poke-card-img")
-    #     self.assertEqual(image.is_displayed(), True)
+    def test_featured_pokemon(self):
+        self.browser.get(self.live_server_url + "/")
+        images = self.browser.find_elements(By.CLASS_NAME, "poke-card-img")
+        self.assertEqual(len(images), 8)
+        
+    def test_featured_pokemon_clickable(self):
+        self.browser.get(self.live_server_url + "/")
+        card = self.browser.find_element(By.CLASS_NAME, "poke-card")
+        link = card.find_element(By.TAG_NAME, "a")
+        expected_url = link.get_attribute("href")
+        link.click()
+        self.assertEqual(self.browser.current_url, expected_url)
+        
+    
+        
