@@ -23,6 +23,7 @@
   --font-display: 'Poppins', 'Segoe UI', system-ui, sans-serif;
   --font-body: 'Inter', 'Segoe UI', system-ui, sans-serif;
   --font-legal: "DM Mono", monospace;
+  --font-footer: "fNunito", sans-serif;
 
   --radius-sm: 8px;
   --radius-md: 14px;
@@ -858,4 +859,36 @@ footer {
 
 .browse-card:hover .browse-text {
   color: var(--color-text-muted);
+}
+
+/* .EOP-inner{
+
+} */
+
+.EOP-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  place-items: center;
+  gap: 24px;
+  padding: 40px 0px 10px;
+}
+
+.EOP-title{
+  display: block;
+  color: var(--color-white);
+  font-size: clamp(1.3rem, 3.5vw, 1.75rem);
+  font-family: var(--font-footer);
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.EOP-table {
+  text-align: left;
+  border-collapse: separate;
+  border-spacing: 0 1em;
+}
+
+.EOP-table td {
+  color: var(--color-text-faint);
+  font-family: var(--font-footer);
 }
