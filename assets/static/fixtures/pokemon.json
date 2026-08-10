@@ -13,17 +13,46 @@
       "Speed": 100
     },
     "abilities": [
-      {
-        "name": "Blaze",
-        "hidden": false
-      },
-      {
-        "name": "Solar Power",
-        "hidden": true
-      }
-    ],
-    "height": 1.7,
-    "weight": 90.5
+      {"name": "Blaze", "hidden": false},
+      {"name": "Solar Power", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 25,
+    "name": "Pikachu",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png",
+    "types": ["Electric"],
+    "base_stats": {
+      "HP": 35,
+      "Attack": 55,
+      "Defense": 40,
+      "Special Attack": 50,
+      "Special Defense": 50,
+      "Speed": 90
+    },
+    "abilities": [
+      {"name": "Static", "hidden": false},
+      {"name": "Lightning Rod", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 59,
+    "name": "Arcanine",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/59.png",
+    "types": ["Fire"],
+    "base_stats": {
+      "HP": 90,
+      "Attack": 110,
+      "Defense": 80,
+      "Special Attack": 100,
+      "Special Defense": 80,
+      "Speed": 95
+    },
+    "abilities": [
+      {"name": "Intimidate", "hidden": false},
+      {"name": "Flash Fire", "hidden": false},
+      {"name": "Justified", "hidden": true}
+    ]
   },
   {
     "pokedex_number": 94,
@@ -39,39 +68,27 @@
       "Speed": 110
     },
     "abilities": [
-      {
-        "name": "Cursed Body",
-        "hidden": false
-      }
-    ],
-    "height": 1.5,
-    "weight": 40.5
+      {"name": "Cursed Body", "hidden": false}
+    ]
   },
   {
-    "pokedex_number": 130,
-    "name": "Gyarados",
-    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/130.png",
-    "types": ["Water", "Flying"],
+    "pokedex_number": 131,
+    "name": "Lapras",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/131.png",
+    "types": ["Water", "Ice"],
     "base_stats": {
-      "HP": 95,
-      "Attack": 125,
-      "Defense": 79,
-      "Special Attack": 60,
-      "Special Defense": 100,
-      "Speed": 81
+      "HP": 130,
+      "Attack": 85,
+      "Defense": 80,
+      "Special Attack": 85,
+      "Special Defense": 95,
+      "Speed": 60
     },
     "abilities": [
-      {
-        "name": "Intimidate",
-        "hidden": false
-      },
-      {
-        "name": "Moxie",
-        "hidden": true
-      }
-    ],
-    "height": 6.5,
-    "weight": 235.0
+      {"name": "Water Absorb", "hidden": false},
+      {"name": "Shell Armor", "hidden": false},
+      {"name": "Hydration", "hidden": true}
+    ]
   },
   {
     "pokedex_number": 149,
@@ -87,17 +104,27 @@
       "Speed": 80
     },
     "abilities": [
-      {
-        "name": "Inner Focus",
-        "hidden": false
-      },
-      {
-        "name": "Multiscale",
-        "hidden": true
-      }
-    ],
-    "height": 2.2,
-    "weight": 210.0
+      {"name": "Inner Focus", "hidden": false},
+      {"name": "Multiscale", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 197,
+    "name": "Umbreon",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/197.png",
+    "types": ["Dark"],
+    "base_stats": {
+      "HP": 95,
+      "Attack": 65,
+      "Defense": 110,
+      "Special Attack": 60,
+      "Special Defense": 130,
+      "Speed": 65
+    },
+    "abilities": [
+      {"name": "Synchronize", "hidden": false},
+      {"name": "Inner Focus", "hidden": true}
+    ]
   },
   {
     "pokedex_number": 212,
@@ -113,21 +140,29 @@
       "Speed": 65
     },
     "abilities": [
-      {
-        "name": "Swarm",
-        "hidden": false
-      },
-      {
-        "name": "Technician",
-        "hidden": false
-      },
-      {
-        "name": "Light Metal",
-        "hidden": true
-      }
-    ],
-    "height": 1.8,
-    "weight": 118.0
+      {"name": "Swarm", "hidden": false},
+      {"name": "Technician", "hidden": false},
+      {"name": "Light Metal", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 230,
+    "name": "Kingdra",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/230.png",
+    "types": ["Water", "Dragon"],
+    "base_stats": {
+      "HP": 75,
+      "Attack": 95,
+      "Defense": 95,
+      "Special Attack": 95,
+      "Special Defense": 95,
+      "Speed": 85
+    },
+    "abilities": [
+      {"name": "Swift Swim", "hidden": false},
+      {"name": "Sniper", "hidden": false},
+      {"name": "Damp", "hidden": true}
+    ]
   },
   {
     "pokedex_number": 248,
@@ -143,77 +178,263 @@
       "Speed": 61
     },
     "abilities": [
-      {
-        "name": "Sand Stream",
-        "hidden": false
-      },
-      {
-        "name": "Unnerve",
-        "hidden": true
-      }
-    ],
-    "height": 2.0,
-    "weight": 202.0
+      {"name": "Sand Stream", "hidden": false},
+      {"name": "Unnerve", "hidden": true}
+    ]
   },
   {
-    "pokedex_number": 472,
-    "name": "Gliscor",
-    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/472.png",
-    "types": ["Ground", "Flying"],
+    "pokedex_number": 254,
+    "name": "Sceptile",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/254.png",
+    "types": ["Grass"],
     "base_stats": {
-      "HP": 75,
-      "Attack": 95,
-      "Defense": 125,
-      "Special Attack": 45,
-      "Special Defense": 75,
-      "Speed": 95
+      "HP": 70,
+      "Attack": 85,
+      "Defense": 65,
+      "Special Attack": 105,
+      "Special Defense": 85,
+      "Speed": 120
     },
     "abilities": [
-      {
-        "name": "Hyper Cutter",
-        "hidden": false
-      },
-      {
-        "name": "Sand Veil",
-        "hidden": false
-      },
-      {
-        "name": "Poison Heal",
-        "hidden": true
-      }
-    ],
-    "height": 2.0,
-    "weight": 42.5
+      {"name": "Overgrow", "hidden": false},
+      {"name": "Unburden", "hidden": true}
+    ]
   },
   {
-    "pokedex_number": 448,
-    "name": "Lucario",
-    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/448.png",
-    "types": ["Fighting", "Steel"],
+    "pokedex_number": 257,
+    "name": "Blaziken",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/257.png",
+    "types": ["Fire", "Fighting"],
+    "base_stats": {
+      "HP": 80,
+      "Attack": 120,
+      "Defense": 70,
+      "Special Attack": 110,
+      "Special Defense": 70,
+      "Speed": 80
+    },
+    "abilities": [
+      {"name": "Blaze", "hidden": false},
+      {"name": "Speed Boost", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 260,
+    "name": "Swampert",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/260.png",
+    "types": ["Water", "Ground"],
+    "base_stats": {
+      "HP": 100,
+      "Attack": 110,
+      "Defense": 90,
+      "Special Attack": 85,
+      "Special Defense": 90,
+      "Speed": 60
+    },
+    "abilities": [
+      {"name": "Torrent", "hidden": false},
+      {"name": "Damp", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 282,
+    "name": "Gardevoir",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/282.png",
+    "types": ["Psychic", "Fairy"],
+    "base_stats": {
+      "HP": 68,
+      "Attack": 65,
+      "Defense": 65,
+      "Special Attack": 125,
+      "Special Defense": 115,
+      "Speed": 80
+    },
+    "abilities": [
+      {"name": "Synchronize", "hidden": false},
+      {"name": "Trace", "hidden": false},
+      {"name": "Telepathy", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 289,
+    "name": "Slaking",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/289.png",
+    "types": ["Normal"],
+    "base_stats": {
+      "HP": 150,
+      "Attack": 160,
+      "Defense": 100,
+      "Special Attack": 95,
+      "Special Defense": 65,
+      "Speed": 100
+    },
+    "abilities": [
+      {"name": "Truant", "hidden": false}
+    ]
+  },
+  {
+    "pokedex_number": 306,
+    "name": "Aggron",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/306.png",
+    "types": ["Steel", "Rock"],
     "base_stats": {
       "HP": 70,
       "Attack": 110,
-      "Defense": 70,
-      "Special Attack": 115,
-      "Special Defense": 70,
-      "Speed": 90
+      "Defense": 180,
+      "Special Attack": 60,
+      "Special Defense": 60,
+      "Speed": 50
     },
     "abilities": [
-      {
-        "name": "Steadfast",
-        "hidden": false
-      },
-      {
-        "name": "Inner Focus",
-        "hidden": false
-      },
-      {
-        "name": "Justified",
-        "hidden": true
-      }
-    ],
-    "height": 1.2,
-    "weight": 54.0
+      {"name": "Sturdy", "hidden": false},
+      {"name": "Rock Head", "hidden": false},
+      {"name": "Heavy Metal", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 330,
+    "name": "Flygon",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/330.png",
+    "types": ["Ground", "Dragon"],
+    "base_stats": {
+      "HP": 80,
+      "Attack": 100,
+      "Defense": 80,
+      "Special Attack": 80,
+      "Special Defense": 80,
+      "Speed": 100
+    },
+    "abilities": [
+      {"name": "Levitate", "hidden": false}
+    ]
+  },
+  {
+    "pokedex_number": 350,
+    "name": "Milotic",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/350.png",
+    "types": ["Water"],
+    "base_stats": {
+      "HP": 95,
+      "Attack": 60,
+      "Defense": 79,
+      "Special Attack": 100,
+      "Special Defense": 125,
+      "Speed": 81
+    },
+    "abilities": [
+      {"name": "Marvel Scale", "hidden": false},
+      {"name": "Competitive", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 362,
+    "name": "Glalie",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/362.png",
+    "types": ["Ice"],
+    "base_stats": {
+      "HP": 80,
+      "Attack": 80,
+      "Defense": 80,
+      "Special Attack": 80,
+      "Special Defense": 80,
+      "Speed": 80
+    },
+    "abilities": [
+      {"name": "Inner Focus", "hidden": false},
+      {"name": "Ice Body", "hidden": false},
+      {"name": "Moody", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 373,
+    "name": "Salamence",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/373.png",
+    "types": ["Dragon", "Flying"],
+    "base_stats": {
+      "HP": 95,
+      "Attack": 135,
+      "Defense": 80,
+      "Special Attack": 110,
+      "Special Defense": 80,
+      "Speed": 100
+    },
+    "abilities": [
+      {"name": "Intimidate", "hidden": false},
+      {"name": "Moxie", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 376,
+    "name": "Metagross",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/376.png",
+    "types": ["Steel", "Psychic"],
+    "base_stats": {
+      "HP": 80,
+      "Attack": 135,
+      "Defense": 130,
+      "Special Attack": 95,
+      "Special Defense": 90,
+      "Speed": 70
+    },
+    "abilities": [
+      {"name": "Clear Body", "hidden": false},
+      {"name": "Light Metal", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 392,
+    "name": "Infernape",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/392.png",
+    "types": ["Fire", "Fighting"],
+    "base_stats": {
+      "HP": 76,
+      "Attack": 104,
+      "Defense": 71,
+      "Special Attack": 104,
+      "Special Defense": 71,
+      "Speed": 108
+    },
+    "abilities": [
+      {"name": "Blaze", "hidden": false},
+      {"name": "Iron Fist", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 395,
+    "name": "Empoleon",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/395.png",
+    "types": ["Water", "Steel"],
+    "base_stats": {
+      "HP": 84,
+      "Attack": 86,
+      "Defense": 88,
+      "Special Attack": 111,
+      "Special Defense": 101,
+      "Speed": 60
+    },
+    "abilities": [
+      {"name": "Torrent", "hidden": false},
+      {"name": "Defiant", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 405,
+    "name": "Luxray",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/405.png",
+    "types": ["Electric"],
+    "base_stats": {
+      "HP": 80,
+      "Attack": 120,
+      "Defense": 79,
+      "Special Attack": 95,
+      "Special Defense": 79,
+      "Speed": 70
+    },
+    "abilities": [
+      {"name": "Rivalry", "hidden": false},
+      {"name": "Intimidate", "hidden": false},
+      {"name": "Guts", "hidden": true}
+    ]
   },
   {
     "pokedex_number": 445,
@@ -229,16 +450,776 @@
       "Speed": 102
     },
     "abilities": [
-      {
-        "name": "Sand Veil",
-        "hidden": false
-      },
-      {
-        "name": "Rough Skin",
-        "hidden": true
-      }
-    ],
-    "height": 1.9,
-    "weight": 95.0
+      {"name": "Sand Veil", "hidden": false},
+      {"name": "Rough Skin", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 448,
+    "name": "Lucario",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/448.png",
+    "types": ["Fighting", "Steel"],
+    "base_stats": {
+      "HP": 70,
+      "Attack": 110,
+      "Defense": 70,
+      "Special Attack": 115,
+      "Special Defense": 70,
+      "Speed": 90
+    },
+    "abilities": [
+      {"name": "Steadfast", "hidden": false},
+      {"name": "Inner Focus", "hidden": false},
+      {"name": "Justified", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 461,
+    "name": "Weavile",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/461.png",
+    "types": ["Dark", "Ice"],
+    "base_stats": {
+      "HP": 70,
+      "Attack": 120,
+      "Defense": 65,
+      "Special Attack": 45,
+      "Special Defense": 85,
+      "Speed": 125
+    },
+    "abilities": [
+      {"name": "Pressure", "hidden": false},
+      {"name": "Pickpocket", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 468,
+    "name": "Togekiss",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/468.png",
+    "types": ["Fairy", "Flying"],
+    "base_stats": {
+      "HP": 85,
+      "Attack": 50,
+      "Defense": 95,
+      "Special Attack": 120,
+      "Special Defense": 115,
+      "Speed": 80
+    },
+    "abilities": [
+      {"name": "Hustle", "hidden": false},
+      {"name": "Serene Grace", "hidden": false},
+      {"name": "Super Luck", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 479,
+    "name": "Rotom",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/479.png",
+    "types": ["Electric", "Ghost"],
+    "base_stats": {
+      "HP": 50,
+      "Attack": 50,
+      "Defense": 77,
+      "Special Attack": 95,
+      "Special Defense": 77,
+      "Speed": 91
+    },
+    "abilities": [
+      {"name": "Levitate", "hidden": false}
+    ]
+  },
+  {
+    "pokedex_number": 497,
+    "name": "Serperior",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/497.png",
+    "types": ["Grass"],
+    "base_stats": {
+      "HP": 75,
+      "Attack": 75,
+      "Defense": 95,
+      "Special Attack": 75,
+      "Special Defense": 95,
+      "Speed": 113
+    },
+    "abilities": [
+      {"name": "Overgrow", "hidden": false},
+      {"name": "Contrary", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 500,
+    "name": "Emboar",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/500.png",
+    "types": ["Fire", "Fighting"],
+    "base_stats": {
+      "HP": 110,
+      "Attack": 123,
+      "Defense": 65,
+      "Special Attack": 100,
+      "Special Defense": 65,
+      "Speed": 65
+    },
+    "abilities": [
+      {"name": "Blaze", "hidden": false},
+      {"name": "Reckless", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 530,
+    "name": "Excadrill",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/530.png",
+    "types": ["Ground", "Steel"],
+    "base_stats": {
+      "HP": 110,
+      "Attack": 135,
+      "Defense": 60,
+      "Special Attack": 50,
+      "Special Defense": 65,
+      "Speed": 88
+    },
+    "abilities": [
+      {"name": "Sand Rush", "hidden": false},
+      {"name": "Sand Force", "hidden": false},
+      {"name": "Mold Breaker", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 553,
+    "name": "Krookodile",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/553.png",
+    "types": ["Ground", "Dark"],
+    "base_stats": {
+      "HP": 95,
+      "Attack": 117,
+      "Defense": 80,
+      "Special Attack": 65,
+      "Special Defense": 70,
+      "Speed": 92
+    },
+    "abilities": [
+      {"name": "Intimidate", "hidden": false},
+      {"name": "Moxie", "hidden": false},
+      {"name": "Anger Point", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 567,
+    "name": "Archeops",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/567.png",
+    "types": ["Rock", "Flying"],
+    "base_stats": {
+      "HP": 75,
+      "Attack": 140,
+      "Defense": 65,
+      "Special Attack": 112,
+      "Special Defense": 65,
+      "Speed": 110
+    },
+    "abilities": [
+      {"name": "Defeatist", "hidden": false}
+    ]
+  },
+  {
+    "pokedex_number": 571,
+    "name": "Zoroark",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/571.png",
+    "types": ["Dark"],
+    "base_stats": {
+      "HP": 60,
+      "Attack": 105,
+      "Defense": 60,
+      "Special Attack": 120,
+      "Special Defense": 60,
+      "Speed": 105
+    },
+    "abilities": [
+      {"name": "Illusion", "hidden": false}
+    ]
+  },
+  {
+    "pokedex_number": 609,
+    "name": "Chandelure",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/609.png",
+    "types": ["Ghost", "Fire"],
+    "base_stats": {
+      "HP": 60,
+      "Attack": 55,
+      "Defense": 90,
+      "Special Attack": 145,
+      "Special Defense": 90,
+      "Speed": 80
+    },
+    "abilities": [
+      {"name": "Flash Fire", "hidden": false},
+      {"name": "Flame Body", "hidden": false},
+      {"name": "Infiltrator", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 612,
+    "name": "Haxorus",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/612.png",
+    "types": ["Dragon"],
+    "base_stats": {
+      "HP": 76,
+      "Attack": 147,
+      "Defense": 90,
+      "Special Attack": 60,
+      "Special Defense": 70,
+      "Speed": 97
+    },
+    "abilities": [
+      {"name": "Rivalry", "hidden": false},
+      {"name": "Mold Breaker", "hidden": false},
+      {"name": "Unnerve", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 637,
+    "name": "Volcarona",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/637.png",
+    "types": ["Bug", "Fire"],
+    "base_stats": {
+      "HP": 85,
+      "Attack": 60,
+      "Defense": 65,
+      "Special Attack": 135,
+      "Special Defense": 105,
+      "Speed": 100
+    },
+    "abilities": [
+      {"name": "Flame Body", "hidden": false},
+      {"name": "Swarm", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 658,
+    "name": "Greninja",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/658.png",
+    "types": ["Water", "Dark"],
+    "base_stats": {
+      "HP": 72,
+      "Attack": 95,
+      "Defense": 67,
+      "Special Attack": 103,
+      "Special Defense": 71,
+      "Speed": 122
+    },
+    "abilities": [
+      {"name": "Torrent", "hidden": false},
+      {"name": "Protean", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 663,
+    "name": "Talonflame",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/663.png",
+    "types": ["Fire", "Flying"],
+    "base_stats": {
+      "HP": 78,
+      "Attack": 81,
+      "Defense": 71,
+      "Special Attack": 74,
+      "Special Defense": 69,
+      "Speed": 126
+    },
+    "abilities": [
+      {"name": "Flame Body", "hidden": false},
+      {"name": "Gale Wings", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 691,
+    "name": "Dragalge",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/691.png",
+    "types": ["Poison", "Dragon"],
+    "base_stats": {
+      "HP": 65,
+      "Attack": 75,
+      "Defense": 90,
+      "Special Attack": 97,
+      "Special Defense": 123,
+      "Speed": 44
+    },
+    "abilities": [
+      {"name": "Poison Point", "hidden": false},
+      {"name": "Poison Touch", "hidden": false},
+      {"name": "Adaptability", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 700,
+    "name": "Sylveon",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/700.png",
+    "types": ["Fairy"],
+    "base_stats": {
+      "HP": 95,
+      "Attack": 65,
+      "Defense": 65,
+      "Special Attack": 110,
+      "Special Defense": 130,
+      "Speed": 60
+    },
+    "abilities": [
+      {"name": "Cute Charm", "hidden": false},
+      {"name": "Pixilate", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 706,
+    "name": "Goodra",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/706.png",
+    "types": ["Dragon"],
+    "base_stats": {
+      "HP": 90,
+      "Attack": 100,
+      "Defense": 70,
+      "Special Attack": 110,
+      "Special Defense": 150,
+      "Speed": 80
+    },
+    "abilities": [
+      {"name": "Sap Sipper", "hidden": false},
+      {"name": "Hydration", "hidden": false},
+      {"name": "Gooey", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 715,
+    "name": "Noivern",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/715.png",
+    "types": ["Flying", "Dragon"],
+    "base_stats": {
+      "HP": 85,
+      "Attack": 70,
+      "Defense": 80,
+      "Special Attack": 97,
+      "Special Defense": 80,
+      "Speed": 123
+    },
+    "abilities": [
+      {"name": "Frisk", "hidden": false},
+      {"name": "Infiltrator", "hidden": false},
+      {"name": "Telepathy", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 724,
+    "name": "Decidueye",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/724.png",
+    "types": ["Grass", "Ghost"],
+    "base_stats": {
+      "HP": 78,
+      "Attack": 107,
+      "Defense": 75,
+      "Special Attack": 100,
+      "Special Defense": 100,
+      "Speed": 70
+    },
+    "abilities": [
+      {"name": "Overgrow", "hidden": false},
+      {"name": "Long Reach", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 727,
+    "name": "Incineroar",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/727.png",
+    "types": ["Fire", "Dark"],
+    "base_stats": {
+      "HP": 95,
+      "Attack": 115,
+      "Defense": 90,
+      "Special Attack": 80,
+      "Special Defense": 90,
+      "Speed": 60
+    },
+    "abilities": [
+      {"name": "Blaze", "hidden": false},
+      {"name": "Intimidate", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 730,
+    "name": "Primarina",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/730.png",
+    "types": ["Water", "Fairy"],
+    "base_stats": {
+      "HP": 80,
+      "Attack": 74,
+      "Defense": 74,
+      "Special Attack": 126,
+      "Special Defense": 116,
+      "Speed": 60
+    },
+    "abilities": [
+      {"name": "Torrent", "hidden": false},
+      {"name": "Liquid Voice", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 748,
+    "name": "Toxapex",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/748.png",
+    "types": ["Poison", "Water"],
+    "base_stats": {
+      "HP": 50,
+      "Attack": 63,
+      "Defense": 152,
+      "Special Attack": 53,
+      "Special Defense": 142,
+      "Speed": 35
+    },
+    "abilities": [
+      {"name": "Merciless", "hidden": false},
+      {"name": "Limber", "hidden": false},
+      {"name": "Regenerator", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 758,
+    "name": "Salazzle",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/758.png",
+    "types": ["Poison", "Fire"],
+    "base_stats": {
+      "HP": 68,
+      "Attack": 64,
+      "Defense": 60,
+      "Special Attack": 111,
+      "Special Defense": 60,
+      "Speed": 117
+    },
+    "abilities": [
+      {"name": "Corrosion", "hidden": false},
+      {"name": "Oblivious", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 773,
+    "name": "Silvally",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/773.png",
+    "types": ["Normal"],
+    "base_stats": {
+      "HP": 95,
+      "Attack": 95,
+      "Defense": 95,
+      "Special Attack": 95,
+      "Special Defense": 95,
+      "Speed": 95
+    },
+    "abilities": [
+      {"name": "RKS System", "hidden": false}
+    ]
+  },
+  {
+    "pokedex_number": 778,
+    "name": "Mimikyu",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/778.png",
+    "types": ["Ghost", "Fairy"],
+    "base_stats": {
+      "HP": 55,
+      "Attack": 90,
+      "Defense": 80,
+      "Special Attack": 50,
+      "Special Defense": 105,
+      "Speed": 96
+    },
+    "abilities": [
+      {"name": "Disguise", "hidden": false}
+    ]
+  },
+  {
+    "pokedex_number": 784,
+    "name": "Kommo-o",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/784.png",
+    "types": ["Dragon", "Fighting"],
+    "base_stats": {
+      "HP": 75,
+      "Attack": 110,
+      "Defense": 125,
+      "Special Attack": 100,
+      "Special Defense": 105,
+      "Speed": 85
+    },
+    "abilities": [
+      {"name": "Bulletproof", "hidden": false},
+      {"name": "Soundproof", "hidden": false},
+      {"name": "Overcoat", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 815,
+    "name": "Cinderace",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/815.png",
+    "types": ["Fire"],
+    "base_stats": {
+      "HP": 80,
+      "Attack": 116,
+      "Defense": 75,
+      "Special Attack": 65,
+      "Special Defense": 75,
+      "Speed": 119
+    },
+    "abilities": [
+      {"name": "Blaze", "hidden": false},
+      {"name": "Libero", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 818,
+    "name": "Inteleon",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/818.png",
+    "types": ["Water"],
+    "base_stats": {
+      "HP": 70,
+      "Attack": 85,
+      "Defense": 65,
+      "Special Attack": 125,
+      "Special Defense": 65,
+      "Speed": 120
+    },
+    "abilities": [
+      {"name": "Torrent", "hidden": false},
+      {"name": "Sniper", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 823,
+    "name": "Corviknight",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/823.png",
+    "types": ["Flying", "Steel"],
+    "base_stats": {
+      "HP": 98,
+      "Attack": 87,
+      "Defense": 105,
+      "Special Attack": 53,
+      "Special Defense": 85,
+      "Speed": 67
+    },
+    "abilities": [
+      {"name": "Pressure", "hidden": false},
+      {"name": "Unnerve", "hidden": false},
+      {"name": "Mirror Armor", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 887,
+    "name": "Dragapult",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/887.png",
+    "types": ["Dragon", "Ghost"],
+    "base_stats": {
+      "HP": 88,
+      "Attack": 120,
+      "Defense": 75,
+      "Special Attack": 100,
+      "Special Defense": 75,
+      "Speed": 142
+    },
+    "abilities": [
+      {"name": "Clear Body", "hidden": false},
+      {"name": "Infiltrator", "hidden": false},
+      {"name": "Cursed Body", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 892,
+    "name": "Urshifu",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/892.png",
+    "types": ["Fighting", "Dark"],
+    "base_stats": {
+      "HP": 100,
+      "Attack": 130,
+      "Defense": 100,
+      "Special Attack": 63,
+      "Special Defense": 60,
+      "Speed": 97
+    },
+    "abilities": [
+      {"name": "Unseen Fist", "hidden": false}
+    ]
+  },
+  {
+    "pokedex_number": 908,
+    "name": "Meowscarada",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/908.png",
+    "types": ["Grass", "Dark"],
+    "base_stats": {
+      "HP": 76,
+      "Attack": 110,
+      "Defense": 70,
+      "Special Attack": 81,
+      "Special Defense": 70,
+      "Speed": 123
+    },
+    "abilities": [
+      {"name": "Overgrow", "hidden": false},
+      {"name": "Protean", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 911,
+    "name": "Skeledirge",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/911.png",
+    "types": ["Fire", "Ghost"],
+    "base_stats": {
+      "HP": 104,
+      "Attack": 75,
+      "Defense": 100,
+      "Special Attack": 110,
+      "Special Defense": 75,
+      "Speed": 66
+    },
+    "abilities": [
+      {"name": "Blaze", "hidden": false},
+      {"name": "Unaware", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 914,
+    "name": "Quaquaval",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/914.png",
+    "types": ["Water", "Fighting"],
+    "base_stats": {
+      "HP": 85,
+      "Attack": 120,
+      "Defense": 80,
+      "Special Attack": 85,
+      "Special Defense": 75,
+      "Speed": 85
+    },
+    "abilities": [
+      {"name": "Torrent", "hidden": false},
+      {"name": "Moxie", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 923,
+    "name": "Pawmot",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/923.png",
+    "types": ["Electric", "Fighting"],
+    "base_stats": {
+      "HP": 70,
+      "Attack": 115,
+      "Defense": 70,
+      "Special Attack": 70,
+      "Special Defense": 60,
+      "Speed": 105
+    },
+    "abilities": [
+      {"name": "Volt Absorb", "hidden": false},
+      {"name": "Natural Cure", "hidden": false},
+      {"name": "Iron Fist", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 934,
+    "name": "Garganacl",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/934.png",
+    "types": ["Rock"],
+    "base_stats": {
+      "HP": 100,
+      "Attack": 100,
+      "Defense": 130,
+      "Special Attack": 45,
+      "Special Defense": 90,
+      "Speed": 35
+    },
+    "abilities": [
+      {"name": "Purifying Salt", "hidden": false},
+      {"name": "Sturdy", "hidden": false},
+      {"name": "Clear Body", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 936,
+    "name": "Armarouge",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/936.png",
+    "types": ["Fire", "Psychic"],
+    "base_stats": {
+      "HP": 85,
+      "Attack": 60,
+      "Defense": 100,
+      "Special Attack": 125,
+      "Special Defense": 80,
+      "Speed": 75
+    },
+    "abilities": [
+      {"name": "Flash Fire", "hidden": false},
+      {"name": "Weak Armor", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 937,
+    "name": "Ceruledge",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/937.png",
+    "types": ["Fire", "Ghost"],
+    "base_stats": {
+      "HP": 75,
+      "Attack": 125,
+      "Defense": 80,
+      "Special Attack": 60,
+      "Special Defense": 100,
+      "Speed": 85
+    },
+    "abilities": [
+      {"name": "Flash Fire", "hidden": false},
+      {"name": "Weak Armor", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 943,
+    "name": "Mabosstiff",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/943.png",
+    "types": ["Dark"],
+    "base_stats": {
+      "HP": 80,
+      "Attack": 120,
+      "Defense": 90,
+      "Special Attack": 60,
+      "Special Defense": 70,
+      "Speed": 85
+    },
+    "abilities": [
+      {"name": "Guard Dog", "hidden": false},
+      {"name": "Strong Jaw", "hidden": false},
+      {"name": "Stakeout", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 950,
+    "name": "Klawf",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/950.png",
+    "types": ["Rock"],
+    "base_stats": {
+      "HP": 70,
+      "Attack": 100,
+      "Defense": 115,
+      "Special Attack": 35,
+      "Special Defense": 55,
+      "Speed": 75
+    },
+    "abilities": [
+      {"name": "Anger Shell", "hidden": false},
+      {"name": "Shell Armor", "hidden": false},
+      {"name": "Regenerator", "hidden": true}
+    ]
+  },
+  {
+    "pokedex_number": 959,
+    "name": "Tinkaton",
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/959.png",
+    "types": ["Fairy", "Steel"],
+    "base_stats": {
+      "HP": 85,
+      "Attack": 75,
+      "Defense": 77,
+      "Special Attack": 70,
+      "Special Defense": 105,
+      "Speed": 94
+    },
+    "abilities": [
+      {"name": "Mold Breaker", "hidden": false},
+      {"name": "Own Tempo", "hidden": false},
+      {"name": "Pickpocket", "hidden": true}
+    ]
   }
 ]
