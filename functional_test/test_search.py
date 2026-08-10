@@ -6,7 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 
 
-class SearchLoadsTest (LiveServerTestCase):
+class SearchTest (LiveServerTestCase):
 
     def setUp(self):
         self.browser = webdriver.Chrome()
