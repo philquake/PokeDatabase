@@ -2,6 +2,8 @@
    PokeDatabase — Site Styles (base.html + home.html)
    =========================================================== */
 
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&display=swap');
+
 :root {
   --color-bg-header: #0d1120;
   --color-bg-hero-top: #171d3d;
@@ -20,6 +22,7 @@
 
   --font-display: 'Poppins', 'Segoe UI', system-ui, sans-serif;
   --font-body: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-legal: "DM Mono", monospace;
 
   --radius-sm: 8px;
   --radius-md: 14px;
@@ -704,6 +707,11 @@ footer {
   color: var(--color-text-faint);
   font-size: 0.9rem;
   text-align: center;
+}
+
+.legal-section{
+  font-family: var(--font-legal);
+  color: var(--color-text-faint);
 }
 
 /* ===== Responsive ===== */
