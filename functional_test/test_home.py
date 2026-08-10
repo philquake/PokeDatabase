@@ -41,5 +41,10 @@ class HomePageTest(LiveServerTestCase):
         link.click()
         self.assertEqual(self.browser.current_url, expected_url)
         
-    
-        
+    def test_browse_clickable(self):
+        self.browser.get(self.live_server_url + "/")
+        card = self.browser.find_element(By.CLASS_NAME, "browse-card")
+        link = card.find_element(By.TAG_NAME, "a")
+        expected_url = link.get_attribute("href")
+        link.click()
+        self.assertEqual(self.browser.current_url, expected_url)

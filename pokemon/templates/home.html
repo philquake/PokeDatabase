@@ -132,9 +132,95 @@
         </article>
       {% endfor %}
     </div>
+  </div>
+</section>
+
+
+<section class="browse-pages">
+  <div class="browse-grid">
+    <article class="browse-card">
+      <a href="{% url 'types' %}">
+        <div class="type-icon"> 
+          🔥
+        </div>
+        <div class="browse-title">
+          Pokemon Types
+        </div>
+        <div class="browse-text">
+          Explore Pokémon types
+        </div>
+      </a>
+    </article>
+    <article class="browse-card">
+      <a href="{% url 'region' %}">
+        <div class="type-icon"> 
+          🗺️
+        </div>
+        <div class="browse-title">
+          Region
+        </div>
+        <div class="browse-text">
+          Discover Pokémon from every generation
+        </div>
+      </a>
+    </article>
+    <article class="browse-card">
+      <a href="{% url 'abilities' %}">
+        <div class="type-icon"> 
+          ⚡
+        </div>
+        <div class="browse-title">
+          Abilities
+        </div>
+        <div class="browse-text">
+          Learn about unique Pokémon abilities
+        </div>
+      </a>
+    </article>
+
+
+    <article class="browse-card">
+      <a href="{% url 'competitive' %}">
+        <div class="type-icon"> 
+          🏆
+        </div>
+        <div class="browse-title">
+          Competitive
+        </div>
+        <div class="browse-text">
+          Analyze the strongest Pokémon
+        </div>
+      </a>
+    </article>
+    <article class="browse-card">
+      <a href="{% url 'moves' %}">
+        <div class="type-icon"> 
+          ⚔️
+        </div>
+        <div class="browse-title">
+          Moves
+        </div>
+        <div class="browse-text">
+          Explore moves and battle strategies
+        </div>
+      </a>
+    </article>
+    <article class="browse-card">
+      <a href="{% url 'items' %}">
+        <div class="type-icon"> 
+          🎒
+        </div>
+        <div class="browse-title">
+          Items
+        </div>
+        <div class="browse-text">
+          Discover useful Pokémon items
+        </div>
+      </a>
+    </article>
 
   </div>
-
 </section>
+
 {% endblock %}
  
