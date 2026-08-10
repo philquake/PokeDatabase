@@ -118,3 +118,6 @@ def moves(request):
 
 def competitive(request):
     return HttpResponse("Competitive Analysis page is not implemented yet.")
+
+def items(request):
+    return HttpResponse("Items page is not implemenets yet")
