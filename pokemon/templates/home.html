@@ -104,29 +104,31 @@
     <div class="featured-grid">
       {% for pokemon in featured_pokemon %}
         <article class="poke-card">
-          <div class="poke-card-art">
-            <div class="poke-card-glow"></div>
-            <img src="{{ pokemon.image }}" alt="{{ pokemon.name }}" class="poke-card-img" loading="lazy">
-            <div class="poke-card-types">
-              {% for t in pokemon.types %}
-                <span class="type-badge type-{{ t|lower }}">{{ t|upper }}</span>
-              {% endfor %}
+          <a href="{% url 'pokemon_detail' pokemon.name %}">
+            <div class="poke-card-art">
+              <div class="poke-card-glow"></div>
+              <img src="{{ pokemon.image }}" alt="{{ pokemon.name }}" class="poke-card-img" loading="lazy">
+              <div class="poke-card-types">
+                {% for t in pokemon.types %}
+                  <span class="type-badge type-{{ t|lower }}">{{ t|upper }}</span>
+                {% endfor %}
+              </div>
             </div>
-          </div>
-          <div class="poke-card-body">
-            <div class="poke-card-heading">
-              <h3 class="poke-card-name">{{ pokemon.name }}</h3>
-              <span class="poke-card-id">#{{ pokemon.pokedex_number|stringformat:"03d" }}</span>
+            <div class="poke-card-body">
+              <div class="poke-card-heading">
+                <h3 class="poke-card-name">{{ pokemon.name }}</h3>
+                <span class="poke-card-id">#{{ pokemon.pokedex_number|stringformat:"03d" }}</span>
+              </div>
+              <dl class="poke-card-stats">
+                {% for stat_name, stat_value in pokemon.stats.items %}
+                  <div class="poke-stat">
+                    <dt>{{ stat_name }}</dt>
+                    <dd>{{ stat_value }}</dd>
+                  </div>
+                {% endfor %}
+              </dl>
             </div>
-            <dl class="poke-card-stats">
-              {% for stat_name, stat_value in pokemon.stats.items %}
-                <div class="poke-stat">
-                  <dt>{{ stat_name }}</dt>
-                  <dd>{{ stat_value }}</dd>
-                </div>
-              {% endfor %}
-            </dl>
-          </div>
+          </a>
         </article>
       {% endfor %}
     </div>
