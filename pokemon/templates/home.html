@@ -63,7 +63,8 @@
           <span class="type-emoji">{{ featured.type_emoji|default:"🐾" }}</span>
           {{ featured.types|join:" / " }}
         </div>
-        <div class="pokemon-tag pokemon-tag-id">#{{ featured.pokedex_number|stringformat:"03d" }}</div>
+				{% comment %} <div class="pokemon-tag pokemon-tag-name">{{ featured.name}}</div> {% endcomment %}
+        <div class="pokemon-tag pokemon-tag-id">{{ featured.name}} #{{ featured.pokedex_number|stringformat:"03d" }}</div>
  
         <div class="pokemon-image-wrap">
           <img
@@ -98,7 +99,7 @@
         <h2 class="featured-title">Featured Pokémon</h2>
         <p class="featured-subtitle">Discover popular Pokémon and their essential statistics.</p>
       </div>
-      <a href="{% url 'pokedex' %}" class="btn btn-dark">View All <span class="arrow">→</span></a>
+      <a href="{% url 'pokedex' %}" class="view-all btn btn-dark">View All <span class="arrow">→</span></a>
     </div>
 
     <div class="featured-grid">
