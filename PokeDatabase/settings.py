@@ -123,3 +123,5 @@ STATICFILES_DIRS = [BASE_DIR / 'assets' / 'static']
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+FEATURED_POKEMON_COUNT = 8
