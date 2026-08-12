@@ -14,11 +14,14 @@ class SearchTest (LiveServerTestCase):
         self.browser.quit()
         
     def test_user_can_search_for_pokemon_via_form(self):
-        self.browser.get(self.live_server_url + reverse("home"))
+        self.browser.get(self.live_server_url)
         search_box = self.browser.find_element(By.NAME, "search")
         search_box.send_keys("Gengar")
-        search_button = self.browser.find_element(By.CLASS_NAME, "submit")
-        search_button.click()
+        search_box.submit()
+
+        WebDriverWait(self.browser, 5).until(
+            lambda browser: browser.current_url.endswith("/pokemon/pokedex/Gengar/")
+        )
 
         self.assertEqual(
                 self.browser.current_url,
@@ -29,11 +32,10 @@ class SearchTest (LiveServerTestCase):
             )
         
     def test_search_for_nonexistent_pokemon_via_form(self):
-        self.browser.get(self.live_server_url + reverse("home"))
+        self.browser.get(self.live_server_url)
         search_box = self.browser.find_element(By.NAME, "search")
-        search_box.send_keys("NotaPokemon")
-        search_button = self.browser.find_element(By.CLASS_NAME, "submit")
-        search_button.click()
+        search_box.send_keys("NotAPokemon")
+        search_box.submit()
 
         self.assertEqual(self.browser.current_url, self.live_server_url + reverse("home"))
         self.assertIn("Pokemon not found", self.browser.page_source)
