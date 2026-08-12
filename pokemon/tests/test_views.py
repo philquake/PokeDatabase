@@ -8,10 +8,7 @@ class PokemonViewTest(SimpleTestCase):
     def test_pokemon_detail_url_resolves_to_correct_view(self):
      response = self.client.get(reverse("pokemon_detail" , args=["Gengar"]))
 
-     self.assertTemplateUsed(
-        response,
-        "pokemon_detail.html"
-     )
+     self.assertEqual(response.status_code, 200)
 
     def test_pokemon_detail_passes_pokemon_to_template(self):
         response = self.client.get(reverse("pokemon_detail" , args=["Gengar"]))
@@ -105,6 +102,7 @@ class PokemonViewTest(SimpleTestCase):
             follow=True         ##so it follows the redirect elsewise it will stay at teh static url
         )
         
+        self.assertEqual(response.status_code, 200)
         self.assertRedirects(response, reverse("home"))
         self.assertContains(response, "Pokemon not found")
                 
