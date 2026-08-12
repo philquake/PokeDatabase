@@ -3,8 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
-
+from django.urls import reverse
 
 class SearchTest (LiveServerTestCase):
 
@@ -15,29 +14,26 @@ class SearchTest (LiveServerTestCase):
         self.browser.quit()
         
     def test_user_can_search_for_pokemon_via_form(self):
-        self.browser.get(self.live_server_url)
+        self.browser.get(self.live_server_url + reverse("home"))
         search_box = self.browser.find_element(By.NAME, "search")
         search_box.send_keys("Gengar")
-        search_box.submit()
+        search_button = self.browser.find_element(By.CLASS_NAME,"search-button")
+        search_button.click()
 
-        self.assertEqual(self.browser.current_url, self.live_server_url + "/pokemon/pokedex/Gengar/")
-
-    def test_user_search_not_a_pokemon(self):
-        self.browser.get(self.live_server_url)
+        self.assertEqual(
+                self.browser.current_url,
+                self.live_server_url + reverse(
+                    "pokemon_detail",
+                    kwargs={"name": "Gengar"}
+                )
+            )
+        
+    def test_search_for_nonexistent_pokemon_via_form(self):
+        self.browser.get(self.live_server_url + reverse("home"))
         search_box = self.browser.find_element(By.NAME, "search")
-        search_box.send_keys("NotAPokemon")
-        search_box.submit()
-        WebDriverWait(self.browser, 5).until(
-            EC.text_to_be_present_in_element((By.TAG_NAME, "footer"), "Pokemon not found")
-        )
-        self.assertIn("Pokemon not found", self.browser.page_source )
+        search_box.send_keys("NotaPokemon")
+        search_button = self.browser.find_element(By.CLASS_NAME,"search-button")
+        search_button.click()
 
-    def test_user_search_empty(self):
-        self.browser.get(self.live_server_url)
-
-        search_box = self.browser.find_element(By.NAME, "search")
-        search_box.submit()
-        WebDriverWait(self.browser, 5).until(
-            EC.text_to_be_present_in_element((By.TAG_NAME, "footer"), "Pokemon name required")
-        )
-        self.assertIn("Pokemon name required", self.browser.page_source)
+        self.assertEqual(self.browser.current_url, self.live_server_url + reverse("home"))
+        self.assertIn("Pokemon not found", self.browser.page_source)

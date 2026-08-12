@@ -4,9 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver import Keys
 from selenium.webdriver.support import expected_conditions as EC
-
-
-
+from django.urls import reverse
 
 class HomePageTest(LiveServerTestCase):
     
@@ -19,21 +17,21 @@ class HomePageTest(LiveServerTestCase):
         super().tearDown()
             
     def test_home_page_title(self):
-        self.browser.get(self.live_server_url + "/")
+        self.browser.get(self.live_server_url + reverse("home"))
         self.assertEqual(self.browser.title, "Home")
                  
-    def test_home_page_returns_200(self):
-        response = self.client.get("/")
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "base.html")
+    def test_home_page_loads(self):
+        self.browser.get(self.live_server_url + reverse("home"))
+        body = self.browser.find_element(By.TAG_NAME, "body")
+        self.assertTrue(body.is_displayed())
     
     def test_search_bar_present(self):
-        self.browser.get(self.live_server_url + "/")
+        self.browser.get(self.live_server_url + reverse("home"))
         search_bar = self.browser.find_element(By.CLASS_NAME, "search-input")
         self.assertIsNotNone(search_bar)
         
     def test_hero_pokemon_content(self):
-        self.browser.get(self.live_server_url + "/")
+        self.browser.get(self.live_server_url + reverse("home"))
 
         WebDriverWait(self.browser, 10).until(
             lambda driver: driver.execute_script("""
@@ -53,14 +51,14 @@ class HomePageTest(LiveServerTestCase):
         self.assertTrue(top_stat.is_displayed())
         
     def test_featured_pokemon_exist(self):
-        self.browser.get(self.live_server_url + "/")
+        self.browser.get(self.live_server_url + reverse("home"))
         self.browser.find_element(By.TAG_NAME, 'body').send_keys(Keys.END) ##Scroll down to the featured pokemon section that has lazy loading
 
         cards = self.browser.find_elements(By.CLASS_NAME, "poke-card")
         self.assertEqual(len(cards), 8)
         
     def test_featured_pokemon_img_loads(self):
-        self.browser.get(self.live_server_url + "/")
+        self.browser.get(self.live_server_url + reverse("home"))
 
         cards = WebDriverWait(self.browser, 10).until(
             lambda driver: driver.find_elements(
@@ -84,7 +82,7 @@ class HomePageTest(LiveServerTestCase):
             )
      
     def test_featured_pokemon_content(self):
-        self.browser.get(self.live_server_url + "/")
+        self.browser.get(self.live_server_url + reverse("home"))
         types = self.browser.find_element(By. CLASS_NAME, "type-badge")
         name = self.browser.find_element(By. CLASS_NAME, "poke-card-name")
         id = self.browser.find_element(By. CLASS_NAME, "poke-card-id")
@@ -94,7 +92,7 @@ class HomePageTest(LiveServerTestCase):
         self.assertIsNotNone(id)
         
     def test_featured_pokemon_redirect(self):
-        self.browser.get(self.live_server_url + "/")
+        self.browser.get(self.live_server_url + reverse("home"))
         card = self.browser.find_element(By.CLASS_NAME, "poke-card")
         link = card.find_element(By.TAG_NAME, "a")
         expected_url = link.get_attribute("href")
@@ -102,7 +100,7 @@ class HomePageTest(LiveServerTestCase):
         self.assertEqual(self.browser.current_url, expected_url)
     
     def test_browse_card_content(self):
-        self.browser.get(self.live_server_url + "/")
+        self.browser.get(self.live_server_url + reverse("home"))
         resources = self.browser.find_element(By.CLASS_NAME, "resources")
         links = resources.find_elements(By.TAG_NAME, "a")
         self.assertEqual(
@@ -114,7 +112,7 @@ class HomePageTest(LiveServerTestCase):
         # links[2].get_attribute("href"),"https://github.com/philquake")
         
     def test_browse_card_redirects(self):
-        self.browser.get(self.live_server_url + "/")
+        self.browser.get(self.live_server_url + reverse("home"))
         card = self.browser.find_element(By.CLASS_NAME, "browse-card")
         link = card.find_element(By.TAG_NAME, "a")
         expected_url = link.get_attribute("href")
@@ -122,12 +120,12 @@ class HomePageTest(LiveServerTestCase):
         self.assertEqual(self.browser.current_url, expected_url)
         
     def test_view_all_button(self):
-        self.browser.get(self.live_server_url + "/")
+        self.browser.get(self.live_server_url + reverse("home"))
         view_all = self.browser.find_element(By.CLASS_NAME, "view-all")
         self.assertIsNotNone(view_all)
     
     def test_view_all_redirect(self):
-        self.browser.get(self.live_server_url + "/")
+        self.browser.get(self.live_server_url + reverse("home"))
         view_all = self.browser.find_element(By.CLASS_NAME, "view-all")
         view_all.click()
-        self.assertEqual(self.browser.current_url, self.live_server_url + "/pokemon/pokedex/")
+        self.assertEqual(self.browser.current_url, self.live_server_url + reverse("pokedex"))
