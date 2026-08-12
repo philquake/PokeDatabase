@@ -44,12 +44,12 @@ def home(request):
     return render(request, "home.html", context)
 
 def pokemon_detail(request, name):
-    if not name.strip(): 
-        return render(
-            request,
-            "home.html",
-            {"error": "Pokemon name required"},
-            status=400)
+    if not name.strip():
+        messages.error(request, "Pokemon name required")
+        response = redirect("home")
+        response.status_code = 400
+        return response
+    
     # Load the JSON data from the file
     json_file_path = Path(__file__).resolve().parent.parent / "assets" / "static" / "fixtures" / "pokemon.json"
 
