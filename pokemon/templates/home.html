@@ -37,7 +37,9 @@
       </form>
 
       <div class="hero-class">
-        <a href="{% url 'pokemon_detail' explore_pokemon %}" class="btn btn-primary btn-lg">Explore Pokémon <span class="arrow">→</span></a>
+        {% if explore_pokemon %}
+          <a href="{% url 'pokemon_detail' explore_pokemon %}" class="btn btn-primary btn-lg">Explore Pokémon <span class="arrow">→</span></a>
+        {% endif %}
         <a href="{% url 'competitive' %}" class="btn btn-outline btn-lg">View Rankings</a>
       </div>
 
