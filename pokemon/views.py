@@ -60,17 +60,14 @@ def pokemon_detail(request, name):
         if pokemon["name"].lower() == name.lower():    
             return render(request, 'pokemon_detail.html', {"pokemon": pokemon})
     else:
-        raise Http404(f"No pokemon found match '{name}")
+        raise Http404(f"No pokemon found match '{name}'")
     
 def search(request):
     pokemon_name = request.GET.get("search", "").strip()
 
     if not pokemon_name: 
-            return redirect(
-                request,
-                "home.html",
-                {"error": "Pokemon name required"},
-                status=400)
+            messages.error(request, "Pokemon name required")
+            return redirect("home")
         
     # Load the JSON data from the file
     json_file_path = Path(__file__).resolve().parent.parent / "assets" / "static" / "fixtures" / "pokemon.json"
