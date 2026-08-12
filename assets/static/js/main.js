@@ -151,13 +151,13 @@ function initCardEntrance() {
   cards.forEach((card) => observer.observe(card));
 }
 
-function SearchIconCollapse() {
-  document.getElementById('searchToggle').addEventListener('click', function () {
-      const form = this.closest('.search-form-nav');
-      form.classList.toggle('search-open');
-      if (form.classList.contains('search-open')) {
-          form.querySelector('.search-input-nav').focus();
-      }
-  });
-}
+// function SearchIconCollapse() {
+//   document.getElementById('searchToggle').addEventListener('click', function () {
+//       const form = this.closest('.search-form-nav');
+//       form.classList.toggle('search-open');
+//       if (form.classList.contains('search-open')) {
+//           form.querySelector('.search-input-nav').focus();
+//       }
+//   });
+// }
 

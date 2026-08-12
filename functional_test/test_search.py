@@ -17,7 +17,7 @@ class SearchTest (LiveServerTestCase):
         self.browser.get(self.live_server_url + reverse("home"))
         search_box = self.browser.find_element(By.NAME, "search")
         search_box.send_keys("Gengar")
-        search_button = self.browser.find_element(By.CLASS_NAME,"search-button")
+        search_button = self.browser.find_element(By.CLASS_NAME, "submit")
         search_button.click()
 
         self.assertEqual(
@@ -32,7 +32,7 @@ class SearchTest (LiveServerTestCase):
         self.browser.get(self.live_server_url + reverse("home"))
         search_box = self.browser.find_element(By.NAME, "search")
         search_box.send_keys("NotaPokemon")
-        search_button = self.browser.find_element(By.CLASS_NAME,"search-button")
+        search_button = self.browser.find_element(By.CLASS_NAME, "submit")
         search_button.click()
 
         self.assertEqual(self.browser.current_url, self.live_server_url + reverse("home"))
