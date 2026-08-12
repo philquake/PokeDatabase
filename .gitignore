@@ -32,7 +32,6 @@ src/db.sqlite3
 src/static
 
 # Old files
-/OLD
 outline.txt
 
 
