@@ -90,3 +90,43 @@ class PokemonViewTest(SimpleTestCase):
             len(context["featured_pokemon"]),
             settings.FEATURED_POKEMON_COUNT
         )
+
+    def test_pokemon_detail_returns_404_for_unknown_pokemon(self):
+        response = self.client.get(
+            reverse("pokemon_detail", 
+                    args=["NotARealPokemon"])
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_search_returns_200_when_pokemon_not_found(self):
+        response = self.client.get(
+            reverse("search"),
+            {"search": "NotARealPokemon"},
+            follow=True         ##so it follows the redirect elsewise it will stay at teh static url
+        )
+        
+        self.assertRedirects(response, reverse("home"))
+        self.assertContains(response, "Pokemon not found")
+                
+# #     def test_home_view_does_not_error_when_featured_pokemon_is_empty(self):
+# #         # Requires a way to force featured_pokemon to []
+# #         # e.g. mock the data source or override a setting the view reads from
+# #         response = self.client.get(reverse("home"))
+# #         self.assertEqual(response.status_code, 200)
+
+# #     def test_home_view_does_not_error_when_hero_is_none(self):
+# #         # Requires a way to force hero to None
+# #         # e.g. mock the data source or override a setting the view reads from
+# #         response = self.client.get(reverse("home"))
+# #         self.assertEqual(response.status_code, 200)
+    
+# #     # def test_home_context_is_None(self):
+# #     #     response = self.client.get(reverse("home"))
+# #     #     context = response.context
+        
+# #     #     self.assertIsNone(context," ")
+        
+            
+# # # test_views.py
+# # # View doesn't error when featured is None
+# # # View doesn't error when featured_pokemon is an empty list
