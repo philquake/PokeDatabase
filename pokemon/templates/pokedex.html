@@ -1,10 +1,38 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+    <link href="{% static 'css/pokedex.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block title %}Pokédex{% endblock %}
 
 {% block content %}
+
+<section class="pokedex-page">
+  <header class="pokedex-header">
+    <p class="pokedex-eyebrow">The complete National Dex</p>
+    <h1 class="pokedex-title">The Pokédex</h1>
+    <p class="pokedex-count">{{ pokemon_data|length }} pokemons catalogued</p>
+  </header>
+
+  <div class="pokemon-grid">
     {% for pokemon in pokemon_data %}
-    <div>
-        <h2 class = "pokemon-name">{{ pokemon.name }}</h2>
-        <p>Type: {{ pokemon.type }}</p>
-    </div>
-{% endfor %}
+      <a class="pokemon-card" href="{% url 'pokemon_detail' name=pokemon.name %}">
+        <span class="pokemon-tag">No. {{ pokemon.pokedex_number|stringformat:"03d" }}</span>
+        <div class="pokemon-art">
+          <img src="{{ pokemon.image }}" alt="{{ pokemon.name }}" name="pokemon-image" loading="lazy">
+        </div>
+        <div class="pokemon-body">
+          <h2 class="pokemon-name pokemon-name">{{ pokemon.name }}</h2>
+          <div class="pokemon-types">
+            {% for t in pokemon.types %}
+              <span class="type-chip type-{{ t|lower }}">{{ t }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+</section>
 {% endblock %}
