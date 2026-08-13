@@ -49,7 +49,7 @@ class PokemonViewTest(SimpleTestCase):
         required_keys = [
             "pokemon_count",
             # "move_count",
-            # "ability_count",   ###TO FIX AFTER DATABASE API IS LINKED
+            # "ability_count",   
             "explore_pokemon",
             "hero",
             "featured_pokemon",
@@ -99,7 +99,7 @@ class PokemonViewTest(SimpleTestCase):
         response = self.client.get(
             reverse("search"),
             {"search": "NotARealPokemon"},
-            follow=True         ##so it follows the redirect elsewise it will stay at teh static url
+            follow=True         ##so it follows the redirect elsewise it will stay at the static url
         )
         
         self.assertEqual(response.status_code, 200)
