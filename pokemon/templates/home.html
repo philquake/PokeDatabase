@@ -33,11 +33,13 @@
           placeholder="Search Pokémon by name, type, ability…"
           aria-label="Search Pokémon by name, type, ability"
         >
-        <button type="submit" class="search-button btn btn-primary">Search</button>
+        <button type="submit" class="submit btn btn-primary">Search</button>
       </form>
 
-      <div class="hero-ctas">
-        <a href="{% url 'pokedex' %}" class="btn btn-primary btn-lg">Explore Pokémon <span class="arrow">→</span></a>
+      <div class="hero-class">
+        {% if explore_pokemon %}
+          <a href="{% url 'pokemon_detail' explore_pokemon %}" class="btn btn-primary btn-lg">Explore Pokémon <span class="arrow">→</span></a>
+        {% endif %}
         <a href="{% url 'competitive' %}" class="btn btn-outline btn-lg">View Rankings</a>
       </div>
 
@@ -58,17 +60,17 @@
     </div>
 
     <div class="hero-visual">
-      {% if featured %}
+      {% if hero %}
         <div class="pokemon-tag pokemon-tag-type">
-          <span class="type-emoji">{{ featured.type_emoji|default:"🐾" }}</span>
-          {{ featured.types|join:" / " }}
+          <span class="type-emoji">{{ hero.type_emoji|default:"🐾" }}</span>
+          {{ hero.types|join:" / " }}
         </div>
-        <div class="pokemon-tag pokemon-tag-id">#{{ featured.pokedex_number|stringformat:"03d" }}</div>
+        <div class="pokemon-tag pokemon-tag-id">{{ hero.name}} #{{ hero.pokedex_number|stringformat:"03d" }}</div>
  
         <div class="pokemon-image-wrap">
           <img
-            src="{{ featured.image }}"
-            alt="{{ featured.name }} official artwork"
+            src="{{ hero.image }}"
+            alt="{{ hero.name }} official artwork"
             class="pokemon-image"
             width="800"
             height="800"
@@ -77,7 +79,7 @@
         </div>
  
         <div class="pokemon-tag pokemon-tag-stats">
-          {% for stat_name, stat_value in featured.base_stats.items %}{% if not forloop.first %} · {% endif %}{{ stat_name }} {{ stat_value }}{% endfor %}
+          {% for stat_name, stat_value in hero.top_stats %}{% if not forloop.first %} · {% endif %}{{ stat_name }} {{ stat_value }}{% endfor %}
         </div>
       {% else %}
 
@@ -98,42 +100,196 @@
         <h2 class="featured-title">Featured Pokémon</h2>
         <p class="featured-subtitle">Discover popular Pokémon and their essential statistics.</p>
       </div>
-      <a href="{% url 'pokedex' %}" class="btn btn-dark">View All <span class="arrow">→</span></a>
+      <a href="{% url 'pokedex' %}" class="view-all btn btn-dark">View All <span class="arrow">→</span></a>
     </div>
 
     <div class="featured-grid">
       {% for pokemon in featured_pokemon %}
         <article class="poke-card">
-          <div class="poke-card-art">
-            <div class="poke-card-glow"></div>
-            <img src="{{ pokemon.image }}" alt="{{ pokemon.name }}" class="poke-card-img" loading="lazy">
-            <div class="poke-card-types">
-              {% for t in pokemon.types %}
-                <span class="type-badge type-{{ t|lower }}">{{ t|upper }}</span>
-              {% endfor %}
+          <a href="{% url 'pokemon_detail' pokemon.name %}">
+            <div class="poke-card-art">
+              <div class="poke-card-glow"></div>
+              <img src="{{ pokemon.image }}" alt="{{ pokemon.name }}" class="poke-card-img" loading="lazy">
+              <div class="poke-card-types">
+                {% for t in pokemon.types %}
+                  <span class="type-badge type-{{ t|lower }}">{{ t|upper }}</span>
+                {% endfor %}
+              </div>
             </div>
-          </div>
-          <div class="poke-card-body">
-            <div class="poke-card-heading">
-              <h3 class="poke-card-name">{{ pokemon.name }}</h3>
-              <span class="poke-card-id">#{{ pokemon.pokedex_number|stringformat:"03d" }}</span>
+            <div class="poke-card-body">
+              <div class="poke-card-heading">
+                <h3 class="poke-card-name">{{ pokemon.name }}</h3>
+                <span class="poke-card-id">#{{ pokemon.pokedex_number|stringformat:"03d" }}</span>
+              </div>
             </div>
-            <dl class="poke-card-stats">
-              {% for stat_name, stat_value in pokemon.stats.items %}
-                <div class="poke-stat">
-                  <dt>{{ stat_name }}</dt>
-                  <dd>{{ stat_value }}</dd>
-                </div>
-              {% endfor %}
-            </dl>
-          </div>
+          </a>
         </article>
       {% endfor %}
     </div>
-
   </div>
-
-  <button class="help-fab" type="button" aria-label="Help" aria-expanded="false">?</button>
 </section>
+
+<section class="browse">
+  <div class="browse-inner">
+
+    <div class="browse-header">
+      <div>
+        <p class="eyebrow"><span class="eyebrow-icon">✦</span> Browse</p>
+        <h2 class="featured-title">Explore Pokémon</h2>
+        <p class="featured-subtitle">Dive into every corner of the Pokémon universe</p>
+      </div>
+    </div>
+    
+    <div class="browse-grid">
+
+        <article class="browse-card">
+          <a href="{% url 'types' %}">
+            <div class="browse-card-type-icon"> 
+              🔥
+            </div>
+            <div class="browse-card-name">
+              Pokemon Types
+            </div>
+            <div class="browse-text">
+              Explore Pokémon types
+            </div>
+          </a>
+        </article>
+
+        <article class="browse-card">
+          <a href="{% url 'region' %}">
+            <div class="browse-card-type-icon"> 
+              🗺️
+            </div>
+            <div class="browse-card-name">
+              Region
+            </div>
+            <div class="browse-text">
+              Discover Pokémon from every generation
+            </div>
+          </a>
+        </article>
+
+        <article class="browse-card">
+          <a href="{% url 'abilities' %}">
+            <div class="browse-card-type-icon"> 
+              ⚡
+            </div>
+            <div class="browse-card-name">
+              Abilities
+            </div>
+            <div class="browse-text">
+              Learn about unique Pokémon abilities
+            </div>
+          </a>
+        </article>
+
+        <article class="browse-card">
+          <a href="{% url 'competitive' %}">
+            <div class="browse-card-type-icon"> 
+              🏆
+            </div>
+            <div class="browse-card-name">
+              Competitive
+            </div>
+            <div class="browse-text">
+              Analyze the strongest Pokémon
+            </div>
+          </a>
+        </article>
+
+        <article class="browse-card">
+          <a href="{% url 'moves' %}">
+            <div class="browse-card-type-icon"> 
+              ⚔️
+            </div>
+            <div class="browse-card-name">
+              Moves
+            </div>
+            <div class="browse-text">
+              Explore moves and battle strategies
+            </div>
+          </a>
+        </article>
+        
+        <article class="browse-card">
+          <a href="{% url 'items' %}">
+            <div class="browse-card-type-icon"> 
+              🎒
+            </div>
+            <div class="browse-card-name">
+              Items
+            </div>
+            <div class="browse-text">
+              Discover useful Pokémon items
+            </div>
+          </a>
+        </article>
+
+      </div>
+  </div>
+</section>
+
+<section class="EOP">
+	<div class="EOP-inner">
+		<div class="EOP-grid">
+
+			<div class="resources">
+				<span class="EOP-title">Resources</span>
+				<table class="EOP-table">
+					<tr>
+						<td>
+							<a href=" ">
+								API
+							</a>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<a href=" ">
+								Resources
+							</a>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<a href="https://github.com/philquake">
+								GitHub
+							</a>
+						</td>
+					</tr>
+				</table>
+			</div>
+
+			<div class="Community">
+				<span class="EOP-title">Community</span>
+				<table class="EOP-table">
+					<tr>
+						<td>
+							<a href=" ">
+								Discord
+							</a>
+						</td>
+					</tr>
+					<tr>
+						<td>
+								<a href=" ">
+									Twitter
+								</a>
+							</td>
+					</tr>
+					<tr>
+						<td>
+							<a href=" ">
+								Reddit
+							</a>
+						</td>
+					</tr>
+				</table>
+		</div> 
+
+	</div>
+</section>
+
 {% endblock %}
  

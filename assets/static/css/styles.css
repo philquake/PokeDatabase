@@ -2,6 +2,8 @@
    PokeDatabase — Site Styles (base.html + home.html)
    =========================================================== */
 
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&display=swap');
+
 :root {
   --color-bg-header: #0d1120;
   --color-bg-hero-top: #171d3d;
@@ -20,6 +22,8 @@
 
   --font-display: 'Poppins', 'Segoe UI', system-ui, sans-serif;
   --font-body: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-legal: "DM Mono", monospace;
+  --font-footer: "fNunito", sans-serif;
 
   --radius-sm: 8px;
   --radius-md: 14px;
@@ -114,22 +118,28 @@ img {
 .topbar {
   background: var(--color-bg-header);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  z-index: 1020;
 }
 
-.nav {
+.site-navbar {
   max-width: 1440px;
   margin: 0 auto;
   padding: 16px 48px;
   display: flex;
   align-items: center;
   gap: 8px;
+
 }
 
-/* logo is the first <a> in .nav, holding the icon + text */
-.nav > a:first-child {
+/* desktop: always show the links, ignore Bootstrap's collapse default */
+.site-navbar .navbar-collapse {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* logo is the first <a> in .site-navbar, holding the icon + text */
+.site-navbar > a:first-child {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -152,13 +162,13 @@ img {
 }
 
 /* nav links (Home / Pokédex / Types / Region / Abilities / Moves / Competitive) */
-.nav a.home,
-.nav a.pokedex,
-.nav a.types,
-.nav a.region,
-.nav a.abilities,
-.nav a.moves,
-.nav a.competitive {
+.site-navbar a.home,
+.site-navbar a.pokedex,
+.site-navbar a.types,
+.site-navbar a.region,
+.site-navbar a.abilities,
+.site-navbar a.moves,
+.site-navbar a.competitive {
   padding: 8px 14px;
   border-radius: var(--radius-sm);
   color: var(--color-text-muted);
@@ -167,18 +177,18 @@ img {
   transition: background var(--transition-fast), color var(--transition-fast);
 }
 
-.nav a.home:hover,
-.nav a.pokedex:hover,
-.nav a.types:hover,
-.nav a.region:hover,
-.nav a.abilities:hover,
-.nav a.moves:hover,
-.nav a.competitive:hover {
+.site-navbar a.home:hover,
+.site-navbar a.pokedex:hover,
+.site-navbar a.types:hover,
+.site-navbar a.region:hover,
+.site-navbar a.abilities:hover,
+.site-navbar a.moves:hover,
+.site-navbar a.competitive:hover {
   color: var(--color-white);
   background: rgba(255, 255, 255, 0.05);
 }
 
-.nav a.active {
+.site-navbar a.active {
   color: var(--color-yellow);
   background: rgba(244, 196, 48, 0.1);
 }
@@ -234,11 +244,69 @@ img {
   color: var(--color-white);
 }
 
+/* mobile navbar behavior */
+@media (max-width: 991.98px) {
+  .site-navbar {
+    flex-wrap: wrap;
+  }
+
+  .navbar-toggler {
+    order: 2;
+    margin-left: auto;
+    border: none;
+    background: transparent;
+    padding: 6px 10px;
+  }
+
+  .navbar-toggler:focus {
+    box-shadow: none;
+  }
+
+  .site-navbar .navbar-collapse {
+    order: 4;
+    width: 100%;
+  }
+
+  .navbar-collapse:not(.show) {
+    display: none;
+  }
+
+  .site-navbar a.home,
+  .site-navbar a.pokedex,
+  .site-navbar a.types,
+  .site-navbar a.region,
+  .site-navbar a.abilities,
+  .site-navbar a.moves,
+  .site-navbar a.competitive {
+    display: block;
+    padding: 10px 14px;
+  }
+
+  .search-nav {
+    order: 3;
+    margin-left: 0;
+  }
+
+  .search-input-nav {
+    width: 0;
+    padding: 0;
+    opacity: 0;
+    transition: width var(--transition-fast), opacity var(--transition-fast), padding var(--transition-fast);
+  }
+
+  .search-form-nav.search-open .search-input-nav {
+    width: 160px;
+    padding: 8px 0;
+    opacity: 1;
+    margin-right: 6px;
+  }
+}
+
 /* ===== Hero (home.html) ===== */
 
 .hero {
   background: radial-gradient(120% 100% at 75% 30%, #241a3a 0%, var(--color-bg-hero-top) 40%, var(--color-bg-hero-bottom) 100%);
-  padding: 90px 48px;
+  padding: 45px 48px;
   overflow: hidden;
   position: relative;
 }
@@ -323,7 +391,7 @@ img {
   color: var(--color-text-faint);
 }
 
-.hero-ctas {
+.hero-class {
   display: flex;
   gap: 16px;
   margin-bottom: 48px;
@@ -409,6 +477,14 @@ img {
   background: #1a1428;
 }
 
+.home-divider {
+  width: 100%;
+  height: 20px;
+  background: #f0f4ff;
+  clip-path: ellipse(55% 100% at 50% 100%);
+  margin-top: 1rem;
+}
+
 /* ===== Featured Pokémon (home.html) ===== */
 
 :root {
@@ -420,7 +496,7 @@ img {
 
 .featured {
   background: var(--color-light-bg);
-  padding: 72px 48px 96px;
+  padding: 32px 48px 96px;
   position: relative;
 }
 
@@ -573,7 +649,7 @@ img {
 .type-steel     { background: #8993a4; color: #12162b; }
 
 .poke-card-body {
-  padding: 4px 20px 24px;
+  padding: 4px 20px;
 }
 
 .poke-card-heading {
@@ -634,6 +710,11 @@ footer {
   text-align: center;
 }
 
+.legal-section{
+  font-family: var(--font-legal);
+  color: var(--color-text-faint);
+}
+
 /* ===== Responsive ===== */
 
 @media (max-width: 1080px) {
@@ -641,28 +722,17 @@ footer {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .nav a.home,
-  .nav a.pokedex,
-  .nav a.types,
-  .nav a.region,
-  .nav a.abilities,
-  .nav a.moves,
-  .nav a.competitive {
-    display: none;
-  }
-
   .hero-inner {
     grid-template-columns: 1fr;
   }
 
   .hero-visual {
-    order: -1;
     min-height: 320px;
   }
 }
 
 @media (max-width: 640px) {
-  .nav,
+  .site-navbar,
   .hero,
   .featured {
     padding-left: 20px;
@@ -698,4 +768,127 @@ footer {
     animation: none !important;
     transition: none !important;
   }
+}
+
+
+.browse {
+  background: var(--color-light-bg);
+  padding: 0px 48px 96px;
+  position: relative;
+}
+
+.browse-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.browse-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 44px;
+    text-align: center;
+}
+
+.browse-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.browse-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-text-muted);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast),
+  border-color var(--transition-fast), background var(--transition-fast);
+  min-height: 120px;
+}
+
+.browse-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(244, 196, 48, 0.4);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
+  background: var(--color-panel);
+}
+
+.browse-card > a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 32px 24px 28px;
+  height: 100%;
+  justify-content: center;
+}
+
+.browse-card-type-icon {
+  font-size: 1.75rem;
+  line-height: 1;
+  margin-bottom: 16px;
+  transition: transform var(--transition-fast);
+}
+
+.browse-card:hover .browse-card-type-icon {
+  transform: scale(1.06);
+}
+
+.browse-card-name {
+  font-family: var(--font-display);
+  font-size: 1r em;
+  font-weight: 700;
+  color: var(--color-heading-dark);
+  margin-bottom: 8px;
+  transition: color var(--transition-fast);
+}
+
+.browse-card:hover .browse-card-name {
+  color: var(--color-white);
+}
+
+.browse-text {
+  color: var(--color-body-dark);
+  font-size: 0.2 rem;
+  line-height: 1.5;
+  transition: color var(--transition-fast);
+  font: var(--font-body)
+}
+
+.browse-card:hover .browse-text {
+  color: var(--color-text-muted);
+}
+
+/* .EOP-inner{
+
+} */
+
+.EOP-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  place-items: center;
+  gap: 24px;
+  padding: 40px 0px 10px;
+}
+
+.EOP-title{
+  display: block;
+  color: var(--color-white);
+  font-size: clamp(1.3rem, 3.5vw, 1.75rem);
+  font-family: var(--font-footer);
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.EOP-table {
+  text-align: left;
+  border-collapse: separate;
+  border-spacing: 0 1em;
+}
+
+.EOP-table td {
+  color: var(--color-text-faint);
+  font-family: var(--font-footer);
 }

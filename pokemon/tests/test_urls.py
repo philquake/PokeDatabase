@@ -14,14 +14,7 @@ class PokemonURLTests(SimpleTestCase):
         self.assertEqual(resolver.func, views.pokemon_detail)
         self.assertEqual(resolver.kwargs["name"], "Gengar")
 
-    def test_pokemon_detail_url_name(self):
-        resolver = resolve("/pokemon/pokedex/Gengar/")
-        self.assertEqual(resolver.url_name,"pokemon_detail")
-
-    def test_pokemon_detail_captures_name(self):
-        resolver = resolve("/pokemon/pokedex/Gengar/")
-        self.assertEqual(resolver.kwargs["name"],"Gengar")
-
     def test_pokemon_detail_reverse(self):
         url = reverse("pokemon_detail",kwargs={"name": "Gengar"})
         self.assertEqual(url,"/pokemon/pokedex/Gengar/")
+

@@ -12,6 +12,7 @@ urlpatterns = [
     path("abilities/", views.abilities, name="abilities"),
     path("moves/", views.moves, name="moves"),
     path("competitive/", views.competitive, name="competitive"),
+    path("items/", views.items, name="items"),
 
     # Dynamic URLS
     

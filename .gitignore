@@ -3,6 +3,7 @@
 
 # Python cache
 __pycache__/
+__pycache__
 *.py[cod]
 *$py.class
 __init__.py
@@ -31,7 +32,6 @@ src/db.sqlite3
 src/static
 
 # Old files
-/OLD
 outline.txt
 
 

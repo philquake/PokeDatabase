@@ -4,20 +4,27 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="{% static 'bootstrap-5.3.5-dist/css/bootstrap.min.css' %}" rel="stylesheet" />    
+    <script src="{% static 'bootstrap-5.3.5-dist/js/bootstrap.bundle.min.js' %}"></script>
     <link href="{% static 'css/styles.css' %}" rel="stylesheet" />
-    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet" />
-    <script src="{% static 'bootstrap/bootstrap-5.3.5-dist/js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'js/main.js'%}"></script>
+    
     <title>{% block title %}Home{% endblock %}</title>
   </head>
   <body>
-    <div class="container">
-      <header class="topbar">
-        <nav class="nav" aria-label="Main navigation">
-          <a href="{% url 'home' %}">
-          <img class="logo-icon" src="{% static 'img/pokemon_logo.png' %}" alt="Pokemon Logo" /> 
-          <text class="logo-text">PokeDatabase</text>
-          </a>
+    <header class="topbar sticky-top">
+      <nav class="site-navbar" aria-label="Main navigation">
+        <a href="{% url 'home' %}">
+        <img class="logo-icon" src="{% static 'img/pokemon_logo.png' %}" alt="Pokemon Logo" /> 
+        <span class="logo-text">PokeDatabase</span>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarLinks" aria-controls="navbarLinks"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarLinks">
           <a href="{% url 'home' %}"
           class=" home {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
           <a href="{% url 'pokedex' %}"
@@ -32,15 +39,15 @@
           class="moves {% if request.resolver_match.url_name == 'moves' %}active{% endif %}">Moves</a>
           <a href="{% url 'competitive' %}"
           class="competitive {% if request.resolver_match.url_name == 'competitive' %}active{% endif %}">Competitive</a>
-          <div class = "search-nav">
-            <form class="search-form-nav" method="GET" action="{% url 'search' %}">
-              <input class="search-input-nav" type="text" name="search" placeholder="Search Pokémon by name, type, ability...">
-              <button type="button" class="search-icon-nav">🔍</button>
-            </form>
-          </div>
-        </nav>
-      </header>
-    </div>
+      </div>
+       <div class = "search-nav">
+          <form class="search-form-nav" method="GET" action="{% url 'search' %}">
+            <input class="search-input-nav" type="text" name="search" placeholder="Search Pokémon by name, type, ability...">
+            <button type="button" class="search-icon-nav" id="searchToggle">🔍</button>
+          </form>
+        </div>
+      </nav>
+    </header>
     <main>
     {% block content %}
     <h1>{% block header_text %}{% endblock %}</h1>
@@ -48,10 +55,15 @@
     </main>
 
     <footer>
-      <p>© 2025 PokeDatabase</p>  {% comment %} TODO get a section for error messages {% endcomment %}
-      {% if error %}
-        <p>{{ error }}</p>
-      {% endif %}
+      <span class="legal-section">© 2025 PokeDatabase. Fan project — not affiliated with Nintendo or Game Freak.</span>  
+      {% comment %} TODO get a section for error messages {% endcomment %}
+      {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+          <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
     </footer>
   </body>
 </html>

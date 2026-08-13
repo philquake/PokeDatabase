@@ -1,5 +1,5 @@
 from django.test import TestCase
-import lxml.html
+from django.urls import reverse
 
 # Create your tests here.
 class HomePageTest(TestCase):
@@ -13,3 +13,11 @@ class PokemonDetailPageTest(TestCase):
         response = self.client.get("/pokemon/pokedex/Gengar/")
         self.assertTemplateUsed(response, 'pokemon_detail.html')
         
+        
+class BaseHtmlTetst(TestCase):
+    def test_home_uses_base_template(self):
+        response = self.client.get(reverse("home"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "home.html")
+        self.assertTemplateUsed(response, "base.html")

@@ -1,10 +1,11 @@
-from django.http import Http404, HttpResponse, response
+from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, render
-from django.views.generic import TemplateView
 import json
 from pathlib import Path
 from django.shortcuts import render
 import random
+from django.contrib import messages
+
 
 # Create your views here.
 TYPE_EMOJI = {
@@ -16,31 +17,37 @@ TYPE_EMOJI = {
 }
 
 def home(request):
-
     fixture_path = Path(__file__).resolve().parent.parent / "assets" / "static" / "fixtures" / "pokemon.json"
     with open(fixture_path, encoding="utf-8") as f:
         pokemon_data = json.load(f)
 
-    hero = random.choice(pokemon_data)
-    hero["type_emoji"] = TYPE_EMOJI.get(hero["types"][0], "🐾")
-
-    featured_pokemon = random.sample(pokemon_data, min(8, len(pokemon_data)))
+    if pokemon_data:
+        hero = random.choice(pokemon_data)
+        hero["type_emoji"] = TYPE_EMOJI.get(hero["types"][0], "🐾")
+        hero["top_stats"] = sorted(
+            hero["base_stats"].items(), key=lambda stat: stat[1], reverse=True
+        )[:2]
+        featured_pokemon = random.sample(pokemon_data, min(8, len(pokemon_data)))
+        explore_pokemon = random.choice(pokemon_data)["name"]
+    else:
+        hero = None
+        featured_pokemon = []
+        explore_pokemon = ""
 
     context = {
         "pokemon_count": len(pokemon_data),
-        "featured": hero,
-         "featured_pokemon": featured_pokemon,
+        "hero": hero,
+        "featured_pokemon": featured_pokemon,
+        "explore_pokemon": explore_pokemon,
     }
     return render(request, "home.html", context)
 
 def pokemon_detail(request, name):
-
-    if not name: 
-        return render(
-            request,
-            "home.html",
-            {"error": "Pokemon name required"},
-            status=400)
+    if not name.strip():
+        messages.error(request, "Pokemon name required")
+        response = redirect("home")
+        response.status_code = 400
+        return response
     
     # Load the JSON data from the file
     json_file_path = Path(__file__).resolve().parent.parent / "assets" / "static" / "fixtures" / "pokemon.json"
@@ -49,24 +56,17 @@ def pokemon_detail(request, name):
         pokemon_data = json.load(f)
 
     for pokemon in pokemon_data:
-        if pokemon["name"] == name:
+        if pokemon["name"].lower() == name.lower():    
             return render(request, 'pokemon_detail.html', {"pokemon": pokemon})
-
-    return render(
-                request,
-                "home.html",
-                {"error": "Pokemon not found"},
-                status=404)
-
+    else:
+        raise Http404(f"No pokemon found match '{name}'")
+    
 def search(request):
-    pokemon_name = request.GET.get("search")
+    pokemon_name = request.GET.get("search", "").strip()
 
     if not pokemon_name: 
-            return render(
-                request,
-                "home.html",
-                {"error": "Pokemon name required"},
-                status=400)
+            messages.error(request, "Pokemon name required")
+            return redirect("home")
         
     # Load the JSON data from the file
     json_file_path = Path(__file__).resolve().parent.parent / "assets" / "static" / "fixtures" / "pokemon.json"
@@ -78,11 +78,8 @@ def search(request):
         if pokemon["name"].lower() == pokemon_name.lower():
             return redirect("pokemon_detail", name=pokemon["name"])
         
-    return render(
-            request,
-            "home.html",
-            {"error": "Pokemon not found"},
-            status=404)
+    messages.error(request, "Pokemon not found")
+    return redirect("home")
     
 def types(request):
     return HttpResponse("Types page is not implemented yet.")
@@ -107,3 +104,6 @@ def moves(request):
 
 def competitive(request):
     return HttpResponse("Competitive Analysis page is not implemented yet.")
+
+def items(request):
+    return HttpResponse("Items page is not implemenets yet")
