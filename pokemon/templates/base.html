@@ -8,6 +8,7 @@
     <script src="{% static 'bootstrap-5.3.5-dist/js/bootstrap.bundle.min.js' %}"></script>
     <link href="{% static 'css/styles.css' %}" rel="stylesheet" />
     <script src="{% static 'js/main.js'%}"></script>
+    {% block extra_css %}{% endblock %}
     
     <title>{% block title %}Home{% endblock %}</title>
   </head>
@@ -28,7 +29,7 @@
           <a href="{% url 'home' %}"
           class=" home {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
           <a href="{% url 'pokedex' %}"
-          class=" pokedex{% if request.resolver_match.url_name == 'pokedex' %}active{% endif %}">Pokédex</a>
+          class=" pokedex {% if request.resolver_match.url_name == 'pokedex' %}active{% endif %}">Pokédex</a>
           <a href="{% url 'types' %}"
           class=" types {% if request.resolver_match.url_name == 'types' %}active{% endif %}">Types</a>
           <a href="{% url 'region' %}"
