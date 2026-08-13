@@ -1,6 +1,5 @@
-from django.http import Http404, HttpResponse, response
+from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, render
-from django.views.generic import TemplateView
 import json
 from pathlib import Path
 from django.shortcuts import render
