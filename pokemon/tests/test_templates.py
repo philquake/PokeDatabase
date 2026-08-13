@@ -21,3 +21,9 @@ class BaseHtmlTetst(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "home.html")
         self.assertTemplateUsed(response, "base.html")
+        
+class Pokedex(TestCase):
+    def test_pokedex_page_template(self):
+        response = self.client.get(reverse("pokedex"))
+        
+        self.assertTemplateUsed(response, "pokedex.html")

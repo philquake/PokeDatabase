@@ -1,6 +1,8 @@
 from django.test import LiveServerTestCase
 from selenium.webdriver.common.by import By
 from selenium import webdriver
+from django.urls import reverse
+
 
 class Navigation_Links(LiveServerTestCase):
 
@@ -33,11 +35,27 @@ class Navigation_Links(LiveServerTestCase):
 
         self.assertEqual(self.browser.current_url, self.live_server_url + "/pokemon/")
 
-    def test_active_hmtl(self):
+    def test_active_navbar_home(self):
         self.browser.get(self.live_server_url + "/")
         link = self.browser.find_element(By.CSS_SELECTOR, "a.home")
         assert "active" in link.get_attribute("class")
-    
+        
+    def test_active_navbar_pokedex(self):
+        self.browser.get(self.live_server_url + "/pokemon/pokedex")
+        link = self.browser.find_element(By.CSS_SELECTOR, "a.pokedex")
+        assert "active" in link.get_attribute("class")
+  
+    def test_pokedex_card_redirects_to_pokemon_detail(self):
+        self.browser.get(self.live_server_url + reverse("pokedex"))  
+        
+        pokemon = self.browser.find_element(By.CLASS_NAME, "pokemon-card")
+        pokemon_name = pokemon.find_element(By.CLASS_NAME, "pokemon-name").text
+        pokemon.click()
+        
+        self.assertEqual(
+        self.browser.current_url,
+        self.live_server_url + reverse("pokemon_detail", args=[pokemon_name])
+    )
     
     # def test_404_page_navigation_works(self):   ##remember DEBUG = FALSE if testing, need to fix
     #     # Navigate to a page that does not exist
