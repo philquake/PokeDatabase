@@ -55,9 +55,22 @@ def pokemon_detail(request, name):
     with open(json_file_path, "r") as f:
         pokemon_data = json.load(f)
 
-    for pokemon in pokemon_data:
-        if pokemon["name"].lower() == name.lower():    
-            return render(request, 'pokemon_detail.html', {"pokemon": pokemon})
+    for index, pokemon in enumerate(pokemon_data):
+        if pokemon["name"].lower() == name.lower(): 
+            current = pokemon
+            next = (
+                pokemon_data[index +1]
+                if index + 1 < len(pokemon_data)
+                else None
+                )
+            previous = (
+                pokemon_data[index -1]
+                if index > 0
+                else None
+            )
+            return render(request, 'pokemon_detail.html', {
+                "pokemon": current, "next": next, "previous": previous
+                })
     else:
         raise Http404(f"No pokemon found match '{name}'")
     
