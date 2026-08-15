@@ -17,9 +17,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from pokemon import views
+from django.views.generic import RedirectView
+
 
 urlpatterns = [
     # path('admin/', admin.site.urls),
-    path("", views.home, name="home"),  # Include the URLs from the pokemon app
+    path("", RedirectView.as_view(url="/pokemon/", permanent=False)),  # Include the URLs from the pokemon app
     path('pokemon/', include('pokemon.urls')),  # Include the URLs from the pokemon app for pokemon_detail
 ]
