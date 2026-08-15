@@ -37,5 +37,31 @@ class SearchTest (LiveServerTestCase):
         search_box.send_keys("NotAPokemon")
         search_box.submit()
 
+        expected_url = self.live_server_url + reverse("home")
+        WebDriverWait(self.browser, 5).until(
+        lambda browser: browser.current_url == expected_url
+        )
+        
         self.assertEqual(self.browser.current_url, self.live_server_url + reverse("home"))
-        self.assertIn("Pokemon not found", self.browser.page_source)
+        WebDriverWait(self.browser, 5).until(
+        EC.presence_of_element_located((By.CLASS_NAME, "messages"))
+        )       
+         
+    def test_search_case_insensitive_via_form(self):
+        self.browser.get(self.live_server_url)
+        search_box = self.browser.find_element(By.NAME, "search")
+        search_box.send_keys("gEnGaR")
+        search_box.submit()
+ 
+        WebDriverWait(self.browser, 5).until(
+            lambda browser: browser.current_url.endswith("/pokemon/pokedex/Gengar/")
+        )
+ 
+        self.assertEqual(
+            self.browser.current_url,
+            self.live_server_url + reverse(
+                "pokemon_detail",
+                kwargs={"name": "Gengar"}
+            )
+        )
+ 
