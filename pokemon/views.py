@@ -44,7 +44,7 @@ def home(request):
 
 def pokemon_detail(request, name):
     if not name.strip():
-        messages.error(request, "Pokemon name required")
+        messages.error(request, "Pokémon name required")
         response = redirect("home")
         response.status_code = 400
         return response
@@ -72,13 +72,13 @@ def pokemon_detail(request, name):
                 "pokemon": current, "next": next, "previous": previous
                 })
     else:
-        raise Http404(f"No pokemon found match '{name}'")
+        raise Http404(f"No Pokémon found match '{name}'")
     
 def search(request):
     pokemon_name = request.GET.get("search", "").strip()
 
     if not pokemon_name: 
-            messages.error(request, "Pokemon name required")
+            messages.error(request, "Pokémon name required")
             return redirect("home")
         
     # Load the JSON data from the file
@@ -91,7 +91,7 @@ def search(request):
         if pokemon["name"].lower() == pokemon_name.lower():
             return redirect("pokemon_detail", name=pokemon["name"])
         
-    messages.error(request, "Pokemon not found")
+    messages.error(request, f"No Pokémon found matching {pokemon_name}")
     return redirect("home")
     
 def types(request):
