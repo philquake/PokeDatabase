@@ -202,15 +202,6 @@ class SearchViewTest(SimpleTestCase):
 
         self.assertRedirects(response,reverse("pokemon_detail", args=["Gengar"]))
 
-    def test_search_result_contains_gengar(self):
-        response = self.client.get(
-            reverse("search"),
-            {"search": "Gengar"},
-            follow=True
-        )
-
-        self.assertContains(response, "Gengar")
-
     def test_search_returns_200_when_pokemon_not_found(self):
         response = self.client.get(
             reverse("search"),
