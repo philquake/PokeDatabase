@@ -2,6 +2,8 @@ from django.test import LiveServerTestCase
 from selenium.webdriver.common.by import By
 from selenium import webdriver
 from django.urls import reverse
+from django.test import override_settings
+
 
 
 class Navigation_Links(LiveServerTestCase):
@@ -57,22 +59,15 @@ class Navigation_Links(LiveServerTestCase):
         self.live_server_url + reverse("pokemon_detail", args=[pokemon_name])
     )
     
-    # def test_404_page_navigation_works(self):   ##remember DEBUG = FALSE if testing, need to fix
-    #     # Navigate to a page that does not exist
-    #     self.browser.get(self.live_server_url + "/does-not-exist/")
+    @override_settings(DEBUG=False, ALLOWED_HOSTS=["localhost", "testserver"])
+    def test_404_page_navigation_works(self):  
+        self.browser.get(self.live_server_url + "/does-not-exist/")
 
-    #     # Verify the custom 404 page is displayed
-    #     self.assertIn("Page Not Found", self.browser.title)
+        self.assertIn("Page Not Found", self.browser.title)
 
-    #     # Click the navigation link back to the homepage
-    #     self.browser.find_element(
-    #         By.LINK_TEXT, "Home"
-    #     ).click()
+        home = self.browser.find_element(By.LINK_TEXT, "Home")
+        home.click()
 
-    #     # Verify navigation succeeded
-    #     self.assertEqual(
-    #         self.browser.current_url,
-    #         self.live_server_url + "/"
-    #     )
+        self.assertEqual(self.browser.current_url, self.live_server_url + reverse("home") )
 
 
