@@ -27,3 +27,18 @@ class Pokedex(TestCase):
         response = self.client.get(reverse("pokedex"))
         
         self.assertTemplateUsed(response, "pokedex.html")
+
+class AllTemplatesExtendBaseTest(TestCase):
+    def test_all_pokemon_templates_use_base_html(self):
+        pages = [
+            ("home", {}, "home.html"),
+            ("pokedex", {}, "pokedex.html"),
+            ("pokemon_detail", {"name": "Gengar"}, "pokemon_detail.html"),
+        ]
+
+        # subTest lets Django report all failing pages independently in one run, one failing test would stop the loop
+        for url_name, kwargs, template_name in pages:
+            with self.subTest(url_name=url_name):
+                response = self.client.get(reverse(url_name, kwargs=kwargs))
+                self.assertTemplateUsed(response, template_name)
+                self.assertTemplateUsed(response, "base.html")                       
