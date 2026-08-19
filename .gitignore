@@ -31,7 +31,5 @@ staticfiles/
 src/db.sqlite3
 src/static
 
-# Old files
-outline.txt
-
-
+#Personal notes
+outline
