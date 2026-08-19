@@ -6,9 +6,7 @@ from django.test import RequestFactory
 from django.http import Http404
 from pokemon.views import pokemon_detail
 
-class PokemonViewTest(SimpleTestCase):
-
-    # Pokemon Detail
+class PokemonDetailTest(SimpleTestCase):
 
     def test_pokemon_detail_url_resolves_to_correct_view(self):
         response = self.client.get(
@@ -134,7 +132,7 @@ class PokemonViewTest(SimpleTestCase):
         self.assertEqual(response.status_code, 400) 
 
 
-    # Home
+class HomeViewTest(SimpleTestCase):
 
     def test_home_view_returns_200(self):
         response = self.client.get(reverse("home"))
@@ -195,7 +193,7 @@ class PokemonViewTest(SimpleTestCase):
         self.assertIsNone(response.context["hero"])
 
 
-    # Search
+class SearchViewTest(SimpleTestCase):
 
     def test_search_view_redirects(self):
         response = self.client.get(
