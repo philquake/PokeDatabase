@@ -17,8 +17,12 @@ class PokemonDetailURLTests(SimpleTestCase):
 class HomeURLTest(SimpleTestCase):
     
     def test_home_url_resolves(self):
-        resolver = resolve("/")
+        resolver = resolve("/pokemon/")
         self.assertEqual(resolver.func, views.home)
+        
+    def test_root_redirects_to_home(self):
+        response = self.client.get("/")
+        self.assertRedirects(response, "/pokemon/")
                 
 class PokedexURLTest(SimpleTestCase):
     def test_pokedex_url_resolves(self):
