@@ -1,10 +1,11 @@
 from django.test import TestCase
 from django.urls import reverse
+from django.test import override_settings
 
-# Create your tests here.
+
 class HomePageTest(TestCase):
     def test_home_page_template(self):
-        response = self.client.get('/')
+        response = self.client.get(reverse("home"))
         self.assertTemplateUsed(response, 'home.html')
 
 
@@ -14,7 +15,7 @@ class PokemonDetailPageTest(TestCase):
         self.assertTemplateUsed(response, 'pokemon_detail.html')
         
         
-class BaseHtmlTetst(TestCase):
+class BaseHtmlTest(TestCase):
     def test_home_uses_base_template(self):
         response = self.client.get(reverse("home"))
 
@@ -22,7 +23,7 @@ class BaseHtmlTetst(TestCase):
         self.assertTemplateUsed(response, "home.html")
         self.assertTemplateUsed(response, "base.html")
         
-class Pokedex(TestCase):
+class PokedexTest(TestCase):
     def test_pokedex_page_template(self):
         response = self.client.get(reverse("pokedex"))
         
@@ -42,3 +43,8 @@ class AllTemplatesExtendBaseTest(TestCase):
                 response = self.client.get(reverse(url_name, kwargs=kwargs))
                 self.assertTemplateUsed(response, template_name)
                 self.assertTemplateUsed(response, "base.html")                       
+                
+    @override_settings(DEBUG=False, ALLOWED_HOSTS=["localhost", "testserver"])
+    def test_404_template_used(self):
+        response = self.client.get("/does-not-exist")
+        self.assertTemplateUsed(response, "404.html")
