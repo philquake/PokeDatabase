@@ -1,31 +1,81 @@
 {% extends 'base.html' %}
+{% load static %}
+
+<script src="{% static 'js/main.js'%}"></script>
+{% block extra_css %}
+    <link href="{% static 'css/pokemon_detail.css' %}" rel="stylesheet">
+{% endblock %}
 
 {% block header_text %}{{pokemon.pokedex_number}}, {{pokemon.name}}{% endblock %}
 {% block title %}Pokedex Entry - #{{pokemon.pokedex_number}} {{pokemon.name}}{% endblock %}
+
 {% block content %}
-  <div class="pokemon-detail">
-    <div class="pokemon-detail-left">
-      <img class="pokemon-detail-img" src="{{ pokemon.image}}" alt="{{ pokemon.name }}">
-      <div class="pokemon-detail-name">{{ pokemon.name }}</div>
-      <div class="pokemon-detail-types">
-        {% for type in pokemon.types %}
-          <span class="pokemon-type">{{ type }}</span>
-        {% endfor %}
+<div class="pokemon-hero-container">
+  <div class="pokemon-hero type-{{ type|lower }}">
+    
+    <!-- Left Side: Visual Info -->
+    <article class="hero-card">
+      <div class="pokemon-hero-left">
+        <h1 class="pokemon-hero-name">{{ pokemon.name }}</h1>
+        <div class="pokemon-hero-types">
+          {% for type in pokemon.types %}
+            <span class="pokemon-type type-{{ type|lower }}">{{ type|upper }}</span>
+          {% endfor %}
+        </div>
+        <div class ="abilities-section">
+          <span class="abilities-title">Abilities</span>
+          <div class="abilities-card">
+            {% for ability in pokemon.abilities %}
+              <span class="pokemon-hero-ability">{{ ability.name }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        {% if evolution_chain %}
+        <div class="pokemon-evolution-chain">
+          {% for stage in evolution_chain %}
+            <a href="{% url 'pokemon_detail' stage.name %}" class="evolution-stage">
+              <img class="stage-img" src="{{ stage.image }}" alt="{{ stage.name }}">
+            </a>
+          {% endfor %}
+          </div>
+        {% endif %}
+      </div> 
+    </article>
+
+    <!-- Center Column: Image -->
+    <article class="hero-card">
+      <div class="pokemon-hero-center">
+        <img class="pokemon-hero-img" src="{{ pokemon.image }}"> 
       </div>
-    </div>
-    <div class="pokemon-detail-right">
-      <h2>Stats</h2>
-      <ul class="pokemon-stats">
-        {% for stat_name, stat_value in pokemon.base_stats.items %}
-          <li><span class="stat-name">{{ stat_name }}</span>: <span class="stat-value">{{ stat_value }}</span></li>
-        {% endfor %}
-      </ul>
-      {% if next %}
-        <a a href="{% url 'pokemon_detail' next.name %}" class="next">Next - {{next.name}}</a>
-      {% endif %}
-      {% if previous %}
-        <a a href="{% url 'pokemon_detail' previous.name %}" class="previous">Previous - {{previous.name}}</a>
-      {% endif %}
-    </div>
+    </article>
+
+    <!-- Right Column: Stats & Weakness -->
+    <article class="hero-card">
+      <h2 class="stats-title">Base Stats</h2>          
+          {{ pokemon.base_stats|json_script:"base-stats-data" }}
+          <div class="hex-chart-wrap"
+              data-hex-chart
+              data-type="{{ pokemon.types.0 }}"
+              data-stats-id="base-stats-data">
+          </div>
+          <div id="weakness">
+          <h2 class="weakness-title">Weakness</h2>
+          {% for w in pokemon.type_effectiveness.weaknesses %}
+            <span class="weakness-type type-{{ w|lower }}">{{ w|upper }}</span>
+          {% endfor %}
+        </div>
+    </article>
+
   </div>
+</div>
+
+<div class="pokemon-navigation">
+          {% if previous %}
+          &larr;<a a href="{% url 'pokemon_detail' previous.name %}" class="previous">Previous - {{previous.name}}</a>
+          {% endif %}
+      
+          {% if next %}
+          <a a href="{% url 'pokemon_detail' next.name %}" class="next">Next - {{next.name}} &rarr;</a>
+          {% endif %}
+        </div>
 {% endblock %}
