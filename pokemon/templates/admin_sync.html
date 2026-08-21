@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Sync Pokémon{% endblock %}
+
+{% block content %}
+  <div class="admin-sync">
+    <h1>Sync Pokémon Data</h1>
+    <p>Pull the next batch of new Pokémon from the Pokelance API into the catalog.</p>
+
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="sync-button btn btn-primary">Sync Now</button>
+    </form>
+
+    {% if sync_success %}
+      <div class="sync-success">
+        Sync complete — {{ new_pokemon|length }} new Pokémon added.
+        <ul>
+          {% for pokemon in new_pokemon %}
+            <li>{{ pokemon.name }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    {% if sync_error %}
+      <div class="sync-error">
+        Sync failed: {{ sync_error }}
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}

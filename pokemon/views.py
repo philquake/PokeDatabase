@@ -1,10 +1,15 @@
+
+import json
+import random
+
+from django.contrib import messages
+from django.contrib.auth.decorators import user_passes_test
 from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, render
-import json
+
 from pathlib import Path
-from django.shortcuts import render
-import random
-from django.contrib import messages
+from pokemon.services.data import load_pokemon_data, build_name_lookup
+from pokemon.services.pokelance_client import sync_pokemon_data, PokelanceAPIError
 
 
 # Create your views here.
@@ -17,9 +22,7 @@ TYPE_EMOJI = {
 }
 
 def home(request):
-    fixture_path = Path(__file__).resolve().parent.parent / "assets" / "static" / "fixtures" / "pokemon.json"
-    with open(fixture_path, encoding="utf-8") as f:
-        pokemon_data = json.load(f)
+    pokemon_data = load_pokemon_data()
 
     if pokemon_data:
         hero = random.choice(pokemon_data)
@@ -49,12 +52,9 @@ def pokemon_detail(request, name):
         response.status_code = 400
         return response
     
-    # Load the JSON data from the file
-    json_file_path = Path(__file__).resolve().parent.parent / "assets" / "static" / "fixtures" / "pokemon.json"
-
-    with open(json_file_path, "r") as f:
-        pokemon_data = json.load(f)
-
+    pokemon_data = load_pokemon_data()
+    by_name = build_name_lookup(pokemon_data)
+    
     for index, pokemon in enumerate(pokemon_data):
         if pokemon["name"].lower() == name.lower(): 
             current = pokemon
@@ -68,8 +68,18 @@ def pokemon_detail(request, name):
                 if index > 0
                 else None
             )
+            
+            evolution_chain = [
+                by_name[evo_name.lower()]
+                for evo_name in current.get("evolution_chain", [])
+                if evo_name.lower() in by_name
+            ]
+            
             return render(request, 'pokemon_detail.html', {
-                "pokemon": current, "next": next, "previous": previous
+                "pokemon": current, 
+                "next": next, 
+                "previous": previous,
+                "evolution_chain": evolution_chain,
                 })
     else:
         raise Http404(f"No Pokémon found match '{name}'")
@@ -98,11 +108,7 @@ def types(request):
     return HttpResponse("Types page is not implemented yet.")
 
 def pokedex(request):
-    # Load the JSON data from the file
-    json_file_path = Path(__file__).resolve().parent.parent / "assets" / "static" / "fixtures" / "pokemon.json"
-    
-    with open(json_file_path, "r") as f:
-        pokemon_data = json.load(f)
+    pokemon_data = load_pokemon_data()
             
     return render(request, "pokedex.html", {"pokemon_data": pokemon_data})
 
@@ -120,3 +126,29 @@ def competitive(request):
 
 def items(request):
     return HttpResponse("Items page is not implemenets yet")
+
+
+def _is_staff(user):
+    return user.is_authenticated and user.is_staff
+
+@user_passes_test(_is_staff, login_url="home")
+def admin_sync_pokemon(request):
+    """
+    Staff-only page that triggers a sync against the Pokelance client.
+ 
+    GET just shows the sync page. POST triggers the sync and re-renders
+    the same page with either the list of newly added Pokémon or a
+    sensible error message if the external API call fails — a failure
+    here should never surface as a 500.
+    """
+    context = {}
+ 
+    if request.method == "POST":
+        try:
+            new_pokemon = sync_pokemon_data()
+            context["sync_success"] = True
+            context["new_pokemon"] = new_pokemon
+        except PokelanceAPIError as e:
+            context["sync_error"] = str(e)
+ 
+    return render(request, "admin_sync.html", context)
