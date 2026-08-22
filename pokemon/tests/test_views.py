@@ -51,7 +51,7 @@ class PokemonDetailTest(SimpleTestCase):
         )
         next = response.context["next"]
         
-        self.assertEqual(next["name"], "Lapras")
+        self.assertEqual(next["name"], "Onix")
         
     def test_pokemon_detail_previous_pokemon_link(self):
         response = self.client.get(
@@ -61,7 +61,7 @@ class PokemonDetailTest(SimpleTestCase):
         )
         previous = response.context["previous"]
         
-        self.assertEqual(previous["name"], "Arcanine")
+        self.assertEqual(previous["name"], "Haunter")
         
     def test_first_pokemon_has_no_previous_link(self):
         response = self.client.get(
@@ -76,7 +76,7 @@ class PokemonDetailTest(SimpleTestCase):
     def test_last_pokemon_has_no_previous_link(self):
         response = self.client.get(
             reverse("pokemon_detail",
-                    args=["Tinkaton"]
+                    args=["Flaaffy"]
             )
         )
         next = response.context["next"]
@@ -95,8 +95,8 @@ class PokemonDetailTest(SimpleTestCase):
         pokemon = response.context["pokemon"]
         self.assertEqual(pokemon["name"], "Gengar")
 
-        self.assertEqual(response.context["next"]["name"], "Lapras")
-        self.assertEqual(response.context["previous"]["name"], "Arcanine")
+        self.assertEqual(response.context["next"]["name"], "Onix")
+        self.assertEqual(response.context["previous"]["name"], "Haunter")
 
     def test_pokemon_detail_returns_404_for_unknown_pokemon(self):
         response = self.client.get(
