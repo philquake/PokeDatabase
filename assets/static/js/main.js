@@ -8,6 +8,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   hexChart();
+  sectionTabSticky(); 
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduceMotion) return;
@@ -17,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initFloatingArt();
   initVisualParallax();
   initCardEntrance();
+  
 });
 
 /* -----------------------------------------------------------
@@ -287,3 +289,43 @@ function hexChart() {
   window.HexChart = { renderHexChart, buildHexChart, initAll };
 }
 
+/* -----------------------------------------------------------
+   7. Pokémon detail — section tab switching, sticky-aware
+----------------------------------------------------------- */
+function sectionTabSticky() {
+  const tabs = document.querySelectorAll('.pdex-cornav-item');
+  const panels = document.querySelectorAll('.panel');
+  if (!tabs.length) return;
+
+  function activate(tabName, { focus = false } = {}) {
+    tabs.forEach((tab) => {
+      const isActive = tab.dataset.tab === tabName;
+      tab.classList.toggle('active', isActive);
+      tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      tab.tabIndex = isActive ? 0 : -1;
+      if (isActive && focus) tab.focus();
+    });
+    panels.forEach((panel) => {
+      panel.classList.toggle('active', panel.id === `panel-${tabName}`);
+    });
+    history.replaceState(null, '', `#${tabName}`);
+  }
+
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => activate(tab.dataset.tab));
+    tab.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        const next = e.key === 'ArrowRight'
+          ? tabs[(i + 1) % tabs.length]
+          : tabs[(i - 1 + tabs.length) % tabs.length];
+        activate(next.dataset.tab, { focus: true });
+      }
+    });
+  });
+
+  const initial = (location.hash || '#overview').slice(1);
+  if ([...tabs].some((t) => t.dataset.tab === initial)) {
+    activate(initial);
+  }
+}
