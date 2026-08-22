@@ -155,11 +155,8 @@ function initCardEntrance() {
 }
 
 /* -----------------------------------------------------------
-   6. Stat Graph - stats show in a graph
+   6. Stat Graph - Renders a 6-axis hexagonal stat chart (HP/Atk/Def/SpA/SpD/Spe) as inline SVG
 ----------------------------------------------------------- */
-
-/* hex-chart.js
-   Renders a 6-axis hexagonal stat chart (HP/Atk/Def/SpA/SpD/Spe) as inline SVG. */
 
 function hexChart() {
   "use strict";
