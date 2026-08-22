@@ -21,7 +21,7 @@ from django.views.generic import RedirectView
 
 
 urlpatterns = [
-    # path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls),
     path("", RedirectView.as_view(url="/pokemon/", permanent=False)),  # Include the URLs from the pokemon app
     path('pokemon/', include('pokemon.urls')),  # Include the URLs from the pokemon app for pokemon_detail
 ]

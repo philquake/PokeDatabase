@@ -17,6 +17,8 @@ urlpatterns = [
     # Dynamic URLS
     
     path("pokedex/<str:name>/", views.pokemon_detail, name="pokemon_detail"),
+    path("admin/sync/", views.admin_sync_pokemon, name="admin_sync_pokemon"),
+
 
     
 ]
