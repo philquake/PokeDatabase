@@ -12,7 +12,6 @@ from pokemon.services.data import load_pokemon_data, build_name_lookup
 from pokemon.services.pokelance_client import sync_pokemon_data, PokelanceAPIError
 
 
-# Create your views here.
 TYPE_EMOJI = {
     "Fire": "🔥", "Water": "💧", "Grass": "🌿", "Electric": "⚡",
     "Flying": "🌪️", "Psychic": "🔮", "Ice": "❄️", "Dragon": "🐉",
@@ -20,6 +19,13 @@ TYPE_EMOJI = {
     "Poison": "☠️", "Ground": "⛰️", "Rock": "🪨", "Bug": "🐛",
     "Ghost": "👻", "Steel": "⚙️",
 }
+
+TYPE_DEFENSE_ORDER = [
+    ("Normal", "NOR"), ("Fire", "FIR"), ("Water", "WAT"), ("Electric", "ELE"), ("Grass", "GRA"),
+    ("Ice", "ICE"), ("Fighting", "FIG"), ("Poison", "POI"), ("Ground", "GRO"),
+    ("Flying", "FLY"), ("Psychic", "PSY"), ("Bug", "BUG"), ("Rock", "ROC"), ("Ghost", "GHO"),
+    ("Dragon", "DRA"), ("Dark", "DAR"), ("Steel", "STE"), ("Fairy", "FAI"),
+]
 
 def home(request):
     pokemon_data = load_pokemon_data()
@@ -80,10 +86,33 @@ def pokemon_detail(request, name):
                 "next": next, 
                 "previous": previous,
                 "evolution_chain": evolution_chain,
+                "all_types": [t.lower() for t in TYPE_EMOJI],
+                "type_defense_order": TYPE_DEFENSE_ORDER,
+                "stat_ranges": calculate_stat_range(current["base_stats"]),  # add this line
+
+                
                 })
     else:
         raise Http404(f"No Pokémon found match '{name}'")
-    
+
+def calculate_stat_range(base_stats):
+    """
+    Level 100 min/max for each stat, using the standard formula:
+    - Min: IV 0, EV 0, hindering nature (×0.9, HP unaffected)
+    - Max: IV 31, EV 252, beneficial nature (×1.1, HP unaffected)
+    """
+    level = 100
+    ranges = {}
+    for stat_name, base in base_stats.items():
+        if stat_name == "HP":
+            min_val = ((2 * base) * level) // 100 + level + 10
+            max_val = ((2 * base + 31 + 63) * level) // 100 + level + 10
+        else:
+            min_val = int((((2 * base) * level) // 100 + 5) * 0.9)
+            max_val = int((((2 * base + 31 + 63) * level) // 100 + 5) * 1.1)
+        ranges[stat_name] = {"min": min_val, "max": max_val}
+    return ranges
+   
 def search(request):
     pokemon_name = request.GET.get("search", "").strip()
 
