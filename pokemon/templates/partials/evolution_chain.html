@@ -1,0 +1,16 @@
+<div class="pokemon-evolution-chain {{ container_class }}">
+    {% if evolution_chain %}
+        <div class="evo-chain">
+          {% for stage in evolution_chain %}
+            <a href="{% url 'pokemon_detail' stage.name %}"
+              class="evo-node {% if stage.name == pokemon.name %}current{% endif %}">
+              <img src="{{ stage.image }}" alt="{{ stage.name }}">
+              <span>{{ stage.name }}</span>
+            </a>
+            {% if not forloop.last %}<span class="evo-arrow">&rarr;</span>{% endif %}
+          {% endfor %}
+        </div>
+      {% else %}
+        <p>{{ pokemon.name }} doesn't evolve.</p>
+      {% endif %}
+</div>

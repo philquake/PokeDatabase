@@ -5,7 +5,6 @@
 
 {% block extra_css %}
     <link href="{% static 'css/pokemon_detail.css' %}" rel="stylesheet">
-    <script src="{% static 'js/main.js'%}"></script>
 {% endblock %}
 
 {% block header_text %}{{pokemon.pokedex_number}}, {{pokemon.name}}{% endblock %}
@@ -32,17 +31,7 @@
             {% endfor %}
           </div>
         </div>
-        {% if evolution_chain %}
-        <div class="pokemon-evolution-chain">
-          {% for stage in evolution_chain %}
-            <a href="{% url 'pokemon_detail' stage.name %}" class="evolution-stage">
-              <img class="stage-img" src="{{ stage.image }}" alt="{{ stage.name }}">
-            </a>
-            {% if not forloop.last %}<span class="evo-arrow">&rarr;</span>{% endif %}
-          {% endfor %}
-          </div>
-        {% endif %}
-      </div> 
+      {% include "partials/evolution_chain.html" with container_class="tab-evolution" %}      </div> 
     </article>
 
     <!-- Center Column: Image -->
@@ -80,18 +69,34 @@
      ============================================================ -->
 <nav class="pdex-cornav" aria-label="Pokémon detail sections">
   <div class="pdex-cornav-items" id="tabList" role="tablist">
-    <button class="pdex-cornav-item active" role="tab" aria-selected="true" data-tab="overview">Overview</button>
-    <button class="pdex-cornav-item" role="tab" aria-selected="false" data-tab="moves">Moves</button>
-    <button class="pdex-cornav-item" role="tab" aria-selected="false" data-tab="evolution">Evolution</button>
-    <button class="pdex-cornav-item" role="tab" aria-selected="false" data-tab="location">Location</button>
-    <button class="pdex-cornav-item" role="tab" aria-selected="false" data-tab="breeding">Breeding</button>
+
+    <button class="pdex-cornav-item active" id="tab-overview" data-bs-toggle="tab"
+            data-bs-target="#panel-overview" type="button" role="tab"
+            aria-controls="panel-overview" aria-selected="true">Overview</button>
+
+    <button class="pdex-cornav-item" id="tab-moves" data-bs-toggle="tab"
+            data-bs-target="#panel-moves" type="button" role="tab"
+            aria-controls="panel-moves" aria-selected="false">Moves</button>
+
+    <button class="pdex-cornav-item" id="tab-evolution" data-bs-toggle="tab"
+            data-bs-target="#panel-evolution" type="button" role="tab"
+            aria-controls="panel-evolution" aria-selected="false">Evolution</button>
+
+    <button class="pdex-cornav-item" id="tab-location" data-bs-toggle="tab"
+            data-bs-target="#panel-location" type="button" role="tab"
+            aria-controls="panel-location" aria-selected="false">Location</button>
+
+    <button class="pdex-cornav-item" id="tab-breeding" data-bs-toggle="tab"
+            data-bs-target="#panel-breeding" type="button" role="tab"
+            aria-controls="panel-breeding" aria-selected="false">Breeding</button>
+
   </div>
 </nav>
 
-<div class="panels">
+<div class="panels tab-content">
 
 <!-- OVERVIEW -->
-<section class="panel active" id="panel-overview" role="tabpanel">
+<section class="panel tab-pane fade show active" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview">
 
   <div class="overview-columns">
 
@@ -179,7 +184,7 @@
 </section>
 
   <!-- MOVES -->
-  <section class="panel" id="panel-moves" role="tabpanel">
+  <section class="panel tab-pane fade" id="panel-moves" role="tabpanel" aria-labelledby="tab-moves">
     <div class="detail-card detail-empty">
       <p>Move data isn't wired up yet — this panel is ready once the data layer supports it.</p>
       {# Feature gap: moves list — needs model fields + view logic #}
@@ -187,28 +192,14 @@
   </section>
 
   <!-- EVOLUTION -->
-  <section class="panel" id="panel-evolution" role="tabpanel">
+  <section class="panel tab-pane fade" id="panel-evolution" role="tabpanel" aria-labelledby="tab-evolution">
     <div class="detail-card">
       <h3>Evolution chain</h3>
-      {% if evolution_chain %}
-        <div class="evo-chain">
-          {% for stage in evolution_chain %}
-            <a href="{% url 'pokemon_detail' stage.name %}"
-              class="evo-node {% if stage.name == pokemon.name %}current{% endif %}">
-              <img src="{{ stage.image }}" alt="{{ stage.name }}">
-              <span>{{ stage.name }}</span>
-            </a>
-            {% if not forloop.last %}<span class="evo-arrow">&rarr;</span>{% endif %}
-          {% endfor %}
-        </div>
-      {% else %}
-        <p>{{ pokemon.name }} doesn't evolve.</p>
-      {% endif %}
-    </div>
+      {% include "partials/evolution_chain.html" with container_class="tab-evolution" %}    </div>
   </section>
 
   <!-- LOCATION -->
-  <section class="panel" id="panel-location" role="tabpanel">
+  <section class="panel tab-pane fade" id="panel-location" role="tabpanel" aria-labelledby="tab-location">
     <div class="detail-card detail-empty">
       <p>Location data isn't wired up yet — this panel is ready once encounter data is available.</p>
       {# Feature gap: encounter locations — needs model fields + view logic #}
@@ -216,7 +207,7 @@
   </section>
 
   <!-- BREEDING -->
-  <section class="panel" id="panel-breeding" role="tabpanel">
+  <section class="panel tab-pane fade" id="panel-breeding" role="tabpanel" aria-labelledby="tab-breeding">
     <div class="detail-card">
       <h3>Gender ratio</h3>
       {% if pokemon.gender %}
