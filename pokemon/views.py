@@ -86,11 +86,8 @@ def pokemon_detail(request, name):
                 "next": next, 
                 "previous": previous,
                 "evolution_chain": evolution_chain,
-                "all_types": [t.lower() for t in TYPE_EMOJI],
                 "type_defense_order": TYPE_DEFENSE_ORDER,
-                "stat_ranges": calculate_stat_range(current["base_stats"]),  # add this line
-
-                
+                "stat_ranges": calculate_stat_range(current["base_stats"]),
                 })
     else:
         raise Http404(f"No Pokémon found match '{name}'")
@@ -160,7 +157,7 @@ def items(request):
 def _is_staff(user):
     return user.is_authenticated and user.is_staff
 
-@user_passes_test(_is_staff, login_url="home")
+@user_passes_test(_is_staff, login_url="home", redirect_field_name=None)
 def admin_sync_pokemon(request):
     """
     Staff-only page that triggers a sync against the Pokelance client.
