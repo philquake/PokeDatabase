@@ -1,6 +1,8 @@
 from django.test import TestCase
 from django.urls import reverse
 from django.test import override_settings
+from django.contrib.auth import get_user_model
+
 
 
 class HomePageTest(TestCase):
@@ -48,3 +50,23 @@ class AllTemplatesExtendBaseTest(TestCase):
     def test_404_template_used(self):
         response = self.client.get("/does-not-exist")
         self.assertTemplateUsed(response, "404.html")
+
+User = get_user_model()
+
+class ApiSync(TestCase):
+    def setUp(self):
+        self.url = reverse("admin_sync_pokemon")
+   
+        self.staff_user = User.objects.create_user(
+            username="staffer", password="testpass123", is_staff=True
+        )
+        self.regular_user = User.objects.create_user(
+            username="regular", password="testpass123", is_staff=False
+        )
+        
+    def test_admin_sync_renders_admin_sync_template(self):
+        self.client.login(username="staffer", password="testpass123")
+        response = self.client.get(reverse("admin_sync_pokemon"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "admin_sync.html")
