@@ -22,7 +22,6 @@ duration of a single sync() call since many Pokémon share types.
 import json
 from pathlib import Path
 
-import requests
 
 FIXTURE_PATH = (
     Path(__file__).resolve().parent.parent.parent
@@ -64,6 +63,8 @@ def _save_fixture(pokemon_data):
 
 
 def _get(url, context):
+    import requests
+
     """Shared GET-and-decode helper. Wraps any failure in PokelanceAPIError."""
     try:
         response = requests.get(url, timeout=REQUEST_TIMEOUT_SECONDS)
@@ -187,6 +188,8 @@ def _to_fixture_entry(raw, species, evolution_chain, type_matchups):
             "base_happiness": species["base_happiness"],
             "type_effectiveness": type_matchups,
             "evolution_chain": evolution_chain,
+            "moves": raw["moves"],
+            "location": raw["location"],
         }
     except (KeyError, TypeError) as exc:
         raise PokelanceAPIError(
