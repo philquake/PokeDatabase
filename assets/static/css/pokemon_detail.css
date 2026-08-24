@@ -266,12 +266,12 @@
 /* Set this to your actual Bootstrap navbar height so the tab
    bar pins directly beneath it instead of under the page top. */
 :root {
-  --site-navbar-height: 83.6094px;
+  --site-navbar-height: 75px;
+  --cornav-height: 52px;
 }
 
 .pdex-cornav {
   position: sticky;
-  top: var(--site-navbar-height);
   z-index: 500;
   background: rgba(18, 20, 32, 0.85);
   backdrop-filter: blur(8px);
@@ -280,16 +280,20 @@
   padding: 10px 20px;
 }
 
-.pdex-cornav-items {
+.pdex-cornav-items,[id^="panel-"] {
   display: flex;
   gap: 6px;
   overflow-x: auto;
   scrollbar-width: none;
   max-width: 1100px;
   margin: 0 auto;
+  scroll-margin-top: calc(var(--topbar-height) + var(--cornav-height));
+
 }
 
-.pdex-cornav-items::-webkit-scrollbar { display: none; }
+.pdex-cornav-items::-webkit-scrollbar { 
+  display: none; 
+}
 
 .pdex-cornav-item {
   flex: 0 0 auto;
