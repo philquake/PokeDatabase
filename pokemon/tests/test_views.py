@@ -79,16 +79,6 @@ class PokemonDetailTest(SimpleTestCase):
         previous = response.context["previous"]
         
         self.assertIsNone(previous)
-        
-    # def test_last_pokemon_has_no_previous_link(self):
-    #     response = self.client.get(
-    #         reverse("pokemon_detail",
-    #                 args=["Flaaffy"]
-    #         )
-    #     )
-    #     next = response.context["next"]
-        
-    #     self.assertIsNone(next)
             
     def test_lowercase_pokemon_detail_loads(self):
         response = self.client.get(
@@ -202,7 +192,25 @@ class PokemonDetailTest(SimpleTestCase):
         result = get_item(data, "Defense")
 
         self.assertIsNone(result)
-
+        
+    def test_get_pokemon_move_list(self):
+        data  = {
+            "version": "red-blue",
+            "move": "confuse-ray",
+            "level_learnt": "1",
+            "method": "level-up"
+            }
+        result = get_item(data, "version")
+        
+        self.assertEqual(result, "red-blue")
+        
+    def test_get_generation(self):
+        data = {
+            "generation": "I",
+        }
+        result = get_item(data, "generation")
+        
+        self.assertEqual(result, "I")
 
 class HomeViewTest(SimpleTestCase):
 

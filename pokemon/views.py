@@ -6,7 +6,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, render
-
+from itertools import groupby
+from operator import itemgetter
 from pathlib import Path
 from pokemon.services.data import load_pokemon_data, build_name_lookup
 from pokemon.services.pokelance_client import sync_pokemon_data, PokelanceAPIError
@@ -81,6 +82,8 @@ def pokemon_detail(request, name):
                 if evo_name.lower() in by_name
             ]
             
+            learnt_hm, learnt_tm = group_hm_tm_moves(current.get("moves", []))
+            
             return render(request, 'pokemon_detail.html', {
                 "pokemon": current, 
                 "next": next, 
@@ -88,9 +91,30 @@ def pokemon_detail(request, name):
                 "evolution_chain": evolution_chain,
                 "type_defense_order": TYPE_DEFENSE_ORDER,
                 "stat_ranges": calculate_stat_range(current["base_stats"]),
+                "learnt_hm": learnt_hm,
+                "learnt_tm": learnt_tm,
                 })
     else:
         raise Http404(f"No Pokémon found match '{name}'")
+
+def group_hm_tm_moves(moves):
+    """
+    Split moves learned via TM/HM ('machine') from everything else.
+    PokéAPI doesn't distinguish HM from TM in move_learn_method — both are
+    "machine" — so if HM vs. TM needs to be split further later, that'll
+    need its own lookup, not a name-based guess.
+    """
+    
+    HM_NAMES = {
+        "Cut", "Fly", "Surf", "Strength", "Flash", "Whirlpool",
+        "Waterfall", "Rock Smash", "Dive", "Rock Climb", "Defog",
+    }
+    
+    machine_moves = [m for m in moves if m["method"] == "machine"]
+    learnt_hm = [m for m in machine_moves if m["name"] in HM_NAMES]
+    learnt_tm = [m for m in machine_moves if m["name"] not in HM_NAMES]
+    
+    return learnt_hm, learnt_tm
 
 def calculate_stat_range(base_stats):
     """
@@ -109,7 +133,7 @@ def calculate_stat_range(base_stats):
             max_val = int((((2 * base + 31 + 63) * level) // 100 + 5) * 1.1)
         ranges[stat_name] = {"min": min_val, "max": max_val}
     return ranges
-   
+
 def search(request):
     pokemon_name = request.GET.get("search", "").strip()
 

@@ -129,3 +129,11 @@ class PokemonDetailFunctionalTest(StaticLiveServerTestCase):
         self.assertIn("show", breeding_panel.get_attribute("class"))
         self.assertTrue(breeding_panel.is_displayed())
         self.assertNotIn("active", overview_panel.get_attribute("class"))
+    
+    def test_pokemon_moves(self):
+        self.browser.get(self.live_server_url + reverse("pokemon_detail", kwargs={"name": "Gengar"}))
+        self.assertIn("Confuse Ray", self.browser.page_source)
+        
+    def test_pokemon_moves_by_version(self):
+        ...
+        

@@ -157,7 +157,33 @@ class ToFixtureEntryTest(SimpleTestCase):
                     #checks if the error passes by PokelanceAPIError is a KeyError
                     self.assertIsInstance(cm.exception.__cause__,KeyError)
                     
+class ToFixtureEntryMovesTest(SimpleTestCase):
+    
+    @patch("pokemon.services.pokelance_client._fetch_moves")
+    def test_moves_are_included_in_fixture_entry(self, mock_fetch_moves):
+        mock_fetch_moves.return_value = [
+            {"name": "Tackle", "version": "red-blue", "level_learnt": 1, "method": "level-up"}
+        ]
 
+        raw = {
+            "id": 1, "name": "bulbasaur",
+            "sprites": {"other": {"official-artwork": {"front_default": "img.png"}}},
+            "types": [{"type": {"name": "grass"}}],
+            "stats": [{"stat": {"name": "hp"}, "base_stat": 45}],
+            "abilities": [], "height": 7, "weight": 69,
+            "base_experience": 64,
+        }
+        species = {
+            "genera": [{"genus": "Seed Pokémon", "language": {"name": "en"}}],
+            "generation": {"name": "generation-i"},
+            "gender_rate": 1, "egg_groups": [],
+            "capture_rate": 45, "base_happiness": 70,
+        }
+
+        entry = _to_fixture_entry(raw, species, ["Bulbasaur"], {"weaknesses": [], "resistances": [], "immunities": []})
+
+        self.assertEqual(entry["moves"], mock_fetch_moves.return_value)
+        mock_fetch_moves.assert_called_once_with(raw)
 
 class SyncPokemonDataTest(SimpleTestCase):
     @patch("pokemon.services.pokelance_client._save_fixture")
@@ -178,8 +204,8 @@ class SyncPokemonDataTest(SimpleTestCase):
         mock_save,
     ):
         
-        mock_load.return_value = [{"pokedex_number": 1, "name": "Bulbasaur"}]
-        mock_fetch_pokemon.return_value = {"id": 999, "name": "dummy"}
+        mock_load.return_value = [{"pokedex_number": 1, "name": "Bulbasaur"}, ]
+        mock_fetch_pokemon.return_value = {"id": 999, "name": "dummy", "types": [{"type": {"name": "normal"}}],}
         mock_fetch_species.return_value = {"name": "dummy-species"}
         mock_fetch_evolution_chain.return_value = ["Dummy"]
         mock_fetch_type_matchups.return_value = {
@@ -188,9 +214,9 @@ class SyncPokemonDataTest(SimpleTestCase):
         mock_to_fixture_entry.return_value = {"pokedex_number": 999, "name": "Dummy"}
 
         count = 5
-        result = sync_pokemon_data(count=count)
+        result = sync_pokemon_data(count=count, update_existing=False)
 
-        self.assertEqual(len(result), count)
+        self.assertEqual(len((result["added"])), count)
         self.assertEqual(mock_fetch_pokemon.call_count, count)
         self.assertEqual(mock_to_fixture_entry.call_count, count)
 

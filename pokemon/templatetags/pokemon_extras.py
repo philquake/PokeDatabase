@@ -9,3 +9,19 @@ register = template.Library()
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
+
+@register.simple_tag
+def has_moves(moves, version, method=None):
+    """
+    True if `moves` contains at least one entry matching `version`
+    (and `method`, when given). Used to hide a moves-card table
+    entirely when that version/method combination has no data,
+    instead of rendering an empty table.
+    """
+    for move in moves:
+        if move.get("version") != version:
+            continue
+        if method is not None and move.get("method") != method:
+            continue
+        return True
+    return False
