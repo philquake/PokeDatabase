@@ -49,6 +49,17 @@ ALL_TYPE_NAMES = [
     "dragon", "dark", "steel", "fairy",
 ]
 
+GENERATIONS = {
+    "generation-i": 1,
+    "generation-ii": 2,
+    "generation-iii": 3,
+    "generation-iv": 4,
+    "generation-v": 5,
+    "generation-vi": 6,
+    "generation-vii": 7,
+    "generation-viii": 8,
+}
+
 IDENTITY_FIELDS = {"pokedex_number"}
 
 class PokelanceAPIError(Exception):
@@ -110,7 +121,14 @@ def _fetch_moves(raw_pokemon):
             })
     return moves
 
-
+def _fetch_generation(species):
+    gen_name = species["generation"]["name"]  # e.g. "generation-i"
+    for gen, gen_num in GENERATIONS.items():
+        if gen == gen_name:
+            return gen_num
+    raise PokelanceAPIError(
+        f"Unknown generation '{gen_name}' for {species['name']}"
+    )
 
 def _walk_evolution_chain(chain_node, names=None):
     """Flatten PokéAPI's nested evolution chain tree into an ordered name list."""
@@ -209,13 +227,15 @@ def _to_fixture_entry(raw, species, evolution_chain, type_matchups):
                 "male_pct": round((8 - gender_rate) / 8 * 100, 1),
             }
         )
+        
+        
 
         return {
             "pokedex_number": raw["id"],
             "name": raw["name"].capitalize(),
             "image": raw["sprites"]["other"]["official-artwork"]["front_default"],
             "category": english_genus,
-            "generation": species["generation"]["name"],
+            "generation": _fetch_generation(species),
             "types": [t["type"]["name"].capitalize() for t in raw["types"]],
             "base_stats": base_stats,
             "stat_total": sum(base_stats.values()),
