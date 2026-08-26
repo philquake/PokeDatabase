@@ -145,6 +145,49 @@ def _fetch_evolution_chain(species_data):
     chain_data = _get(chain_url, f"evolution chain for {species_data['name']}")
     return _walk_evolution_chain(chain_data["chain"])
 
+def _fetch_locations(pokedex_number):
+    """
+    Fetch wild encounter locations for a Pokémon from PokéAPI's
+    /pokemon/{id}/encounters endpoint and flatten it into a list of
+    per-encounter dicts, one per (location area, version, method) combo:
+ 
+        {
+            "location": "Route 1",
+            "version": "red-blue",
+            "method": "Walk",
+            "chance": 45,
+            "min_level": 2,
+            "max_level": 5,
+        }
+ 
+    PokéAPI nests this fairly deeply (location_area -> version_details ->
+    encounter_details), so this does the flattening once here rather than
+    pushing that logic into the template. A Pokémon with no wild encounters
+    (starters, legendaries, evolutions-only, etc.) simply returns [].
+    """
+    raw = _get(
+        f"{POKEAPI_BASE_URL}/{pokedex_number}/encounters",
+        f"encounter locations for #{pokedex_number}",
+    )
+ 
+    locations = []
+    for entry in raw:
+        location_name = (
+            entry["location_area"]["name"].replace("-", " ").title()
+        )
+        for version_detail in entry.get("version_details", []):
+            version = version_detail["version"]["name"]
+            for encounter in version_detail.get("encounter_details", []):
+                locations.append({
+                    "location": location_name,
+                    "version": version,
+                    "method": encounter["method"]["name"].replace("-", " ").title(),
+                    "chance": encounter["chance"],
+                    "min_level": encounter["min_level"],
+                    "max_level": encounter["max_level"],
+                })
+ 
+    return locations
 
 def _fetch_type_matchups(type_names, cache):
     """
@@ -189,7 +232,8 @@ def _fetch_and_build_entry(pokedex_number, type_matchup_cache):
     type_matchups = _fetch_type_matchups(
         [t["type"]["name"] for t in raw["types"]], type_matchup_cache
     )
-    return _to_fixture_entry(raw, species, evolution_chain, type_matchups)
+    locations = _fetch_locations(pokedex_number)
+    return _to_fixture_entry(raw, species, evolution_chain, type_matchups, locations)
 
 def _diff_fields(existing_entry, fresh_entry):
     """
@@ -204,7 +248,7 @@ def _diff_fields(existing_entry, fresh_entry):
         if key not in IDENTITY_FIELDS and existing_entry.get(key) != fresh_value
     }
     
-def _to_fixture_entry(raw, species, evolution_chain, type_matchups):
+def _to_fixture_entry(raw, species, evolution_chain, type_matchups, locations):
     """Convert raw PokéAPI data into PokeDatabase's fixture shape."""
     try:
         base_stats = {
@@ -258,6 +302,7 @@ def _to_fixture_entry(raw, species, evolution_chain, type_matchups):
             "type_effectiveness": type_matchups,
             "evolution_chain": evolution_chain,
             "moves": _fetch_moves(raw),
+            "locations": locations,
         }
     except (KeyError, TypeError) as exc:
         raise PokelanceAPIError(

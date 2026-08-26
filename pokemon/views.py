@@ -93,6 +93,7 @@ def pokemon_detail(request, name):
                 "stat_ranges": calculate_stat_range(current["base_stats"]),
                 "learnt_hm": learnt_hm,
                 "learnt_tm": learnt_tm,
+                "locations": current.get("locations", []),
                 })
     else:
         raise Http404(f"No Pokémon found match '{name}'")

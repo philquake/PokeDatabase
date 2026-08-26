@@ -25,3 +25,16 @@ def has_moves(moves, version, method=None):
             continue
         return True
     return False
+
+@register.simple_tag
+def has_encounters(locations, version):
+    """
+    True if `locations` contains at least one wild encounter entry for
+    the given `version`. Used to hide a version's encounter table when
+    that game has no wild encounters for this Pokémon (evolutions-only,
+    starters, event-exclusive, etc.), showing a fallback message instead.
+    """
+    for encounter in locations:
+        if encounter.get("version") == version:
+            return True
+    return False
