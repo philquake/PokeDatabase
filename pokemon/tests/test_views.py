@@ -9,7 +9,7 @@ from pokemon.services.pokelance_client import PokelanceAPIError
 from pokemon.templatetags.pokemon_extras import get_item
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-
+from django.template import Context, Template
 
 
 
@@ -178,20 +178,6 @@ class PokemonDetailTest(SimpleTestCase):
 
             self.assertEqual(names, ["Gastly", "Gengar"])
             self.assertNotIn("Haunter", names)
-
-    def test_get_item_returns_value_for_existing_key(self):
-        data = {"HP": 48, "Attack": 55}
-
-        result = get_item(data, "HP")
-
-        self.assertEqual(result, 48)
-
-    def test_get_item_returns_none_for_missing_key(self):
-        data = {"HP": 48, "Attack": 55}
-
-        result = get_item(data, "Defense")
-
-        self.assertIsNone(result)
         
     def test_get_pokemon_move_list(self):
         data  = {
@@ -212,6 +198,83 @@ class PokemonDetailTest(SimpleTestCase):
         
         self.assertEqual(result, "I")
 
+class GetItemFilterTest(SimpleTestCase):
+    """Direct unit tests against the filter function itself."""
+ 
+    def test_returns_value_for_existing_key(self):
+        self.assertEqual(get_item({"HP": 100}, "HP"), 100)
+ 
+    def test_returns_none_for_missing_key(self):
+        self.assertIsNone(get_item({"HP": 100}, "Attack"))
+ 
+    def test_returns_none_for_empty_dict(self):
+        self.assertIsNone(get_item({}, "HP"))
+ 
+    def test_works_with_variable_keys(self):
+        stat_ranges = {
+            "HP": {"min": 200, "max": 300},
+            "Attack": {"min": 50, "max": 150},
+        }
+        for stat_name, expected in stat_ranges.items():
+            with self.subTest(stat_name=stat_name):
+                self.assertEqual(get_item(stat_ranges, stat_name), expected)
+ 
+class GetItemFilterTemplateRenderingTest(SimpleTestCase):
+    """
+    Confirms the filter is registered under {% load pokemon_extras %} and
+    behaves correctly when used from a template. This is the actual scenario
+    the filter exists for: a variable key (e.g. a loop variable) that dot
+    notation can't resolve, since {{ stat_ranges.stat_name }} would look for
+    a literal key "stat_name" rather than the loop variable's value.
+    """
+ 
+    def _render(self, template_string, context):
+        template = Template(template_string)
+        return template.render(Context(context))
+ 
+    def test_filter_resolves_variable_key_in_template(self):
+        output = self._render(
+            "{% load pokemon_extras %}{{ stat_ranges|get_item:stat_name }}",
+            {
+                "stat_ranges": {"HP": "200-300"},
+                "stat_name": "HP",
+            },
+        )
+        self.assertEqual(output, "200-300")
+ 
+    def test_filter_renders_empty_string_for_missing_key_in_template(self):
+        # Django renders None as an empty string when interpolated in a template
+        output = self._render(
+            "{% load pokemon_extras %}{{ stat_ranges|get_item:stat_name }}",
+            {
+                "stat_ranges": {"HP": "200-300"},
+                "stat_name": "Speed",
+            },
+        )
+        self.assertEqual(output, "")
+ 
+    def test_filter_used_in_a_loop_with_dict_access(self):
+        # Mirrors the actual usage in pokemon_detail.html: looping over
+        # base_stats.items and looking up the matching entry in stat_ranges
+        # by the current loop key.
+        template_string = (
+            "{% load pokemon_extras %}"
+            "{% for stat_name, stat_value in base_stats.items %}"
+            "{{ stat_name }}:{{ stat_value }}={{ stat_ranges|get_item:stat_name }} "
+            "{% endfor %}"
+        )
+        output = self._render(
+            template_string,
+            {
+                "base_stats": {"HP": 60, "Attack": 65},
+                "stat_ranges": {
+                    "HP": "180-274",
+                    "Attack": "112-207",
+                },
+            },
+        )
+        self.assertEqual(output.strip(), "HP:60=180-274 Attack:65=112-207")
+        
 class HomeViewTest(SimpleTestCase):
 
     def test_home_view_returns_200(self):
@@ -271,7 +334,6 @@ class HomeViewTest(SimpleTestCase):
         response = self.client.get(reverse("home"))
         self.assertEqual(response.context["featured_pokemon"], [])
         self.assertIsNone(response.context["hero"])
-
 
 class SearchViewTest(SimpleTestCase):
 
