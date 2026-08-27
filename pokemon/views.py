@@ -186,20 +186,25 @@ def _is_staff(user):
 def admin_sync_pokemon(request):
     """
     Staff-only page that triggers a sync against the Pokelance client.
- 
+
     GET just shows the sync page. POST triggers the sync and re-renders
-    the same page with either the list of newly added Pokémon or a
-    sensible error message if the external API call fails — a failure
-    here should never surface as a 500.
+    the same page with either the lists of newly added / updated Pokémon
+    or a sensible error message if the external API call fails — a
+    failure here should never surface as a 500.
+
+    sync_pokemon_data() returns {"added": [...], "updated": [...]};
+    both lists are unwrapped into separate context keys so the template
+    can render each independently.
     """
     context = {}
- 
+
     if request.method == "POST":
         try:
-            new_pokemon = sync_pokemon_data()
+            result = sync_pokemon_data()
             context["sync_success"] = True
-            context["new_pokemon"] = new_pokemon
+            context["new_pokemon"] = result["added"]
+            context["updated_pokemon"] = result["updated"]
         except PokelanceAPIError as e:
             context["sync_error"] = str(e)
- 
+
     return render(request, "admin_sync.html", context)

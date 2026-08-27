@@ -14,12 +14,25 @@
 
     {% if sync_success %}
       <div class="sync-success">
-        Sync complete — {{ new_pokemon|length }} new Pokémon added.
-        <ul>
-          {% for pokemon in new_pokemon %}
-            <li>{{ pokemon.name }}</li>
-          {% endfor %}
-        </ul>
+        Sync complete — {{ new_pokemon|length }} new Pokémon added, {{ updated_pokemon|length }} updated.
+
+        {% if new_pokemon %}
+          <h3>Added</h3>
+          <ul class="sync-added">
+            {% for pokemon in new_pokemon %}
+              <li>{{ pokemon.name }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+
+        {% if updated_pokemon %}
+          <h3>Updated</h3>
+          <ul class="sync-updated">
+            {% for pokemon in updated_pokemon %}
+              <li>{{ pokemon.name }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
       </div>
     {% endif %}
 
