@@ -104,11 +104,11 @@ def _fetch_species(raw_pokemon):
     return _get(species_url, f"species data for {raw_pokemon['name']}")
 
 
-# Flatten PokéAPI's per-move `version_group_details` into one row per
-#     (move, version group, method, level) combination:
- 
-#         {"name": "Thunder Punch", "version": "red-blue", "level": 0, "method": "egg"}
 def _fetch_moves(raw_pokemon):
+    """ Flatten PokéAPI's per-move `version_group_details` into one row per
+    (move, version group, method, level) combination:
+        {"name": "Thunder Punch", "version": "red-blue", "level": 0, "method": "egg"} """
+        
     moves = []
     for move_entry in raw_pokemon.get("moves", []):
         move_name = move_entry["move"]["name"].replace("-", " ").title()
@@ -140,9 +140,9 @@ def _walk_evolution_chain(chain_node, names=None):
     return names
 
 
-def _fetch_evolution_chain(species_data):
-    chain_url = species_data["evolution_chain"]["url"]
-    chain_data = _get(chain_url, f"evolution chain for {species_data['name']}")
+def _fetch_evolution_chain(species):
+    chain_url = species["evolution_chain"]["url"]
+    chain_data = _get(chain_url, f"evolution chain for {species['name']}")
     return _walk_evolution_chain(chain_data["chain"])
 
 def _fetch_locations(pokedex_number):
@@ -160,8 +160,7 @@ def _fetch_locations(pokedex_number):
             "max_level": 5,
         }
  
-    PokéAPI nests this fairly deeply (location_area -> version_details ->
-    encounter_details), so this does the flattening once here rather than
+    This does the flattening once here rather than
     pushing that logic into the template. A Pokémon with no wild encounters
     (starters, legendaries, evolutions-only, etc.) simply returns [].
     """
