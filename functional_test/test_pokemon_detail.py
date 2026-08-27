@@ -13,7 +13,25 @@ class PokemonDetailFunctionalTest(StaticLiveServerTestCase):
 
     def tearDown(self):
         self.browser.quit()
-
+        
+    def _scroll_and_click(self, element):
+        """
+        Scrolls an element to the center of the viewport and waits for it
+        to be clickable before clicking. Plain .click() only does a minimal
+        scroll-into-view, which can leave the element positioned under the
+        sticky topbar (position: sticky; top: 0), causing
+        ElementClickInterceptedException on long pages like pokemon_detail.
+        """
+        self.browser.execute_script(
+            "arguments[0].scrollIntoView({block: 'center'});", element
+        )
+        WebDriverWait(self.browser, 5).until(
+            EC.element_to_be_clickable((By.ID, element.get_attribute("id")))
+            if element.get_attribute("id")
+            else lambda d: element.is_displayed() and element.is_enabled()
+        )
+        element.click()
+    
     def test_pokemon_detail_loads(self):
         self.browser.get(self.live_server_url + reverse("pokemon_detail", kwargs={"name": "Gengar"}))
         self.assertEqual(self.browser.title, "Pokedex Entry - #94 Gengar")
@@ -38,11 +56,10 @@ class PokemonDetailFunctionalTest(StaticLiveServerTestCase):
     def test_next_pokemon_link(self):
         self.browser.get(self.live_server_url + reverse("pokemon_detail", kwargs={"name": "Gengar"}))
         next = self.browser.find_element(By.CLASS_NAME, "next") # -> Onix
-        next.click()
+        self._scroll_and_click(next)
         
         expected_url = self.live_server_url + reverse("pokemon_detail", kwargs={"name": "Onix"})
         
-        #Waits for browser to redirect to expected url
         WebDriverWait(self.browser, 5).until(
             lambda browser: browser.current_url == expected_url
                 )
@@ -52,11 +69,10 @@ class PokemonDetailFunctionalTest(StaticLiveServerTestCase):
     def test_previous_pokemon_link(self):
         self.browser.get(self.live_server_url + reverse("pokemon_detail", kwargs={"name": "Gengar"}))
         next = self.browser.find_element(By.CLASS_NAME, "previous") # -> Haunter
-        next.click()
+        self._scroll_and_click(next)
         
         expected_url = self.live_server_url + reverse("pokemon_detail", kwargs={"name": "Haunter"})
         
-        #Waits for browser to redirect to expected url
         WebDriverWait(self.browser, 5).until(
             lambda browser: browser.current_url == expected_url
                 )
@@ -82,13 +98,13 @@ class PokemonDetailFunctionalTest(StaticLiveServerTestCase):
 
     def test_chained_next_navigation(self):
         self.browser.get(self.live_server_url + reverse("pokemon_detail", kwargs={"name": "Gengar"}))
-        self.browser.find_element(By.CLASS_NAME, "next").click()  # -> Onix
+        self._scroll_and_click(self.browser.find_element(By.CLASS_NAME, "next"))  # -> Onix
 
         WebDriverWait(self.browser, 5).until(
             lambda driver: driver.title == "Pokedex Entry - #95 Onix"
         )
 
-        self.browser.find_element(By.CLASS_NAME, "next").click()  # -> Drowzee
+        self._scroll_and_click(self.browser.find_element(By.CLASS_NAME, "next"))  # -> Drowzee
         WebDriverWait(self.browser, 5).until(
             lambda driver: driver.title == "Pokedex Entry - #96 Drowzee"
         )

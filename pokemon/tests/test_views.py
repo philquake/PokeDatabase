@@ -4,12 +4,13 @@ from django.conf import settings
 from unittest.mock import patch ###Makes you allows you to temporarily replace a target with a mock object
 from django.test import RequestFactory
 from django.http import Http404
-from pokemon.views import pokemon_detail, calculate_stat_range
+from pokemon.views import pokemon_detail, calculate_stat_range, group_hm_tm_moves
 from pokemon.services.pokelance_client import PokelanceAPIError
 from pokemon.templatetags.pokemon_extras import get_item
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.template import Context, Template
+
 
 
 
@@ -242,8 +243,9 @@ class GetItemFilterTemplateRenderingTest(SimpleTestCase):
         )
         self.assertEqual(output, "200-300")
  
-    def test_filter_renders_empty_string_for_missing_key_in_template(self):
-        # Django renders None as an empty string when interpolated in a template
+    def test_filter_renders_literal_none_string_for_missing_key_in_template(self):
+    # get_item returns None explicitly (not a failed lookup), so Django
+    # renders it via force_str(None) -> the literal string "None", not "".
         output = self._render(
             "{% load pokemon_extras %}{{ stat_ranges|get_item:stat_name }}",
             {
@@ -251,7 +253,7 @@ class GetItemFilterTemplateRenderingTest(SimpleTestCase):
                 "stat_name": "Speed",
             },
         )
-        self.assertEqual(output, "")
+        self.assertEqual(output, "None")
  
     def test_filter_used_in_a_loop_with_dict_access(self):
         # Mirrors the actual usage in pokemon_detail.html: looping over
@@ -274,7 +276,105 @@ class GetItemFilterTemplateRenderingTest(SimpleTestCase):
             },
         )
         self.assertEqual(output.strip(), "HP:60=180-274 Attack:65=112-207")
+
+class GroupHmTmMovesTests(TestCase):
+
+    def test_group_hm_tm_moves_splits_hm_named_moves_correctly(self):
+        moves = [
+            {
+                "name": "Cut",
+                "method": "machine",
+            },
+            {
+                "name": "Fly",
+                "method": "machine",
+            },
+            {
+                "name": "Surf",
+                "method": "machine",
+            },
+            {
+                "name": "Thunderbolt",
+                "method": "machine",
+            },
+        ]
+
+        hm, tm = group_hm_tm_moves(moves)
+
+        self.assertEqual(
+            hm,
+            [
+                {
+                    "name": "Cut",
+                    "method": "machine",
+                },
+                {
+                    "name": "Fly",
+                    "method": "machine",
+                },
+                {
+                    "name": "Surf",
+                    "method": "machine",
+                },
+            ],
+        )
+
+        self.assertEqual(
+            tm,
+            [
+                {
+                    "name": "Thunderbolt",
+                    "method": "machine",
+                },
+            ],
+        )
         
+    def test_group_hm_tm_moves_treats_non_hm_machine_moves_as_tm(self):
+        moves = [
+            {"name": "Cut", "method": "machine"},
+            {"name": "Thunderbolt", "method": "machine"},
+            {"name": "Ice Beam", "method": "machine"},
+        ]
+
+        expected_hm = [
+            {"name": "Cut", "method": "machine"},
+        ]
+
+        expected_tm = [
+            {"name": "Thunderbolt", "method": "machine"},
+            {"name": "Ice Beam", "method": "machine"},
+        ]
+
+        hm, tm = group_hm_tm_moves(moves)
+
+        self.assertEqual(hm, expected_hm)
+        self.assertEqual(tm, expected_tm)
+    
+    def test_group_hm_tm_moves_ignores_non_machine_methods(self):
+        moves = [
+            {
+                "name": "Cut",
+                "method": "machine",
+            },
+            {
+                "name": "Tackle",
+                "method": "level-up",
+            },
+            {
+                "name": "Surf",
+                "method": "machine",
+            },
+        ]
+        
+        expected_hm = [
+                    {"name": "Cut", "method": "machine"},
+                    {"name": "Surf", "method": "machine"},
+                ]
+
+        hm, tm = group_hm_tm_moves(moves)
+
+        self.assertEqual(hm,expected_hm)
+        self.assertEqual(tm, [])
 class HomeViewTest(SimpleTestCase):
 
     def test_home_view_returns_200(self):
@@ -356,7 +456,6 @@ class SearchViewTest(SimpleTestCase):
         self.assertContains(response, "No Pokémon found matching NotARealPokemon")
         
 User = get_user_model()
-
 class AdminSyncViewTest(TestCase):
     
     def setUp(self):
@@ -367,7 +466,10 @@ class AdminSyncViewTest(TestCase):
     
     @patch("pokemon.views.sync_pokemon_data")
     def test_post_success_adds_new_pokemon_to_context(self, mock_sync):
-        mock_sync.return_value = ["Bulbasaur", "Charmander"]
+        mock_sync.return_value = {
+            "added": ["Bulbasaur", "Charmander"],
+            "updated": [],
+        }
         self.client.force_login(self.staff_user)
 
         response = self.client.post(self.url)
@@ -375,8 +477,24 @@ class AdminSyncViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context["sync_success"])
         self.assertEqual(response.context["new_pokemon"], ["Bulbasaur", "Charmander"])
+        self.assertEqual(response.context["updated_pokemon"], [])
         self.assertNotIn("sync_error", response.context)
         mock_sync.assert_called_once()
+
+    @patch("pokemon.views.sync_pokemon_data")
+    def test_post_success_surfaces_updated_pokemon(self, mock_sync):
+        mock_sync.return_value = {
+            "added": [],
+            "updated": ["Gengar"],
+        }
+        self.client.force_login(self.staff_user)
+
+        response = self.client.post(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["sync_success"])
+        self.assertEqual(response.context["new_pokemon"], [])
+        self.assertEqual(response.context["updated_pokemon"], ["Gengar"])
 
     @patch("pokemon.views.sync_pokemon_data")
     def test_post_failure_does_not_500(self, mock_sync):
@@ -388,4 +506,45 @@ class AdminSyncViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["sync_error"], "upstream API unavailable")
         self.assertNotIn("sync_success", response.context)
+          
+class TypesViewTest(TestCase):
+    
+    def test_types_view_returns_200(self):
+        response = self.client.get(reverse("types"))
         
+        self.assertEqual(response.status_code, 200)
+
+class RegionViewTest(TestCase):
+    
+    def test_region_view_returns_200(self):
+        response = self.client.get(reverse("region"))
+        
+        self.assertEqual(response.status_code, 200)
+        
+class AbilitiesViewTest(TestCase):
+    
+    def test_abilities_view_returns_200(self):
+        response = self.client.get(reverse("abilities"))
+        
+        self.assertEqual(response.status_code, 200)
+        
+class MovesViewTest(TestCase):
+    
+    def test_moves_view_returns_200(self):
+        response = self.client.get(reverse("moves"))
+        
+        self.assertEqual(response.status_code, 200)
+        
+class CompetitiveViewTest(TestCase):
+    
+    def test_competitive_view_returns_200(self):
+        response = self.client.get(reverse("competitive"))
+        
+        self.assertEqual(response.status_code, 200)
+        
+class ItemsViewTest(TestCase):
+    
+    def test_items_view_returns_200(self):
+        response = self.client.get(reverse("items"))
+        
+        self.assertEqual(response.status_code, 200)
