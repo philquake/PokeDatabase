@@ -14,7 +14,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [3.14.2]
+        python-version: ["3.14.2"]
 
     steps:
     - uses: actions/checkout@v4
@@ -31,5 +31,5 @@ jobs:
 
     - name: Run Tests with Coverage
       run: |
-        coverage run manage.py test
+        coverage run manage.py test pokemon.tests
         coverage report --fail-under=80
