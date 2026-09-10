@@ -1,136 +1,105 @@
 # PokeDatabase
 
-A Django-based Pokémon database application that retrieves, organizes, and displays Pokémon information using data from the [PokéAPI](https://pokeapi.co/).
-
-The project is designed as both a practical Pokémon lookup application and a learning project for developing web applications with **Python, Django, databases, API integration, HTML/CSS, and Test-Driven Development (TDD)**.
-
----
+PokeDatabase is a Django-based Pokémon reference app that catalogs Pokémon data, displays detailed stats, and supports data syncing from the PokéAPI ecosystem. The project blends a searchable Pokédex experience with a lightweight app architecture intended for learning, experimentation, and extension.
 
 ## Overview
 
-**PokeDatabase** provides an organized interface for searching and viewing Pokémon information.
+This project is built around a simple but functional web experience:
 
-The application is being developed with a focus on:
+- browse a searchable Pokémon catalog
+- view detailed Pokémon information pages
+- inspect stats, moves, evolution chains, and encounter data
+- sync or refresh dataset entries through a staff-only admin flow
+- use a JSON fixture as the app's local dataset source
 
-* Django web development
-* API integration
-* Database design and management
-* Automated testing
-* Test-Driven Development
-* Responsive web design
-* Clean and maintainable application structure
-
-Pokémon data can include information such as:
-
-* Pokédex number
-* Pokémon name
-* Types
-* Abilities
-* Height
-* Weight
-* Base statistics
-* Sprites and images
-* Evolution information
-* Generation information
-
-The project can serve as a foundation for a larger Pokémon information and statistics platform.
-
----
+The app is designed as a practical Django project with an emphasis on data handling, template rendering, and test coverage.
 
 ## Features
 
-### Current Features
+### Included
 
-* Pokémon search
-* Pokémon information display
-* Integration with Pokémon data sources
-* Structured Django application architecture
-* HTML templates for displaying Pokémon information
-* Static asset management
-* Automated unit testing
-* Functional testing
-* Responsive interface development
+- Pokédex listing page
+- Individual Pokémon detail views
+- Search by Pokémon name
+- Featured home page with random Pokémon highlights
+- Evolution chain rendering
+- Stats and type information
+- JSON-based fixture data loading
+- Staff sync UI for refreshing Pokémon data
+- Django test suite for application and view-level validation
 
-### Planned Features
+### Current project status
 
-* Advanced Pokémon search and filtering
-* Pokémon type filtering
-* Evolution chains
-* Move database
-* Ability database
-* Pokémon comparison
-* Favorite Pokémon system
-* User authentication
-* Trainer/user profiles
-* Competitive Pokémon statistics
-* Pokémon team builder
-* REST API
-* Improved mobile interface
-* Administrative dashboard
-* Expanded database functionality
+The app is in active development. Some routes, such as type, region, ability, move, competitive, and item pages, are scaffolded or intentionally placeholder-based while the core experience continues to evolve.
 
----
+## Tech Stack
 
-## Technology Stack
-
-| Technology | Purpose                                    |
-| ---------- | ------------------------------------------ |
-| Python     | Primary programming language               |
-| Django     | Web application framework                  |
-| SQLite     | Development database                       |
-| HTML5      | Page structure                             |
-| CSS3       | Styling                                    |
-| Bootstrap  | Responsive UI components                   |
-| JavaScript | Client-side functionality                  |
-| PokéAPI    | Pokémon data source                        |
-| Pokébase   | Python interface for Pokémon API resources |
-| Selenium   | Functional/browser testing                 |
-| lxml       | HTML parsing during testing                |
-| Git/GitHub | Version control and project hosting        |
-
----
+- Python
+- Django
+- SQLite
+- HTML, CSS, and Bootstrap
+- JavaScript for front-end interactions
+- PokéAPI / Pokélance-style data integration
+- Django testing framework
 
 ## Project Structure
 
-The project follows a Django-based structure.
-
 ```text
 PokeDatabase/
-│
-├── functional_tests/       # Functional/Selenium tests
-│
-├── lists/                  # Main Django application
-│   ├── migrations/
-│   ├── static/
-│   │   ├── bootstrap/
-│   │   ├── css/
-│   │   └── img/
-│   │
-│   ├── templates/
-│   │   └── lists/
-│   │
-│   ├── models.py
-│   ├── views.py
-│   ├── urls.py
-│   └── tests.py
-│
-├── PokeDatabase/            # Django project configuration
+├── PokeDatabase/
+│   ├── __init__.py
+│   ├── asgi.py
 │   ├── settings.py
 │   ├── urls.py
-│   └── ...
-│
+│   └── wsgi.py
+├── pokemon/
+│   ├── services/
+│   │   ├── data.py
+│   │   └── pokelance_client.py
+│   ├── templates/
+│   │   ├── 404.html
+│   │   ├── admin_sync.html
+│   │   ├── base.html
+│   │   ├── home.html
+│   │   ├── pokedex.html
+│   │   ├── pokemon_detail.html
+│   │   └── partials/
+│   ├── templatetags/
+│   │   ├── __init__.py
+│   │   └── pokemon_extras.py
+│   ├── tests/
+│   │   ├── services/
+│   │   ├── test_templates.py
+│   │   ├── test_urls.py
+│   │   └── test_views.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── urls.py
+│   └── views.py
+├── assets/
+│   └── static/
+│       ├── css/
+│       ├── fixtures/
+│       ├── img/
+│       └── js/
+├── functional_test/
+│   ├── test_api_sync.py
+│   ├── test_home.py
+│   ├── test_navigation.py
+│   ├── test_pokedex.py
+│   ├── test_pokemon_detail.py
+│   └── test_search.py
+├── db.sqlite3
 ├── manage.py
+├── outline.txt
 ├── requirements.txt
-├── .gitignore
+├── LICENSE
 ├── README.md
-└── LICENSE
+└── pokemonCollection-1787721228542.json
 ```
 
-> The structure may change as the application develops.
-
----
-
-## Installation
+## Local Setup
 
 ### 1. Clone the repository
 
@@ -141,18 +110,18 @@ cd PokeDatabase
 
 ### 2. Create a virtual environment
 
-macOS/Linux:
+On macOS/Linux:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-Windows:
+On Windows:
 
 ```powershell
 python -m venv .venv
-.venv\Scripts\activate
+.venv\Scripts\Activate.ps1
 ```
 
 ### 3. Install dependencies
@@ -161,92 +130,83 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-If the project is being developed without a `requirements.txt` file yet, install Django and the required testing/API packages separately.
-
-### 4. Run database migrations
+### 4. Apply database migrations
 
 ```bash
 python manage.py migrate
 ```
 
-### 5. Start the development server
+### 5. Run the local server
 
 ```bash
 python manage.py runserver
 ```
 
-The application can then be accessed through:
+Then visit:
 
 ```text
 http://127.0.0.1:8000/
 ```
 
----
+## App Usage
 
-## Pokémon Data
+### Home page
 
-PokeDatabase uses Pokémon data from the [PokéAPI](https://pokeapi.co/).
+The home page presents a featured Pokémon, a navigation to discovery areas, and a search form.
 
-PokéAPI provides structured Pokémon information that can be used to retrieve resources such as:
+### Search
 
-* Pokémon
-* Abilities
-* Moves
-* Types
-* Species
-* Evolution chains
-* Items
-* Berries
-* Locations
+Use the search box to find a Pokémon by name. Matching names are resolved to the detail page for the selected Pokémon.
 
-The application can retrieve API resources and use the information to populate or display Pokémon data.
+### Pokédex
 
-Example using Pokébase:
+The Pokédex view lists all catalogued Pokémon and provides direct links to each detail page.
 
-```python
-import pokebase as pb
+### Pokémon detail
 
-pokemon = pb.pokemon("pikachu")
+Each detail page includes:
 
-print(pokemon.name)
-print(pokemon.height)
-print(pokemon.weight)
-```
+- Pokémon name and Pokédex number
+- image and type information
+- base stats and stat ranges
+- evolution chain
+- moves and encounters
+- related navigation to previous/next Pokémon
 
----
+### Staff sync
 
-## Example
-
-A user can search for a Pokémon such as:
+The application includes a staff-only sync page at:
 
 ```text
-Pikachu
+/admin/sync/
 ```
 
-The application can display information such as:
+This page triggers a refresh against the external Pokémon data source and updates the local fixture data when new or changed entries are found.
 
-```text
-Name: Pikachu
-Pokédex Number: 25
-Type: Electric
-Height: 0.4 m
-Weight: 6.0 kg
-Ability: Static
+## Data Source
+
+The project uses generated Pokémon data sourced from the PokéAPI ecosystem and stores a local JSON fixture for application usage. Data is processed through helper modules under the `pokemon/services/` package and used to populate detail pages and the Pokédex.
+
+## Running Tests
+
+Run the Django test suite with:
+
+```bash
+python manage.py test
 ```
 
-The exact information displayed depends on the application's current implementation and available data.
+You can also target a specific app or test module if needed.
 
----
+## Notes
 
-## Testing
+- The project uses SQLite for local development.
+- Static assets are served from the `assets/static` directory.
+- UI sections such as type, region, abilities, moves, competitive, and items pages are present in the app structure and may be expanded over time.
+- This project is suitable for learning Django, API-driven data handling, template logic, and test-driven development.
 
-Testing is an important part of the project.
+## License
 
-PokeDatabase uses both **unit tests** and **functional tests** to verify application behavior.
-
-### Unit Tests
-
-Unit tests are used to test individual components of the application, such as:
+This project is licensed under the terms of the repository license. See the LICENSE file for details.
 
 * Models
 * Views
