@@ -18,7 +18,7 @@ class PokemonDetailURLTests(SimpleTestCase):
         url = reverse("pokemon_detail",kwargs={"name": "Gengar"})
         self.assertEqual(url,"/pokemon/pokedex/Gengar/")
         
-class HomeURLTest(SimpleTestCase):
+class HomeURLTest(TestCase):
     
     def test_home_url_resolves(self):
         resolver = resolve("/pokemon/")

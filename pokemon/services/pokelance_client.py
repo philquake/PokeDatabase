@@ -2,7 +2,7 @@
 pokelance_client.py
 
 Client for syncing new Pokémon from the public PokéAPI (https://pokeapi.co)
-into PokeDatabase's JSON-backed fixture file.
+into PokeDatabase's database (see pokemon.models / services.data).
 
     - identity: pokedex_number, name, image, category (genus), generation
     - battle basics: types, base_stats (+ total), abilities
@@ -19,15 +19,11 @@ requests per Pokémon than before. Type-matchup lookups are cached for the
 duration of a single sync() call since many Pokémon share types.
 """
 
-import json
-from pathlib import Path
 import requests
 
+from pokemon.models import Pokemon
+from pokemon.services.data import pokemon_to_dict, save_pokemon_entry
 
-FIXTURE_PATH = (
-    Path(__file__).resolve().parent.parent.parent
-    / "assets" / "static" / "fixtures" / "pokemon.json"
-)
 
 POKEAPI_BASE_URL = "https://pokeapi.co/api/v2/pokemon"
 POKEAPI_POKEMON_SPECIES_URL = "https://pokeapi.co/api/v2/pokemon-species" 
@@ -58,6 +54,7 @@ GENERATIONS = {
     "generation-vi": 6,
     "generation-vii": 7,
     "generation-viii": 8,
+    "generation-ix": 9,
 }
 
 IDENTITY_FIELDS = {"pokedex_number"}
@@ -66,14 +63,18 @@ class PokelanceAPIError(Exception):
     """Raised when the Pokelance client can't complete a sync."""
 
 
-def _load_fixture():
-    with open(FIXTURE_PATH, "r", encoding="utf-8") as f:
-        return json.load(f)
+def _existing_numbers():
+    return set(Pokemon.objects.values_list("pokedex_number", flat=True))
 
 
-def _save_fixture(pokemon_data):
-    with open(FIXTURE_PATH, "w", encoding="utf-8") as f:
-        json.dump(pokemon_data, f, indent=2)
+def _load_entry(pokedex_number):
+    """Fixture-shaped dict (incl. moves/locations) for a stored Pokémon."""
+    pokemon = Pokemon.objects.get(pokedex_number=pokedex_number)
+    return pokemon_to_dict(pokemon, include_related=True)
+
+
+def _save_entry(entry):
+    save_pokemon_entry(entry)
 
 
 def _get(url, context):
@@ -312,15 +313,20 @@ def _to_fixture_entry(raw, species, evolution_chain, type_matchups, locations):
 def sync_pokemon_data(count=5, update_existing=True):
     """
     Fetch up to `count` new Pokémon from PokéAPI that aren't already in the
-    local fixture, append them, and return the list of newly added entries.
+    database and store them; then, if `update_existing`, re-fetch every stored
+    Pokémon and patch any fields that are missing or have drifted.
+
+    Each Pokémon is saved as soon as it's fetched, so if the sync fails part
+    way through, everything fetched before the failure is kept.
+
+    Returns {"added": [...], "updated": [...]} of fixture-shaped dicts.
 
     Raises PokelanceAPIError if the external API can't be reached or
     returns something unusable. Callers should catch this and show an
     admin-facing error rather than letting it bubble up as a 500.
     """
-    existing = _load_fixture()
-    existing_by_number = {p["pokedex_number"]: p for p in existing}
-    known_numbers = set(existing_by_number)
+    known_numbers = _existing_numbers()
+    existing_numbers = sorted(known_numbers)
     highest_known = max(known_numbers, default=0)
 
     type_matchup_cache = {}
@@ -336,25 +342,20 @@ def sync_pokemon_data(count=5, update_existing=True):
             next_number += 1
             continue
 
-        new_entries.append(_fetch_and_build_entry(next_number, type_matchup_cache))
+        entry = _fetch_and_build_entry(next_number, type_matchup_cache)
+        _save_entry(entry)
+        new_entries.append(entry)
         known_numbers.add(next_number)
         next_number += 1
 
     # --- Pass 2: patch existing Pokémon whose data has drifted ---
     if update_existing:
-        for pokedex_number, existing_entry in existing_by_number.items():
+        for pokedex_number in existing_numbers:
+            existing_entry = _load_entry(pokedex_number)
             fresh_entry = _fetch_and_build_entry(pokedex_number, type_matchup_cache)
             diff = _diff_fields(existing_entry, fresh_entry)
             if diff:
+                _save_entry({"pokedex_number": pokedex_number, **diff})
                 updated_entries.append({**existing_entry, **diff})
-
-    if new_entries or updated_entries:
-        updated_by_number = {e["pokedex_number"]: e for e in updated_entries}
-        merged_fixture = [
-            updated_by_number.get(entry["pokedex_number"], entry)
-            for entry in existing
-        ]
-        merged_fixture.extend(new_entries)
-        _save_fixture(merged_fixture)
 
     return {"added": new_entries, "updated": updated_entries}

@@ -10,7 +10,7 @@ This project is built around a simple but functional web experience:
 - view detailed Pokémon information pages
 - inspect stats, moves, evolution chains, and encounter data
 - sync or refresh dataset entries through a staff-only admin flow
-- use a JSON fixture as the app's local dataset source
+- store Pokémon, moves and encounters in a SQLite database, seeded from a JSON file
 
 The app is designed as a practical Django project with an emphasis on data handling, template rendering, and test coverage.
 
@@ -24,7 +24,7 @@ The app is designed as a practical Django project with an emphasis on data handl
 - Featured home page with random Pokémon highlights
 - Evolution chain rendering
 - Stats and type information
-- JSON-based fixture data loading
+- SQLite-backed data models (Pokémon, moves, encounters) with Django admin
 - Staff sync UI for refreshing Pokémon data
 - Django test suite for application and view-level validation
 
@@ -53,6 +53,10 @@ PokeDatabase/
 │   ├── urls.py
 │   └── wsgi.py
 ├── pokemon/
+│   ├── management/commands/
+│   │   ├── import_pokemon_json.py
+│   │   └── sync_pokemon.py
+│   ├── migrations/
 │   ├── services/
 │   │   ├── data.py
 │   │   └── pokelance_client.py
@@ -68,7 +72,10 @@ PokeDatabase/
 │   │   ├── __init__.py
 │   │   └── pokemon_extras.py
 │   ├── tests/
+│   │   ├── fixtures/sample_pokemon.json
 │   │   ├── services/
+│   │   ├── helpers.py
+│   │   ├── test_data.py
 │   │   ├── test_templates.py
 │   │   ├── test_urls.py
 │   │   └── test_views.py
@@ -127,11 +134,14 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-### 4. Apply database migrations
+### 4. Create the database and load the Pokémon data
 
 ```bash
 python manage.py migrate
+python manage.py import_pokemon_json
 ```
+
+`import_pokemon_json` loads the seed file `assets/static/fixtures/pokemon.json` into `db.sqlite3`. It's safe to run again; existing Pokémon are updated, not duplicated.
 
 ### 5. Run the local server
 
@@ -178,11 +188,26 @@ The application includes a staff-only sync page at:
 /admin/sync/
 ```
 
-This page triggers a refresh against the external Pokémon data source and updates the local fixture data when new or changed entries are found.
+This page triggers a refresh against the external Pokémon data source and updates the database when new or changed entries are found.
+
+For larger syncs, use the management command instead, since a full refresh takes too long for a web request:
+
+```bash
+python manage.py sync_pokemon --count 20             # add 20 new Pokémon, then re-check all stored ones
+python manage.py sync_pokemon --count 20 --no-update # only add new Pokémon
+```
+
+Each Pokémon is saved as soon as it's fetched, so an interrupted sync keeps its progress.
 
 ## Data Source
 
-The project uses generated Pokémon data sourced from the PokéAPI ecosystem and stores a local JSON fixture for application usage. Data is processed through helper modules under the `pokemon/services/` package and used to populate detail pages and the Pokédex.
+Pokémon data comes from [PokéAPI](https://pokeapi.co/) and is stored in SQLite through three models in `pokemon/models.py`:
+
+- `Pokemon` — one row per species (stats, types, abilities, matchups, evolution chain, generation and region)
+- `PokemonMove` — one row per move / game version / learn method
+- `PokemonEncounter` — one row per wild encounter location / game version
+
+`assets/static/fixtures/pokemon.json` is a seed file only; the app never reads it at runtime. The models are also registered in the Django admin (`/admin/`).
 
 ## Running Tests
 

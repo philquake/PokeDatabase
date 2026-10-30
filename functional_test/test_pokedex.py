@@ -4,10 +4,12 @@ from selenium import webdriver
 from django.urls import reverse
 from selenium.webdriver import Keys
 from selenium.webdriver.support.ui import WebDriverWait
+from pokemon.tests.helpers import load_sample_pokemon
 
 class Pokedex(LiveServerTestCase):
 
     def setUp(self):
+        load_sample_pokemon()
         self.browser = webdriver.Chrome()
 
     def tearDown(self):

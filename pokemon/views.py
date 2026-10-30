@@ -1,15 +1,11 @@
 
-import json
-import random
-
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, render
-from itertools import groupby
-from operator import itemgetter
-from pathlib import Path
-from pokemon.services.data import load_pokemon_data, build_name_lookup
+from pokemon.models import Pokemon
+from pokemon.services.data import get_pokemon_by_name, pokemon_to_dict
 from pokemon.services.pokelance_client import sync_pokemon_data, PokelanceAPIError
 
 
@@ -29,23 +25,26 @@ TYPE_DEFENSE_ORDER = [
 ]
 
 def home(request):
-    pokemon_data = load_pokemon_data()
+    pokemon_count = Pokemon.objects.count()
 
-    if pokemon_data:
-        hero = random.choice(pokemon_data)
+    if pokemon_count:
+        random_pokemon = Pokemon.objects.order_by("?")
+        hero = pokemon_to_dict(random_pokemon.first())
         hero["type_emoji"] = TYPE_EMOJI.get(hero["types"][0], "🐾")
         hero["top_stats"] = sorted(
             hero["base_stats"].items(), key=lambda stat: stat[1], reverse=True
         )[:2]
-        featured_pokemon = random.sample(pokemon_data, min(8, len(pokemon_data)))
-        explore_pokemon = random.choice(pokemon_data)["name"]
+        featured_pokemon = [
+            pokemon_to_dict(p) for p in random_pokemon[:settings.FEATURED_POKEMON_COUNT]
+        ]
+        explore_pokemon = random_pokemon.values_list("name", flat=True).first()
     else:
         hero = None
         featured_pokemon = []
         explore_pokemon = ""
 
     context = {
-        "pokemon_count": len(pokemon_data),
+        "pokemon_count": pokemon_count,
         "hero": hero,
         "featured_pokemon": featured_pokemon,
         "explore_pokemon": explore_pokemon,
@@ -59,44 +58,40 @@ def pokemon_detail(request, name):
         response.status_code = 400
         return response
     
-    pokemon_data = load_pokemon_data()
-    by_name = build_name_lookup(pokemon_data)
-    
-    for index, pokemon in enumerate(pokemon_data):
-        if pokemon["name"].lower() == name.lower(): 
-            current = pokemon
-            next = (
-                pokemon_data[index +1]
-                if index + 1 < len(pokemon_data)
-                else None
-                )
-            previous = (
-                pokemon_data[index -1]
-                if index > 0
-                else None
-            )
-            
-            evolution_chain = [
-                by_name[evo_name.lower()]
-                for evo_name in current.get("evolution_chain", [])
-                if evo_name.lower() in by_name
-            ]
-            
-            learnt_hm, learnt_tm = group_hm_tm_moves(current.get("moves", []))
-            
-            return render(request, 'pokemon_detail.html', {
-                "pokemon": current, 
-                "next": next, 
-                "previous": previous,
-                "evolution_chain": evolution_chain,
-                "type_defense_order": TYPE_DEFENSE_ORDER,
-                "stat_ranges": calculate_stat_range(current["base_stats"]),
-                "learnt_hm": learnt_hm,
-                "learnt_tm": learnt_tm,
-                "locations": current.get("locations", []),
-                })
-    else:
+    current = get_pokemon_by_name(name)
+    if current is None:
         raise Http404(f"No Pokémon found match '{name}'")
+
+    previous = (
+        Pokemon.objects.filter(pokedex_number__lt=current.pokedex_number)
+        .order_by("-pokedex_number").first()
+    )
+    next = Pokemon.objects.filter(pokedex_number__gt=current.pokedex_number).first()
+
+    by_name = {
+        p.name.lower(): p
+        for p in Pokemon.objects.filter(name__in=current.evolution_chain)
+    }
+    evolution_chain = [
+        pokemon_to_dict(by_name[evo_name.lower()])
+        for evo_name in current.evolution_chain
+        if evo_name.lower() in by_name
+    ]
+
+    pokemon = pokemon_to_dict(current, include_related=True)
+    learnt_hm, learnt_tm = group_hm_tm_moves(pokemon["moves"])
+
+    return render(request, 'pokemon_detail.html', {
+        "pokemon": pokemon,
+        "next": pokemon_to_dict(next) if next else None,
+        "previous": pokemon_to_dict(previous) if previous else None,
+        "evolution_chain": evolution_chain,
+        "type_defense_order": TYPE_DEFENSE_ORDER,
+        "stat_ranges": calculate_stat_range(pokemon["base_stats"]),
+        "learnt_hm": learnt_hm,
+        "learnt_tm": learnt_tm,
+        "locations": pokemon["locations"],
+        })
 
 def group_hm_tm_moves(moves):
     """
@@ -141,17 +136,11 @@ def search(request):
     if not pokemon_name: 
             messages.error(request, "Pokémon name required")
             return redirect("home")
-        
-    # Load the JSON data from the file
-    json_file_path = Path(__file__).resolve().parent.parent / "assets" / "static" / "fixtures" / "pokemon.json"
 
-    with open(json_file_path, "r") as f:
-        pokemon_data = json.load(f)
+    pokemon = get_pokemon_by_name(pokemon_name)
+    if pokemon:
+        return redirect("pokemon_detail", name=pokemon.name)
 
-    for pokemon in pokemon_data:
-        if pokemon["name"].lower() == pokemon_name.lower():
-            return redirect("pokemon_detail", name=pokemon["name"])
-        
     messages.error(request, f"No Pokémon found matching {pokemon_name}")
     return redirect("home")
     
@@ -159,8 +148,8 @@ def types(request):
     return HttpResponse("Types page is not implemented yet.")
 
 def pokedex(request):
-    pokemon_data = load_pokemon_data()
-            
+    pokemon_data = Pokemon.objects.all()
+
     return render(request, "pokedex.html", {"pokemon_data": pokemon_data})
 
 def region(request):

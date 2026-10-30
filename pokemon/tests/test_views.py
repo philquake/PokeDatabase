@@ -10,11 +10,13 @@ from pokemon.templatetags.pokemon_extras import get_item
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.template import Context, Template
+from pokemon.models import Pokemon
+from pokemon.tests.helpers import PokemonDataTestCase
 
 
 
 
-class PokemonDetailTest(SimpleTestCase):
+class PokemonDetailTest(PokemonDataTestCase):
 
     def test_pokemon_detail_url_resolves_to_correct_view(self):
         response = self.client.get(
@@ -164,21 +166,33 @@ class PokemonDetailTest(SimpleTestCase):
                 response = self.client.get(reverse("pokemon_detail", args=[name]))
                 chain = response.context["evolution_chain"]
                 self.assertEqual([stage["name"] for stage in chain], expected)
-        
-        @patch("pokemon.services.build_name_lookup")
-        def test_evolution_chain_unknown_name(self, mock_build_name_lookup):
-            mock_build_name_lookup.return_value = {
-                "gastly": {"name": "Gastly", "sprite_url": "..."},
-                "gengar": {"name": "Gengar", "sprite_url": "..."},
-            }
-            response = self.client.get(reverse("pokemon_detail", args=["Gengar"]))
 
-            self.assertEqual(response.status_code, 200)
-            chain = response.context["evolution_chain"]
-            names = [stage["name"] for stage in chain]
+    def test_evolution_chain_skips_pokemon_not_in_database(self):
+        Pokemon.objects.filter(name="Haunter").delete()
+        response = self.client.get(reverse("pokemon_detail", args=["Gengar"]))
 
-            self.assertEqual(names, ["Gastly", "Gengar"])
-            self.assertNotIn("Haunter", names)
+        self.assertEqual(response.status_code, 200)
+        names = [stage["name"] for stage in response.context["evolution_chain"]]
+
+        self.assertEqual(names, ["Gastly", "Gengar"])
+
+    def test_pokemon_detail_includes_moves_and_locations(self):
+        response = self.client.get(reverse("pokemon_detail", args=["Gengar"]))
+        pokemon = response.context["pokemon"]
+
+        self.assertTrue(pokemon["moves"])
+        self.assertEqual(
+            set(pokemon["moves"][0]), {"name", "version", "level_learnt", "method"}
+        )
+        self.assertEqual(response.context["locations"], pokemon["locations"])
+
+    def test_next_and_previous_skip_missing_pokedex_numbers(self):
+        # #96–99 aren't in the sample data, so Onix (#95) -> Voltorb (#100)
+        response = self.client.get(reverse("pokemon_detail", args=["Onix"]))
+        self.assertEqual(response.context["next"]["name"], "Voltorb")
+
+        response = self.client.get(reverse("pokemon_detail", args=["Voltorb"]))
+        self.assertEqual(response.context["previous"]["name"], "Onix")
         
     def test_get_pokemon_move_list(self):
         data  = {
@@ -375,7 +389,7 @@ class GroupHmTmMovesTests(TestCase):
 
         self.assertEqual(hm,expected_hm)
         self.assertEqual(tm, [])
-class HomeViewTest(SimpleTestCase):
+class HomeViewTest(PokemonDataTestCase):
 
     def test_home_view_returns_200(self):
         response = self.client.get(reverse("home"))
@@ -428,14 +442,14 @@ class HomeViewTest(SimpleTestCase):
             settings.FEATURED_POKEMON_COUNT
         )
 
-    @patch("pokemon.views.json.load")
-    def test_home_view_has_empty_featured_grid_when_no_pokemon(self, mock_json_load):
-        mock_json_load.return_value = []
+class HomeViewEmptyDatabaseTest(TestCase):
+
+    def test_home_view_has_empty_featured_grid_when_no_pokemon(self):
         response = self.client.get(reverse("home"))
         self.assertEqual(response.context["featured_pokemon"], [])
         self.assertIsNone(response.context["hero"])
 
-class SearchViewTest(SimpleTestCase):
+class SearchViewTest(PokemonDataTestCase):
 
     def test_search_view_redirects(self):
         response = self.client.get(

@@ -1,6 +1,6 @@
 # pokemon/tests/test_pokelance_client.py
 
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, TestCase
 import requests
 from unittest.mock import patch, MagicMock
 from pokemon.services.pokelance_client import (
@@ -17,6 +17,7 @@ from pokemon.services.pokelance_client import (
     _to_fixture_entry,
     PokelanceAPIError,
 )
+from pokemon.models import Pokemon
 
 
 class WalkEvolutionChainTest(SimpleTestCase):
@@ -230,6 +231,11 @@ class FetchGenerationTests(SimpleTestCase):
         result = _fetch_generation(species)
         expected_result = 1
         self.assertEqual(result, expected_result)
+
+    def test_fetch_generation_maps_generation_ix(self):
+        species = {"generation": {"name": "generation-ix"}}
+
+        self.assertEqual(_fetch_generation(species), 9)
         
 class FetchLocationsTests(SimpleTestCase):
 
@@ -628,14 +634,14 @@ class ToFixtureEntryMovesTest(SimpleTestCase):
         mock_fetch_moves.assert_called_once_with(raw)
         
 class SyncPokemonDataTest(SimpleTestCase):
-    @patch("pokemon.services.pokelance_client._save_fixture")
+    @patch("pokemon.services.pokelance_client._save_entry")
     @patch("pokemon.services.pokelance_client._to_fixture_entry")
     @patch("pokemon.services.pokelance_client._fetch_locations")
     @patch("pokemon.services.pokelance_client._fetch_type_matchups")
     @patch("pokemon.services.pokelance_client._fetch_evolution_chain")
     @patch("pokemon.services.pokelance_client._fetch_species")
     @patch("pokemon.services.pokelance_client._fetch_pokemon")
-    @patch("pokemon.services.pokelance_client._load_fixture")
+    @patch("pokemon.services.pokelance_client._existing_numbers")
     def test_stops_after_count_reached(
         self,
         mock_load,
@@ -648,7 +654,7 @@ class SyncPokemonDataTest(SimpleTestCase):
         mock_save,
     ):
         
-        mock_load.return_value = [{"pokedex_number": 1, "name": "Bulbasaur"}, ]
+        mock_load.return_value = {1}
         mock_fetch_pokemon.return_value = {"id": 999, "name": "dummy", "types": [{"type": {"name": "normal"}}],}
         mock_fetch_species.return_value = {"name": "dummy-species"}
         mock_fetch_evolution_chain.return_value = ["Dummy"]
@@ -665,5 +671,65 @@ class SyncPokemonDataTest(SimpleTestCase):
         self.assertEqual(mock_fetch_pokemon.call_count, count)
         self.assertEqual(mock_to_fixture_entry.call_count, count)
 
-        mock_save.assert_called_once()
+        self.assertEqual(mock_save.call_count, count)  # saved one by one, not at the end
+
+
+def _entry(pokedex_number, name, **overrides):
+    """A minimal fixture-shaped entry for database-backed sync tests."""
+    entry = {
+        "pokedex_number": pokedex_number,
+        "name": name,
+        "generation": 1,
+        "types": ["Normal"],
+        "base_stats": {"HP": 50},
+        "moves": [{"name": "Tackle", "version": "red-blue", "level_learnt": 1, "method": "level-up"}],
+        "locations": [],
+    }
+    entry.update(overrides)
+    return entry
+
+
+class SyncPokemonDataDatabaseTest(TestCase):
+    """sync_pokemon_data() against the real test database, with only the API fetch mocked."""
+
+    @patch("pokemon.services.pokelance_client._fetch_and_build_entry")
+    def test_new_pokemon_are_saved_to_database(self, mock_fetch):
+        mock_fetch.side_effect = lambda number, cache: _entry(number, f"Mon{number}")
+
+        result = sync_pokemon_data(count=2, update_existing=False)
+
+        self.assertEqual([p["name"] for p in result["added"]], ["Mon1", "Mon2"])
+        self.assertEqual(
+            list(Pokemon.objects.values_list("name", flat=True)), ["Mon1", "Mon2"]
+        )
+        self.assertEqual(Pokemon.objects.get(name="Mon1").moves.count(), 1)
+
+    @patch("pokemon.services.pokelance_client._fetch_and_build_entry")
+    def test_progress_is_kept_when_sync_fails_part_way(self, mock_fetch):
+        def fetch(number, cache):
+            if number == 2:
+                raise PokelanceAPIError("boom")
+            return _entry(number, f"Mon{number}")
+        mock_fetch.side_effect = fetch
+
+        with self.assertRaises(PokelanceAPIError):
+            sync_pokemon_data(count=3, update_existing=False)
+
+        self.assertTrue(Pokemon.objects.filter(name="Mon1").exists())
+
+    @patch("pokemon.services.pokelance_client._fetch_and_build_entry")
+    def test_drifted_pokemon_are_updated_in_database(self, mock_fetch):
+        from pokemon.services.data import save_pokemon_entry
+        save_pokemon_entry(_entry(1, "Bulbasaur", types=["Grass"]))
+        save_pokemon_entry(_entry(2, "Ivysaur"))
+        mock_fetch.side_effect = lambda number, cache: (
+            _entry(1, "Bulbasaur", types=["Grass", "Poison"]) if number == 1
+            else _entry(number, "Ivysaur")
+        )
+
+        result = sync_pokemon_data(count=0, update_existing=True)
+
+        self.assertEqual([p["name"] for p in result["updated"]], ["Bulbasaur"])
+        self.assertEqual(Pokemon.objects.get(name="Bulbasaur").types, ["Grass", "Poison"])
+        self.assertEqual(Pokemon.objects.get(name="Ivysaur").types, ["Normal"])
         

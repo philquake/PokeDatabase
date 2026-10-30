@@ -3,12 +3,14 @@ from selenium.webdriver.common.by import By
 from selenium import webdriver
 from django.urls import reverse
 from django.test import override_settings
+from pokemon.tests.helpers import load_sample_pokemon
 
 
 
 class Navigation_Links(LiveServerTestCase):
 
     def setUp(self):
+        load_sample_pokemon()
         self.browser = webdriver.Chrome()
 
     def tearDown(self):

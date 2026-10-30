@@ -5,10 +5,12 @@ from django.urls import reverse
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 import time
+from pokemon.tests.helpers import load_sample_pokemon
 
 class PokemonDetailFunctionalTest(StaticLiveServerTestCase):
 
     def setUp(self):
+        load_sample_pokemon()
         self.browser = webdriver.Chrome()
 
     def tearDown(self):

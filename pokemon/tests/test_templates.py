@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.test import override_settings
 from django.contrib.auth import get_user_model
+from pokemon.tests.helpers import PokemonDataTestCase
 
 
 
@@ -11,7 +12,7 @@ class HomePageTest(TestCase):
         self.assertTemplateUsed(response, 'home.html')
 
 
-class PokemonDetailPageTest(TestCase):
+class PokemonDetailPageTest(PokemonDataTestCase):
     def test_pokemon_detail_page_template(self):
         response = self.client.get("/pokemon/pokedex/Gengar/")
         self.assertTemplateUsed(response, 'pokemon_detail.html')
@@ -31,7 +32,7 @@ class PokedexTest(TestCase):
         
         self.assertTemplateUsed(response, "pokedex.html")
 
-class AllTemplatesExtendBaseTest(TestCase):
+class AllTemplatesExtendBaseTest(PokemonDataTestCase):
     def test_all_pokemon_templates_use_base_html(self):
         pages = [
             ("home", {}, "home.html"),

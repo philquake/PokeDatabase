@@ -5,11 +5,13 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from django.urls import reverse
+from pokemon.tests.helpers import load_sample_pokemon
 
 class HomePageTest(LiveServerTestCase):
     
     def setUp(self):
         super().setUp()
+        load_sample_pokemon()
         self.browser = webdriver.Chrome()
     
     def tearDown(self):
