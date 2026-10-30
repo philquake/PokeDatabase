@@ -301,6 +301,18 @@ def _to_fixture_entry(raw, species, evolution_chain, type_matchups, locations):
             "base_happiness": species["base_happiness"],
             "type_effectiveness": type_matchups,
             "evolution_chain": evolution_chain,
+            "ev_yield": {
+                STAT_NAME_LOOKUP[stat["stat"]["name"]]: stat["effort"]
+                for stat in raw["stats"]
+                if stat["stat"]["name"] in STAT_NAME_LOOKUP and stat.get("effort")
+            },
+            "growth_rate": species.get("growth_rate", {}).get("name", ""),
+            "held_items": sorted(
+                {
+                    item["item"]["name"].replace("-", " ").title()
+                    for item in raw.get("held_items", [])
+                }
+            ),
             "moves": _fetch_moves(raw),
             "locations": locations,
         }

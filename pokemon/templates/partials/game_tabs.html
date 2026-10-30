@@ -1,0 +1,69 @@
+{# Generation tabs -> game tabs -> content. Needs: generations, prefix ("mv" or "loc"), kind ("moves" or "locations"). #}
+<div class="gen-tabs" role="tablist" aria-label="Generation">
+  {% for gen in generations %}
+    <button class="gen-tab{% if gen.active %} active{% endif %}" id="tab-{{ prefix }}-gen-{{ gen.number }}"
+            data-bs-toggle="tab" data-bs-target="#{{ prefix }}-gen-{{ gen.number }}" type="button" role="tab"
+            aria-controls="{{ prefix }}-gen-{{ gen.number }}" aria-selected="{{ gen.active|yesno:'true,false' }}">Gen {{ gen.roman }}</button>
+  {% endfor %}
+</div>
+
+<div class="tab-content">
+  {% for gen in generations %}
+    <div class="tab-pane fade{% if gen.active %} show active{% endif %}" id="{{ prefix }}-gen-{{ gen.number }}"
+         role="tabpanel" aria-labelledby="tab-{{ prefix }}-gen-{{ gen.number }}">
+
+      <div class="game-tabs" role="tablist" aria-label="Game">
+        {% for version in gen.versions %}
+          <button class="game-tab{% if version.active %} active{% endif %}" id="tab-{{ prefix }}-{{ version.slug }}"
+                  data-bs-toggle="tab" data-bs-target="#{{ prefix }}-{{ version.slug }}" type="button" role="tab"
+                  aria-controls="{{ prefix }}-{{ version.slug }}" aria-selected="{{ version.active|yesno:'true,false' }}">{{ version.label }}</button>
+        {% endfor %}
+      </div>
+
+      <div class="tab-content">
+        {% for version in gen.versions %}
+          <div class="tab-pane fade{% if version.active %} show active{% endif %}" id="{{ prefix }}-{{ version.slug }}"
+               role="tabpanel" aria-labelledby="tab-{{ prefix }}-{{ version.slug }}">
+
+            {% if kind == "moves" %}
+              <div class="moves-grid">
+                {% for section in version.sections %}
+                  <div class="moves-card">
+                    <h4 class="moves-card-title">{{ section.title }} <span class="moves-count">{{ section.moves|length }}</span></h4>
+                    <table class="moves-table">
+                      <tbody>
+                        {% for move in section.moves %}
+                          <tr>
+                            {% if section.show_level %}<td class="move-level">{% if move.level %}Lv. {{ move.level }}{% else %}Evolve{% endif %}</td>{% endif %}
+                            <td class="move-name">{{ move.name }}</td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <table class="location-table">
+                <thead>
+                  <tr><th>Location</th><th>Method</th><th>Level range</th><th>Chance</th></tr>
+                </thead>
+                <tbody>
+                  {% for encounter in version.encounters %}
+                    <tr>
+                      <td>{{ encounter.location }}</td>
+                      <td>{{ encounter.method }}</td>
+                      <td>{% if encounter.min_level == encounter.max_level %}{{ encounter.min_level }}{% else %}{{ encounter.min_level }}&ndash;{{ encounter.max_level }}{% endif %}</td>
+                      <td>{{ encounter.chance }}%</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            {% endif %}
+
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+</div>

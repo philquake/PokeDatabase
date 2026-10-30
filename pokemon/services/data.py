@@ -16,7 +16,7 @@ POKEMON_FIELDS = [
     "pokedex_number", "name", "image", "category", "generation", "types",
     "base_stats", "stat_total", "abilities", "height_m", "weight_kg", "gender",
     "egg_groups", "catch_rate", "base_experience", "base_happiness",
-    "type_effectiveness", "evolution_chain",
+    "type_effectiveness", "evolution_chain", "ev_yield", "growth_rate", "held_items",
 ]
 MOVE_FIELDS = ["name", "version", "level_learnt", "method"]
 ENCOUNTER_FIELDS = ["location", "version", "method", "chance", "min_level", "max_level"]

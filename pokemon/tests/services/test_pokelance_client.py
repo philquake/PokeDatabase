@@ -544,6 +544,35 @@ class ToFixtureEntryTest(SimpleTestCase):
         self.assertEqual(entry["type_effectiveness"], self.type_matchups)
         self.assertEqual(entry["evolution_chain"], self.evolution_chain)
         self.assertEqual(entry["locations"], self.locations)
+
+    def test_training_fields_default_when_api_omits_them(self):
+        entry = _to_fixture_entry(
+            self.raw, self.species, self.evolution_chain, self.type_matchups, self.locations
+        )
+
+        self.assertEqual(entry["ev_yield"], {})
+        self.assertEqual(entry["growth_rate"], "")
+        self.assertEqual(entry["held_items"], [])
+
+    def test_training_fields_are_built_from_api_payload(self):
+        self.raw["stats"] = [
+            {"base_stat": 60, "effort": 0, "stat": {"name": "hp"}},
+            {"base_stat": 130, "effort": 3, "stat": {"name": "special-attack"}},
+        ]
+        self.raw["held_items"] = [
+            {"item": {"name": "spell-tag"}},
+            {"item": {"name": "spell-tag"}},
+            {"item": {"name": "black-glasses"}},
+        ]
+        self.species["growth_rate"] = {"name": "medium-slow"}
+
+        entry = _to_fixture_entry(
+            self.raw, self.species, self.evolution_chain, self.type_matchups, self.locations
+        )
+
+        self.assertEqual(entry["ev_yield"], {"Special Attack": 3})
+        self.assertEqual(entry["growth_rate"], "medium-slow")
+        self.assertEqual(entry["held_items"], ["Black Glasses", "Spell Tag"])
         
     def test_raises_pokelance_error_on_malformed_payload(self):
         cases = {

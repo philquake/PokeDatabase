@@ -616,3 +616,154 @@
   }
   .stat-range { font-size: 0.68rem; }
 }
+/* ============================================================
+   MOVES & LOCATIONS — generation tabs, game tabs, move cards
+   ============================================================ */
+.gen-tabs,
+.game-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.gen-tab,
+.game-tab {
+  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--hex-muted);
+  font-family: var(--font-body);
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.gen-tab {
+  padding: 7px 16px;
+  border-radius: 50px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+}
+
+.game-tab {
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  background: transparent;
+  border-color: var(--hex-grid);
+}
+
+.gen-tab:hover,
+.game-tab:hover { color: var(--hex-text); }
+
+.gen-tab.active {
+  background: var(--color-yellow, #ffcb05);
+  color: #1a1a1a;
+}
+
+.game-tab.active {
+  color: var(--color-yellow, #ffcb05);
+  border-color: var(--color-yellow, #ffcb05);
+  background: rgba(255, 203, 5, 0.08);
+}
+
+.moves-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+  align-items: start;
+}
+
+.moves-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.moves-card-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 0 8px;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-yellow, #ffcb05);
+}
+
+.moves-count {
+  font-size: 0.72rem;
+  color: var(--hex-muted);
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 50px;
+  padding: 1px 8px;
+}
+
+.moves-table,
+.location-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+}
+
+.moves-table td {
+  padding: 5px 0;
+  border-bottom: 1px solid var(--hex-grid);
+  color: var(--hex-text);
+}
+
+.moves-table tr:last-child td { border-bottom: none; }
+
+.move-level {
+  width: 4.5rem;
+  color: var(--hex-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.location-table th {
+  text-align: left;
+  padding: 8px 10px;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--hex-muted);
+  border-bottom: 1px solid var(--hex-grid);
+}
+
+.location-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--hex-grid);
+  color: var(--hex-text);
+}
+
+.location-table tbody tr:hover { background: rgba(255, 255, 255, 0.04); }
+
+@media (max-width: 600px) {
+  .moves-grid { grid-template-columns: 1fr; }
+  .location-table th, .location-table td { padding: 6px 4px; font-size: 0.78rem; }
+}
+
+/* ============================================================
+   HERO — stack the three columns on tablets and phones
+   ============================================================ */
+@media (max-width: 900px) {
+  .pokemon-hero-container {
+    height: auto;
+    padding: 24px 16px;
+  }
+  .pokemon-hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+    border-radius: 24px;
+  }
+  .pokemon-hero-name { font-size: clamp(2.5rem, 12vw, 4rem); }
+  .pokemon-hero-center { display: flex; justify-content: center; }
+  .pokemon-hero-img { max-width: min(70vw, 320px); height: auto; }
+  .abilities-section { margin-top: 16px; }
+}

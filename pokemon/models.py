@@ -41,6 +41,9 @@ class Pokemon(models.Model):
     base_happiness = models.PositiveSmallIntegerField(null=True, blank=True)
     type_effectiveness = models.JSONField(default=dict)
     evolution_chain = models.JSONField(default=list)
+    ev_yield = models.JSONField(default=dict)  # {"Special Attack": 3}
+    growth_rate = models.CharField(max_length=30, blank=True)  # PokéAPI slug, e.g. "medium-slow"
+    held_items = models.JSONField(default=list)  # wild held item names
 
     class Meta:
         ordering = ["pokedex_number"]

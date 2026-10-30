@@ -7,6 +7,12 @@ from django.shortcuts import redirect, render
 from pokemon.models import Pokemon
 from pokemon.services.data import get_pokemon_by_name, pokemon_to_dict
 from pokemon.services.pokelance_client import sync_pokemon_data, PokelanceAPIError
+from pokemon.services.versions import (
+    GROWTH_RATE_EXP_100,
+    HM_NAMES,
+    build_location_generations,
+    build_move_generations,
+)
 
 
 TYPE_EMOJI = {
@@ -91,6 +97,10 @@ def pokemon_detail(request, name):
         "learnt_hm": learnt_hm,
         "learnt_tm": learnt_tm,
         "locations": pokemon["locations"],
+        "move_generations": build_move_generations(pokemon["moves"]),
+        "location_generations": build_location_generations(pokemon["locations"]),
+        "growth_rate_label": pokemon["growth_rate"].replace("-", " ").title(),
+        "exp_to_100": GROWTH_RATE_EXP_100.get(pokemon["growth_rate"]),
         })
 
 def group_hm_tm_moves(moves):
@@ -100,11 +110,6 @@ def group_hm_tm_moves(moves):
     "machine" — so if HM vs. TM needs to be split further later, that'll
     need its own lookup, not a name-based guess.
     """
-    
-    HM_NAMES = {
-        "Cut", "Fly", "Surf", "Strength", "Flash", "Whirlpool",
-        "Waterfall", "Rock Smash", "Dive", "Rock Climb", "Defog",
-    }
     
     machine_moves = [m for m in moves if m["method"] == "machine"]
     learnt_hm = [m for m in machine_moves if m["name"] in HM_NAMES]

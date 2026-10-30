@@ -38,6 +38,9 @@ def _entry(**overrides):
         "base_happiness": 50,
         "type_effectiveness": {"weaknesses": ["dark"], "resistances": [], "immunities": ["normal"]},
         "evolution_chain": ["Gastly", "Haunter", "Gengar"],
+        "ev_yield": {"Special Attack": 3},
+        "growth_rate": "medium-slow",
+        "held_items": ["Spell Tag"],
         "moves": [
             {"name": "Lick", "version": "red-blue", "level_learnt": 1, "method": "level-up"},
             {"name": "Thunderbolt", "version": "red-blue", "level_learnt": 0, "method": "machine"},

@@ -186,6 +186,50 @@ class PokemonDetailTest(PokemonDataTestCase):
         )
         self.assertEqual(response.context["locations"], pokemon["locations"])
 
+    def test_detail_context_has_generation_grouped_moves_and_locations(self):
+        response = self.client.get(reverse("pokemon_detail", args=["Gengar"]))
+
+        move_gens = response.context["move_generations"]
+        self.assertTrue(move_gens)
+        self.assertEqual(sum(g["active"] for g in move_gens), 1)
+        self.assertIn("location_generations", response.context)
+
+    def test_detail_page_renders_move_levels_and_game_tabs(self):
+        response = self.client.get(reverse("pokemon_detail", args=["Gengar"]))
+
+        self.assertContains(response, 'id="tab-mv-gen-1"')
+        self.assertContains(response, 'id="mv-red-blue"')
+        self.assertContains(response, "Lv. ")
+        self.assertContains(response, "Confuse Ray")
+
+    def test_detail_page_with_no_encounters_shows_fallback(self):
+        Pokemon.objects.get(name="Gengar").locations.all().delete()
+        response = self.client.get(reverse("pokemon_detail", args=["Gengar"]))
+
+        self.assertContains(response, "can't be found in the wild")
+
+    def test_detail_page_is_not_bloated_by_per_version_copies(self):
+        response = self.client.get(reverse("pokemon_detail", args=["Gengar"]))
+        self.assertLess(len(response.content), 600_000)
+
+    def test_training_fields_render_when_data_is_present(self):
+        Pokemon.objects.filter(name="Gengar").update(
+            ev_yield={"Special Attack": 3}, growth_rate="medium-slow", held_items=["Spell Tag"]
+        )
+        response = self.client.get(reverse("pokemon_detail", args=["Gengar"]))
+
+        self.assertContains(response, "3 Special Attack")
+        self.assertContains(response, "Medium Slow")
+        self.assertContains(response, "Spell Tag")
+        self.assertContains(response, "1,059,860")
+        self.assertEqual(response.context["exp_to_100"], 1_059_860)
+
+    def test_training_fields_show_dash_when_not_synced_yet(self):
+        response = self.client.get(reverse("pokemon_detail", args=["Gengar"]))
+
+        self.assertIsNone(response.context["exp_to_100"])
+        self.assertNotContains(response, "Not yet tracked")
+
     def test_next_and_previous_skip_missing_pokedex_numbers(self):
         # #96–99 aren't in the sample data, so Onix (#95) -> Voltorb (#100)
         response = self.client.get(reverse("pokemon_detail", args=["Onix"]))
