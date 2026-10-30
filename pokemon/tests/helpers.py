@@ -2,7 +2,7 @@ from pathlib import Path
 
 from django.test import TestCase
 
-from pokemon.services.data import import_pokemon_json
+from pokemon.services.data import import_moves_json, import_pokemon_json
 
 SAMPLE_POKEMON_PATH = Path(__file__).resolve().parent / "fixtures" / "sample_pokemon.json"
 
@@ -23,3 +23,12 @@ class PokemonDataTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         load_sample_pokemon()
+        load_sample_moves()
+
+
+SAMPLE_MOVES_PATH = Path(__file__).resolve().parent / "fixtures" / "sample_moves.json"
+
+
+def load_sample_moves():
+    """Load a small set of move stats (Tackle, Flamethrower, Growl ... one per category)."""
+    import_moves_json(SAMPLE_MOVES_PATH)

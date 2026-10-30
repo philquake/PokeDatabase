@@ -1,11 +1,15 @@
 
+from urllib.parse import urlencode
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
+from django.core.paginator import Paginator
+from django.db.models import F
 from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, render
-from pokemon.models import Pokemon, PokemonMove
-from pokemon.services.data import get_pokemon_by_name, pokemon_to_dict
+from pokemon.models import Move, Pokemon, PokemonMove
+from pokemon.services.data import get_move_info, get_pokemon_by_name, pokemon_to_dict
 from pokemon.services.pokelance_client import sync_pokemon_data, PokelanceAPIError
 from pokemon.services.versions import (
     GROWTH_RATE_EXP_100,
@@ -94,7 +98,9 @@ def pokemon_detail(request, name):
         "learnt_hm": learnt_hm,
         "learnt_tm": learnt_tm,
         "locations": pokemon["locations"],
-        "move_generations": build_move_generations(pokemon["moves"]),
+        "move_generations": build_move_generations(
+            pokemon["moves"], get_move_info(m["name"] for m in pokemon["moves"])
+        ),
         "location_generations": build_location_generations(pokemon["locations"]),
         "growth_rate_label": pokemon["growth_rate"].replace("-", " ").title(),
         "exp_to_100": GROWTH_RATE_EXP_100.get(pokemon["growth_rate"]),
@@ -160,8 +166,91 @@ def region(request):
 def abilities(request):
     return HttpResponse("Abilities page is not implemented yet.")
 
+def pokemon_moves_fragment(request, name, version):
+    """
+    HTML fragment with one game's move tables for a Pokémon. The detail page only
+    renders the visible game up front and fetches the others when their tab is opened,
+    which keeps the page small (a Pokémon has ~25 games and up to ~2,000 move rows).
+    """
+    pokemon = get_pokemon_by_name(name)
+    if pokemon is None:
+        raise Http404(f"No Pokémon found match '{name}'")
+
+    rows = list(pokemon.moves.filter(version=version).values("name", "version", "level_learnt", "method"))
+    if not rows:
+        raise Http404(f"{pokemon.name} has no moves for '{version}'")
+
+    generations = build_move_generations(rows, get_move_info(r["name"] for r in rows))
+    return render(request, "partials/moves_version.html", {"version": generations[0]["versions"][0]})
+
+
+MOVES_PER_PAGE = 50
+MOVE_SORT_FIELDS = {
+    "name": "Name", "type": "Type", "power": "Pow.", "accuracy": "Acc.", "pp": "PP",
+}
+
+
 def moves(request):
-    return HttpResponse("Moves page is not implemented yet.")
+    """All moves with stats, filterable by name / type / category and sortable by column."""
+    stored = Move.objects.all()
+    results = stored
+
+    q = request.GET.get("q", "").strip()
+    type_name = request.GET.get("type", "")
+    category = request.GET.get("category", "")
+    sort = request.GET.get("sort", "")
+    direction = "desc" if request.GET.get("dir") == "desc" else "asc"
+
+    if q:
+        results = results.filter(name__icontains=q)
+    if type_name in {name for name, _ in TYPE_DEFENSE_ORDER}:
+        results = results.filter(type=type_name)
+    else:
+        type_name = ""
+    if category in dict(Move.DAMAGE_CLASSES):
+        results = results.filter(damage_class=category)
+    else:
+        category = ""
+    if sort not in MOVE_SORT_FIELDS:
+        sort = ""
+
+    if sort:
+        field = F(sort)
+        order = field.desc(nulls_last=True) if direction == "desc" else field.asc(nulls_last=True)
+        results = results.order_by(order, "name")
+    else:
+        direction = "asc"
+        results = results.order_by("name")
+
+    filters = {k: v for k, v in (("q", q), ("type", type_name), ("category", category)) if v}
+
+    def columns():
+        for key, label in MOVE_SORT_FIELDS.items():
+            is_current = sort == key
+            next_dir = "desc" if is_current and direction == "asc" else "asc"
+            yield {
+                "label": label,
+                "key": key,
+                "query": urlencode({**filters, "sort": key, "dir": next_dir}),
+                "aria_sort": (direction == "asc" and "ascending" or "descending") if is_current else "none",
+            }
+
+    page_obj = Paginator(results, MOVES_PER_PAGE).get_page(request.GET.get("page"))
+    return render(request, "moves.html", {
+        "page_obj": page_obj,
+        "total": page_obj.paginator.count,
+        "stored_count": stored.count(),
+        "q": q,
+        "selected_type": type_name,
+        "selected_category": category,
+        "type_names": [name for name, _ in TYPE_DEFENSE_ORDER],
+        "categories": Move.DAMAGE_CLASSES,
+        "columns": list(columns()),
+        # Filters + sort, without the page number, for pagination links.
+        "query": urlencode({**filters, **({"sort": sort, "dir": direction} if sort else {})}),
+        "filtering": bool(filters),
+    })
+
 
 def competitive(request):
     return HttpResponse("Competitive Analysis page is not implemented yet.")

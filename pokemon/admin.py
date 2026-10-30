@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from pokemon.models import Pokemon, PokemonEncounter, PokemonMove
+from pokemon.models import Move, Pokemon, PokemonEncounter, PokemonMove
 
 
 @admin.register(Pokemon)
@@ -24,3 +24,10 @@ class PokemonEncounterAdmin(admin.ModelAdmin):
     list_filter = ("version", "method")
     search_fields = ("pokemon__name", "location")
     list_select_related = ("pokemon",)
+
+
+@admin.register(Move)
+class MoveAdmin(admin.ModelAdmin):
+    list_display = ("name", "type", "damage_class", "power", "accuracy", "pp", "generation")
+    list_filter = ("type", "damage_class", "generation")
+    search_fields = ("name", "effect")

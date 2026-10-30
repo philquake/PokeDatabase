@@ -26,23 +26,13 @@
                role="tabpanel" aria-labelledby="tab-{{ prefix }}-{{ version.slug }}">
 
             {% if kind == "moves" %}
-              <div class="moves-grid">
-                {% for section in version.sections %}
-                  <div class="moves-card">
-                    <h4 class="moves-card-title">{{ section.title }} <span class="moves-count">{{ section.moves|length }}</span></h4>
-                    <table class="moves-table">
-                      <tbody>
-                        {% for move in section.moves %}
-                          <tr>
-                            {% if section.show_level %}<td class="move-level">{% if move.level %}Lv. {{ move.level }}{% else %}Evolve{% endif %}</td>{% endif %}
-                            <td class="move-name">{{ move.name }}</td>
-                          </tr>
-                        {% endfor %}
-                      </tbody>
-                    </table>
-                  </div>
-                {% endfor %}
-              </div>
+              {% if gen.active and version.active %}
+                {% include "partials/moves_version.html" %}
+              {% else %}
+                <div class="moves-lazy" data-src="{% url 'pokemon_moves_fragment' pokemon.name version.slug %}" aria-live="polite">
+                  <p class="detail-empty">Loading moves&hellip;</p>
+                </div>
+              {% endif %}
             {% else %}
               <table class="location-table">
                 <thead>

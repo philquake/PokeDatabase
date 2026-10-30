@@ -1,0 +1,16 @@
+[
+  {"name": "Tackle", "type": "Normal", "damage_class": "physical", "power": 40, "accuracy": 100, "pp": 35, "generation": 1, "effect": "Inflicts regular damage with no additional effect."},
+  {"name": "Scratch", "type": "Normal", "damage_class": "physical", "power": 40, "accuracy": 100, "pp": 35, "generation": 1, "effect": "Inflicts regular damage with no additional effect."},
+  {"name": "Growl", "type": "Normal", "damage_class": "status", "power": null, "accuracy": 100, "pp": 40, "generation": 1, "effect": "Lowers the target's Attack by one stage."},
+  {"name": "Smokescreen", "type": "Normal", "damage_class": "status", "power": null, "accuracy": 100, "pp": 20, "generation": 1, "effect": "Lowers the target's accuracy by one stage."},
+  {"name": "Ember", "type": "Fire", "damage_class": "special", "power": 40, "accuracy": 100, "pp": 25, "generation": 1, "effect": "Inflicts regular damage. Has a 10% chance to burn the target."},
+  {"name": "Flamethrower", "type": "Fire", "damage_class": "special", "power": 90, "accuracy": 100, "pp": 15, "generation": 1, "effect": "Inflicts regular damage. Has a 10% chance to burn the target."},
+  {"name": "Fire Blast", "type": "Fire", "damage_class": "special", "power": 110, "accuracy": 85, "pp": 5, "generation": 1, "effect": "Inflicts regular damage. Has a 10% chance to burn the target."},
+  {"name": "Wing Attack", "type": "Flying", "damage_class": "physical", "power": 60, "accuracy": 100, "pp": 35, "generation": 1, "effect": "Inflicts regular damage with no additional effect."},
+  {"name": "Slash", "type": "Normal", "damage_class": "physical", "power": 70, "accuracy": 100, "pp": 20, "generation": 1, "effect": "Inflicts regular damage. Has an increased chance for a critical hit."},
+  {"name": "Dragon Claw", "type": "Dragon", "damage_class": "physical", "power": 80, "accuracy": 100, "pp": 15, "generation": 3, "effect": "Inflicts regular damage with no additional effect."},
+  {"name": "Dragon Rage", "type": "Dragon", "damage_class": "special", "power": null, "accuracy": 100, "pp": 10, "generation": 1, "effect": "Inflicts exactly 40 damage."},
+  {"name": "Swords Dance", "type": "Normal", "damage_class": "status", "power": null, "accuracy": null, "pp": 20, "generation": 1, "effect": "Raises the user's Attack by two stages."},
+  {"name": "Thunderbolt", "type": "Electric", "damage_class": "special", "power": 90, "accuracy": 100, "pp": 15, "generation": 1, "effect": "Inflicts regular damage. Has a 10% chance to paralyze the target."},
+  {"name": "Earthquake", "type": "Ground", "damage_class": "physical", "power": 100, "accuracy": 100, "pp": 10, "generation": 1, "effect": "Inflicts regular damage with no additional effect."}
+]

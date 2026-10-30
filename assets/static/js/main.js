@@ -8,6 +8,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   hexChart(); 
+  initLazyMovePanels();
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduceMotion) return;
@@ -283,4 +284,38 @@ function hexChart() {
 
   // Expose for manual use (e.g. re-render after an AJAX search result swap)
   window.HexChart = { renderHexChart, buildHexChart, initAll };
+}
+
+
+/* -----------------------------------------------------------
+   Lazy move tables — the Moves tab only renders the visible game;
+   the other games' tables are fetched when their tab is first shown.
+   (Runs regardless of reduced-motion: it is functional, not decorative.)
+   ----------------------------------------------------------- */
+function initLazyMovePanels() {
+  const loadPane = async (pane) => {
+    const src = pane.dataset.src;
+    if (!src || pane.dataset.loading) return;
+    pane.dataset.loading = '1';
+    try {
+      const response = await fetch(src, { headers: { 'X-Requested-With': 'fetch' } });
+      if (!response.ok) throw new Error(response.status);
+      pane.innerHTML = await response.text();
+      delete pane.dataset.src;
+    } catch (err) {
+      pane.innerHTML = '<p class="detail-empty">Couldn\u2019t load these moves. Switch tabs and back to try again.</p>';
+    } finally {
+      delete pane.dataset.loading;
+    }
+  };
+
+  document.addEventListener('shown.bs.tab', (event) => {
+    const target = event.target.getAttribute('data-bs-target');
+    const pane = target && document.querySelector(target);
+    if (!pane) return;
+    // The shown pane is either a game pane, or a generation pane whose active game may still be unloaded.
+    pane.querySelectorAll('.moves-lazy[data-src]').forEach((el) => {
+      if (el.closest('.tab-pane').classList.contains('active')) loadPane(el);
+    });
+  });
 }

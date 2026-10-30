@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+    <link href="{% static 'css/moves.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block title %}Moves{% endblock %}
+
+{% block content %}
+{% include "partials/move_sprite.html" %}
+
+<section class="moves-page">
+  <header class="moves-header">
+    <p class="moves-eyebrow">Battle reference</p>
+    <h1 class="moves-title">Moves</h1>
+    <p class="moves-total">
+      {% if filtering %}{{ total }} of {{ stored_count }} moves{% else %}{{ stored_count }} moves{% endif %}
+    </p>
+  </header>
+
+  {% if not stored_count %}
+    <div class="moves-empty">
+      <h2>No move data yet</h2>
+      <p>Moves are loaded from PokéAPI. Run <code>python manage.py sync_moves --only-known</code> to fetch the moves your Pokémon learn, or <code>python manage.py sync_moves</code> for every move.</p>
+    </div>
+  {% else %}
+
+  <form class="moves-filters" method="get" action="{% url 'moves' %}">
+    <div class="moves-field moves-field-search">
+      <label for="moves-q">Name</label>
+      <input id="moves-q" type="search" name="q" value="{{ q }}" placeholder="e.g. Flamethrower" autocomplete="off">
+    </div>
+    <div class="moves-field">
+      <label for="moves-type">Type</label>
+      <select id="moves-type" name="type">
+        <option value="">All types</option>
+        {% for type_name in type_names %}
+          <option value="{{ type_name }}"{% if type_name == selected_type %} selected{% endif %}>{{ type_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="moves-field">
+      <label for="moves-category">Category</label>
+      <select id="moves-category" name="category">
+        <option value="">All categories</option>
+        {% for value, label in categories %}
+          <option value="{{ value }}"{% if value == selected_category %} selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="moves-field moves-field-sort">
+      <label for="moves-sort">Sort by</label>
+      <select id="moves-sort" name="sort">
+        <option value="">Name</option>
+        {% for col in columns %}{% if col.key != "name" %}
+          <option value="{{ col.key }}"{% if col.aria_sort != "none" %} selected{% endif %}>{{ col.label }}</option>
+        {% endif %}{% endfor %}
+      </select>
+    </div>
+    <div class="moves-actions">
+      <button type="submit" class="btn btn-primary">Apply</button>
+      {% if filtering or query %}<a class="moves-reset" href="{% url 'moves' %}">Reset</a>{% endif %}
+    </div>
+  </form>
+
+  <ul class="move-legend" aria-label="Move category key">
+    <li>{% include "partials/move_category.html" with damage_class="physical" %} Physical</li>
+    <li>{% include "partials/move_category.html" with damage_class="special" %} Special</li>
+    <li>{% include "partials/move_category.html" with damage_class="status" %} Status</li>
+  </ul>
+
+  {% if page_obj %}
+    <div class="moves-card moves-results">
+      <table class="moves-table moves-list no-level">
+        <thead>
+          <tr>
+            {% for col in columns %}
+              {% if col.key == "type" %}
+                <th scope="col" class="col-type" aria-sort="{{ col.aria_sort }}"><a href="?{{ col.query }}">{{ col.label }}</a></th>
+                <th scope="col" class="col-cat">Cat.</th>
+              {% else %}
+                <th scope="col" aria-sort="{{ col.aria_sort }}"{% if col.key == "power" or col.key == "accuracy" or col.key == "pp" %} class="num{% if col.key == "accuracy" %} col-acc{% elif col.key == "pp" %} col-pp{% endif %}"{% endif %}><a href="?{{ col.query }}">{{ col.label }}</a></th>
+              {% endif %}
+            {% endfor %}
+            <th scope="col" class="col-effect">Effect</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for move in page_obj %}
+            <tr>
+              <td class="move-name">{{ move.name }}</td>
+              <td class="col-type"><span class="move-type type-{{ move.type|lower }}">{{ move.type|upper }}</span></td>
+              <td class="col-cat">{% include "partials/move_category.html" with damage_class=move.damage_class %}</td>
+              <td class="num pow">{% if move.power is None %}<span class="move-none">&mdash;</span>{% else %}{{ move.power }}{% endif %}</td>
+              <td class="num col-acc">{% if move.accuracy is None %}<span class="move-none">&mdash;</span>{% else %}{{ move.accuracy }}%{% endif %}</td>
+              <td class="num col-pp">{% if move.pp is None %}<span class="move-none">&mdash;</span>{% else %}{{ move.pp }}{% endif %}</td>
+              <td class="col-effect">{{ move.effect }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+      <nav class="moves-pagination" aria-label="Moves pages">
+        {% if page_obj.has_previous %}
+          <a href="?{% if query %}{{ query }}&amp;{% endif %}page={{ page_obj.previous_page_number }}" rel="prev">&larr; Previous</a>
+        {% endif %}
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+          <a href="?{% if query %}{{ query }}&amp;{% endif %}page={{ page_obj.next_page_number }}" rel="next">Next &rarr;</a>
+        {% endif %}
+      </nav>
+    {% endif %}
+  {% else %}
+    <div class="moves-empty">
+      <h2>No moves match</h2>
+      <p>Try a different name, or <a href="{% url 'moves' %}">reset the filters</a>.</p>
+    </div>
+  {% endif %}
+
+  {% endif %}
+</section>
+{% endblock %}

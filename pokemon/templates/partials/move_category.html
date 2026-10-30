@@ -1,0 +1,2 @@
+{# Physical / special / status icon (needs partials/move_sprite.html on the page). Shapes differ per class, so it never relies on colour alone. Needs: damage_class. #}
+<span class="move-cat move-cat-{{ damage_class }}" role="img" aria-label="{{ damage_class|capfirst }}" title="{{ damage_class|capfirst }}"><svg width="20" height="20" aria-hidden="true"><use href="#mc-{{ damage_class }}"/></svg></span>

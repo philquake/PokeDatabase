@@ -8,7 +8,7 @@ from pathlib import Path
 
 from django.db import transaction
 
-from pokemon.models import Pokemon, PokemonEncounter, PokemonMove
+from pokemon.models import Move, Pokemon, PokemonEncounter, PokemonMove
 
 FIXTURE_PATH = Path(__file__).resolve().parent.parent.parent / "assets" / "static" / "fixtures" / "pokemon.json"
 
@@ -19,6 +19,7 @@ POKEMON_FIELDS = [
     "type_effectiveness", "evolution_chain", "ev_yield", "growth_rate", "held_items",
 ]
 MOVE_FIELDS = ["name", "version", "level_learnt", "method"]
+MOVE_INFO_FIELDS = ["name", "type", "damage_class", "power", "accuracy", "pp", "generation", "effect"]
 ENCOUNTER_FIELDS = ["location", "version", "method", "chance", "min_level", "max_level"]
 
 
@@ -70,4 +71,30 @@ def import_pokemon_json(path=FIXTURE_PATH):
         entries = json.load(f)
     for entry in entries:
         save_pokemon_entry(entry)
+    return len(entries)
+
+
+def move_to_dict(move):
+    """Plain dict of a Move's stats (the shape the sync builds and templates read)."""
+    return {field: getattr(move, field) for field in MOVE_INFO_FIELDS}
+
+
+def save_move_entry(entry):
+    """Create or update a Move by name; only the keys present in `entry` are written."""
+    defaults = {k: entry[k] for k in MOVE_INFO_FIELDS if k in entry and k != "name"}
+    move, _ = Move.objects.update_or_create(name=entry["name"], defaults=defaults)
+    return move
+
+
+def get_move_info(names):
+    """{name: stats dict} for whichever of `names` have stats stored; unknown names are skipped."""
+    return {m.name: move_to_dict(m) for m in Move.objects.filter(name__in=set(names))}
+
+
+def import_moves_json(path):
+    """Load (or refresh) move stats from a JSON list of move dicts."""
+    with open(path, "r", encoding="utf-8") as f:
+        entries = json.load(f)
+    for entry in entries:
+        save_move_entry(entry)
     return len(entries)

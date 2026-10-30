@@ -150,7 +150,10 @@ class PokemonDetailFunctionalTest(StaticLiveServerTestCase):
     
     def test_pokemon_moves(self):
         self.browser.get(self.live_server_url + reverse("pokemon_detail", kwargs={"name": "Gengar"}))
-        self.assertIn("Confuse Ray", self.browser.page_source)
+        self._scroll_and_click(self.browser.find_element(By.ID, "tab-moves"))
+        # Only the newest game is rendered up front; Gen I's tables are fetched when its tab opens.
+        self._scroll_and_click(self.browser.find_element(By.ID, "tab-mv-gen-1"))
+        WebDriverWait(self.browser, 10).until(lambda b: "Confuse Ray" in b.page_source)
         
     def test_pokemon_moves_by_version(self):
         ...

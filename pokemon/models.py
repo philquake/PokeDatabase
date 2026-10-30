@@ -91,3 +91,28 @@ class PokemonEncounter(models.Model):
 
     def __str__(self):
         return f"{self.pokemon.name}: {self.location} ({self.version})"
+
+
+class Move(models.Model):
+    """
+    Battle stats for one move. PokemonMove rows (what a Pokémon learns) point at
+    these by display name, so a move's stats are stored once however many
+    Pokémon learn it.
+    """
+
+    DAMAGE_CLASSES = [("physical", "Physical"), ("special", "Special"), ("status", "Status")]
+
+    name = models.CharField(max_length=50, unique=True)  # display name, e.g. "Solar Beam"
+    type = models.CharField(max_length=20)  # "Fire"
+    damage_class = models.CharField(max_length=10, choices=DAMAGE_CLASSES)
+    power = models.PositiveSmallIntegerField(null=True, blank=True)  # None = no fixed power
+    accuracy = models.PositiveSmallIntegerField(null=True, blank=True)  # None = never misses
+    pp = models.PositiveSmallIntegerField(null=True, blank=True)
+    generation = models.PositiveSmallIntegerField(null=True, blank=True)
+    effect = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name

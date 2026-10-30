@@ -108,8 +108,18 @@ def _group_by_generation(version_rows, build_version):
     return result
 
 
-def build_move_generations(moves):
-    """Moves grouped generation -> game -> Level up / Egg / Tutor / TM / HM / Other."""
+MOVE_STAT_FIELDS = ("type", "damage_class", "power", "accuracy", "pp", "effect")
+
+
+def build_move_generations(moves, move_info=None):
+    """
+    Moves grouped generation -> game -> Level up / Egg / Tutor / TM / HM / Other.
+    `move_info` ({name: stats dict}, see data.get_move_info) adds each move's type,
+    damage class, power, accuracy, PP and effect text; moves without stored stats
+    are still listed, with those fields None.
+    """
+    move_info = move_info or {}
+
     by_version = {}
     for move in moves:
         by_version.setdefault(move["version"], []).append(move)
@@ -140,7 +150,14 @@ def build_move_generations(moves):
             sections.append({
                 "title": title,
                 "show_level": key == "level-up",
-                "moves": [{"name": m["name"], "level": m["level_learnt"]} for m in rows],
+                "moves": [
+                    {
+                        "name": m["name"],
+                        "level": m["level_learnt"],
+                        **{f: move_info.get(m["name"], {}).get(f) for f in MOVE_STAT_FIELDS},
+                    }
+                    for m in rows
+                ],
             })
         return {"sections": sections, "move_count": len(version_moves)}
 

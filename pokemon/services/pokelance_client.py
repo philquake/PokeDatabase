@@ -21,11 +21,12 @@ duration of a single sync() call since many Pokémon share types.
 
 import requests
 
-from pokemon.models import Pokemon
-from pokemon.services.data import pokemon_to_dict, save_pokemon_entry
+from pokemon.models import Move, Pokemon, PokemonMove
+from pokemon.services.data import move_to_dict, pokemon_to_dict, save_move_entry, save_pokemon_entry
 
 
 POKEAPI_BASE_URL = "https://pokeapi.co/api/v2/pokemon"
+POKEAPI_MOVE_URL = "https://pokeapi.co/api/v2/move"
 POKEAPI_POKEMON_SPECIES_URL = "https://pokeapi.co/api/v2/pokemon-species" 
 REQUEST_TIMEOUT_SECONDS = 5
 
@@ -371,3 +372,85 @@ def sync_pokemon_data(count=5, update_existing=True):
                 updated_entries.append({**existing_entry, **diff})
 
     return {"added": new_entries, "updated": updated_entries}
+
+
+
+# --- Moves -----------------------------------------------------------------
+
+def _move_display_name(slug):
+    """Same transform _fetch_moves uses, so Move names line up with PokemonMove names."""
+    return slug.replace("-", " ").title()
+
+
+def _existing_moves():
+    return {m.name: move_to_dict(m) for m in Move.objects.all()}
+
+
+def _known_move_names():
+    """Names of moves that at least one stored Pokémon learns."""
+    return set(PokemonMove.objects.values_list("name", flat=True).distinct())
+
+
+def _save_move(entry):
+    save_move_entry(entry)
+
+
+def _to_move_entry(raw):
+    """Flatten a PokéAPI move into the stats dict stored on Move."""
+    generation = GENERATIONS.get(raw["generation"]["name"])
+    if generation is None:
+        raise PokelanceAPIError(f"Unknown generation '{raw['generation']['name']}' for move {raw['name']}")
+
+    effect = next(
+        (e.get("short_effect", "") for e in raw.get("effect_entries", [])
+         if e["language"]["name"] == "en"),
+        "",
+    )
+    effect = effect.replace("$effect_chance", str(raw.get("effect_chance")))
+
+    return {
+        "name": _move_display_name(raw["name"]),
+        "type": raw["type"]["name"].capitalize(),
+        "damage_class": raw["damage_class"]["name"],
+        "power": raw.get("power"),
+        "accuracy": raw.get("accuracy"),
+        "pp": raw.get("pp"),
+        "generation": generation,
+        "effect": effect,
+    }
+
+
+def sync_move_data(only_known=False, refresh=False):
+    """
+    Fetch move stats (type, damage class, power, accuracy, PP, effect text) from
+    PokéAPI and store them as Move rows.
+
+    only_known: just the moves some stored Pokémon learns (hundreds, not ~900).
+    refresh:    re-fetch moves already stored and patch the ones that changed;
+                otherwise stored moves are skipped, so a sync can be resumed.
+
+    Each move is saved as soon as it's fetched, so a failure keeps progress.
+    Returns {"added": [...], "updated": [...]} of move dicts. Raises
+    PokelanceAPIError if PokéAPI can't be reached or returns something unusable.
+    """
+    listing = _get(f"{POKEAPI_MOVE_URL}?limit=2000", "move list")["results"]
+    existing = _existing_moves()
+    known = _known_move_names() if only_known else None
+
+    added, updated = [], []
+    for item in listing:
+        name = _move_display_name(item["name"])
+        if known is not None and name not in known:
+            continue
+        if name in existing and not refresh:
+            continue
+
+        entry = _to_move_entry(_get(item["url"], f"move {name}"))
+        if name not in existing:
+            _save_move(entry)
+            added.append(entry)
+        elif entry != existing[name]:
+            _save_move(entry)
+            updated.append(entry)
+
+    return {"added": added, "updated": updated}

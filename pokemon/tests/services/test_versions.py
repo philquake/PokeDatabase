@@ -80,6 +80,37 @@ class BuildMoveGenerationsTests(SimpleTestCase):
         self.assertEqual([s["title"] for s in sections], ["Egg moves"])
 
 
+class BuildMoveGenerationsInfoTests(SimpleTestCase):
+
+    FLAMETHROWER = {
+        "name": "Flamethrower", "type": "Fire", "damage_class": "special",
+        "power": 90, "accuracy": 100, "pp": 15, "generation": 1,
+        "effect": "Inflicts regular damage. Has a 10% chance to burn the target.",
+    }
+
+    def _rows(self, moves, move_info=None):
+        return build_move_generations(moves, move_info)[0]["versions"][0]["sections"][0]["moves"]
+
+    def test_rows_carry_the_stats_of_a_known_move(self):
+        rows = self._rows([_move("Flamethrower", level=30)], {"Flamethrower": self.FLAMETHROWER})
+
+        self.assertEqual(rows, [{
+            "name": "Flamethrower", "level": 30, "type": "Fire", "damage_class": "special",
+            "power": 90, "accuracy": 100, "pp": 15,
+            "effect": "Inflicts regular damage. Has a 10% chance to burn the target.",
+        }])
+
+    def test_unknown_moves_still_listed_with_empty_stats(self):
+        rows = self._rows([_move("Mystery Move")], {"Flamethrower": self.FLAMETHROWER})
+
+        self.assertEqual(rows[0]["name"], "Mystery Move")
+        for key in ("type", "damage_class", "power", "accuracy", "pp", "effect"):
+            self.assertIsNone(rows[0][key])
+
+    def test_move_info_is_optional(self):
+        self.assertEqual(self._rows([_move("Tackle")])[0]["name"], "Tackle")
+
+
 class BuildLocationGenerationsTests(SimpleTestCase):
 
     def test_groups_individual_games_and_sorts_rows(self):

@@ -3,6 +3,7 @@
 {% load pokemon_extras %}
 
 {% block extra_css %}
+    <link href="{% static 'css/moves.css' %}" rel="stylesheet">
     <link href="{% static 'css/pokemon_detail.css' %}" rel="stylesheet">
 {% endblock %}
 
@@ -10,6 +11,7 @@
 {% block title %}Pokedex Entry - #{{pokemon.pokedex_number}} {{pokemon.name}}{% endblock %}
 
 {% block content %}
+{% include "partials/move_sprite.html" %}
 <div class="pokemon-hero-container">
   <div class="pokemon-hero hero-glow-{{ pokemon.types.0|lower }}">
     
@@ -187,6 +189,7 @@
   <section class="panel tab-pane fade" id="panel-moves" role="tabpanel" aria-labelledby="tab-moves">
     <div class="detail-card">
       <h3>Moves</h3>
+      {% include "partials/move_legend.html" %}
       {% if move_generations %}
         {% include "partials/game_tabs.html" with generations=move_generations prefix="mv" kind="moves" %}
       {% else %}

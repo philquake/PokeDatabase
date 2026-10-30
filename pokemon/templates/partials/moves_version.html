@@ -1,0 +1,36 @@
+{# One game's move tables. Needs: version (a build_move_generations version dict). #}
+<div class="moves-grid">
+  {% for section in version.sections %}
+    <div class="moves-card">
+      <h4 class="moves-card-title">{{ section.title }} <span class="moves-count">{{ section.moves|length }}</span></h4>
+      <table class="moves-table{% if not section.show_level %} no-level{% endif %}">
+        <thead>
+          <tr>
+            <th scope="col" class="move-level">{% if section.show_level %}Lv.{% endif %}</th>
+            <th scope="col">Move</th>
+            <th scope="col" class="col-type">Type</th>
+            <th scope="col" class="col-cat">Cat.</th>
+            <th scope="col" class="num">Pow.</th>
+            <th scope="col" class="num col-acc">Acc.</th>
+            <th scope="col" class="num col-pp">PP</th>
+            <th scope="col" class="col-effect">Effect</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for move in section.moves %}
+            <tr>
+              <td class="move-level">{% if section.show_level %}{% if move.level %}{{ move.level }}{% else %}Evolve{% endif %}{% endif %}</td>
+              <td class="move-name">{{ move.name }}</td>
+              <td class="col-type">{% if move.type %}<span class="move-type type-{{ move.type|lower }}">{{ move.type|upper }}</span>{% else %}<span class="move-none">&mdash;</span>{% endif %}</td>
+              <td class="col-cat">{% if move.damage_class %}{% include "partials/move_category.html" with damage_class=move.damage_class %}{% else %}<span class="move-none">&mdash;</span>{% endif %}</td>
+              <td class="num pow">{% if move.power is None %}<span class="move-none">&mdash;</span>{% else %}{{ move.power }}{% endif %}</td>
+              <td class="num col-acc">{% if move.accuracy is None %}<span class="move-none">&mdash;</span>{% else %}{{ move.accuracy }}%{% endif %}</td>
+              <td class="num col-pp">{% if move.pp is None %}<span class="move-none">&mdash;</span>{% else %}{{ move.pp }}{% endif %}</td>
+              <td class="col-effect">{{ move.effect|default:"" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endfor %}
+</div>
