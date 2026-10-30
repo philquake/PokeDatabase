@@ -15,14 +15,6 @@ from pokemon.services.versions import (
 )
 
 
-TYPE_EMOJI = {
-    "Fire": "🔥", "Water": "💧", "Grass": "🌿", "Electric": "⚡",
-    "Flying": "🌪️", "Psychic": "🔮", "Ice": "❄️", "Dragon": "🐉",
-    "Dark": "🌑", "Fairy": "✨", "Normal": "⭐", "Fighting": "🥊",
-    "Poison": "☠️", "Ground": "⛰️", "Rock": "🪨", "Bug": "🐛",
-    "Ghost": "👻", "Steel": "⚙️",
-}
-
 TYPE_DEFENSE_ORDER = [
     ("Normal", "NOR"), ("Fire", "FIR"), ("Water", "WAT"), ("Electric", "ELE"), ("Grass", "GRA"),
     ("Ice", "ICE"), ("Fighting", "FIG"), ("Poison", "POI"), ("Ground", "GRO"),
@@ -36,7 +28,6 @@ def home(request):
     if pokemon_count:
         random_pokemon = Pokemon.objects.order_by("?")
         hero = pokemon_to_dict(random_pokemon.first())
-        hero["type_emoji"] = TYPE_EMOJI.get(hero["types"][0], "🐾")
         hero["top_stats"] = sorted(
             hero["base_stats"].items(), key=lambda stat: stat[1], reverse=True
         )[:2]
