@@ -2,8 +2,6 @@
    PokeDatabase — Site Styles (base.html + home.html)
    =========================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&display=swap');
-
 :root {
   --color-bg-header: #0d1120;
   --color-bg-hero-top: #171d3d;
@@ -20,10 +18,24 @@
   --color-fire-bg: #1a1220;
   --color-fire-text: #f4c430;
 
-  --font-display: 'Poppins', 'Segoe UI', system-ui, sans-serif;
+  /* Poké-red: the second brand accent (Poké Ball). Use it for emphasis and tags; yellow stays the primary action colour. */
+  --color-red: #e2492c;
+  --color-red-hover: #f0644a;
+  --color-red-strong: #b93a20;     /* carries white text (5.7:1) and sits on light surfaces (5.0:1) */
+
+  /* Fonts (self-hosted, see css/fonts.css): Fredoka headings, Inter text, DM Mono for numbers/tags. */
+  --font-display: 'Fredoka', 'Nunito', 'Segoe UI', system-ui, sans-serif;
   --font-body: 'Inter', 'Segoe UI', system-ui, sans-serif;
-  --font-legal: "DM Mono", monospace;
-  --font-footer: "fNunito", sans-serif;
+  --font-mono: 'DM Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
+
+  /* Type scale */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2rem;
 
   --radius-sm: 8px;
   --radius-md: 14px;
@@ -40,6 +52,7 @@
 
 body {
   font-family: var(--font-body);
+  line-height: 1.6;
   background: var(--color-bg-hero-bottom);
   color: var(--color-white);
   -webkit-font-smoothing: antialiased;
@@ -94,14 +107,14 @@ img {
 }
 
 .btn-outline:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: var(--color-text-faint);
+  background: rgba(226, 73, 44, 0.12);
+  border-color: var(--color-red);
   transform: translateY(-2px);
 }
 
 .btn-lg {
   padding: 14px 26px;
-  font-size: 1rem;
+  font-size: var(--text-base);
 }
 
 .arrow {
@@ -145,7 +158,7 @@ img {
   gap: 10px;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.25rem;
+  font-size: var(--text-xl);
   margin-right: 24px;
   white-space: nowrap;
 }
@@ -173,7 +186,7 @@ img {
   padding: 8px 14px;
   border-radius: var(--radius-sm);
   color: var(--color-text-muted);
-  font-size: 0.95rem;
+  font-size: var(--text-base);
   font-weight: 500;
   transition: background var(--transition-fast), color var(--transition-fast);
 }
@@ -221,7 +234,7 @@ img {
   border: none;
   outline: none;
   color: var(--color-white);
-  font-size: 0.9rem;
+  font-size: var(--text-sm);
   font-family: var(--font-body);
   padding: 8px 0;
   width: 220px;
@@ -331,7 +344,7 @@ img {
   border-radius: var(--radius-pill);
   background: rgba(244, 196, 48, 0.08);
   color: var(--color-yellow);
-  font-size: 0.9rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   margin-bottom: 28px;
 }
@@ -350,7 +363,7 @@ img {
 
 .hero-subtitle {
   color: var(--color-text-muted);
-  font-size: 1.15rem;
+  font-size: var(--text-lg);
   line-height: 1.6;
   max-width: 520px;
   margin-bottom: 36px;
@@ -385,7 +398,7 @@ img {
   border: none;
   outline: none;
   color: var(--color-white);
-  font-size: 1rem;
+  font-size: var(--text-base);
   font-family: var(--font-body);
   padding: 10px 0;
 }
@@ -407,14 +420,14 @@ img {
 
 .stat-value {
   font-family: var(--font-display);
-  font-size: 2rem;
+  font-size: var(--text-3xl);
   font-weight: 800;
   color: var(--color-yellow);
 }
 
 .stat-label {
   color: var(--color-text-muted);
-  font-size: 0.95rem;
+  font-size: var(--text-base);
   margin-top: 2px;
 }
 
@@ -455,7 +468,7 @@ img {
   border-radius: var(--radius-sm);
   background: var(--color-fire-bg);
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: var(--text-base);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
   z-index: 2;
 }
@@ -522,7 +535,7 @@ img {
   gap: 8px;
   color: var(--color-eyebrow);
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   margin-bottom: 12px;
@@ -538,7 +551,7 @@ img {
 
 .featured-subtitle {
   color: var(--color-body-dark);
-  font-size: 1.05rem;
+  font-size: var(--text-lg);
 }
 
 .btn-dark {
@@ -625,31 +638,31 @@ img {
 .type-badge {
   padding: 5px 12px;
   border-radius: var(--radius-pill);
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   font-weight: 700;
   letter-spacing: 0.03em;
-  color: #1a1a1a;
   white-space: nowrap;
 }
 
-.type-fire      { background: #f2703c; color: #fff; }
-.type-water     { background: #4a90d9; color: #fff; }
-.type-grass     { background: #6fbf5c; color: #123; }
-.type-electric  { background: #f5d130; }
-.type-flying    { background: #93a9c9; color: #12162b; }
-.type-psychic   { background: #e85f95; color: #fff; }
-.type-ice       { background: #7fd6d6; color: #123; }
-.type-dragon    { background: #6a5bd6; color: #fff; }
-.type-dark      { background: #4a4658; color: #fff; }
-.type-fairy     { background: #eda3d0; color: #4a1a33; }
-.type-normal    { background: #a3a15a; color: #fff; }
-.type-fighting  { background: #b5502f; color: #fff; }
-.type-poison    { background: #8b3fc4; color: #fff; }
-.type-ground    { background: #c9973f; color: #2a1a05; }
-.type-rock      { background: #a89361; color: #241d0b; }
-.type-bug       { background: #8fb03e; color: #12210a; }
-.type-ghost     { background: #7b5ec4; color: #fff; }
-.type-steel     { background: #8993a4; color: #12162b; }
+/* ===== Pokémon type colours: the single source (every label >= 4.5:1). Used by chips, tiles, the chart, cards. ===== */
+.type-normal    { background: #a3a15a; color: #14172b; }
+.type-fire      { background: #f2703c; color: #14172b; }
+.type-water     { background: #4a90d9; color: #14172b; }
+.type-electric  { background: #f5d130; color: #14172b; }
+.type-grass     { background: #6fbf5c; color: #14172b; }
+.type-ice       { background: #7fd6d6; color: #14172b; }
+.type-fighting  { background: #b5502f; color: #ffffff; }
+.type-poison    { background: #8b3fc4; color: #ffffff; }
+.type-ground    { background: #c9973f; color: #14172b; }
+.type-flying    { background: #93a9c9; color: #14172b; }
+.type-psychic   { background: #e85f95; color: #14172b; }
+.type-bug       { background: #8fb03e; color: #14172b; }
+.type-rock      { background: #a89361; color: #14172b; }
+.type-ghost     { background: #7b5ec4; color: #ffffff; }
+.type-dragon    { background: #6a5bd6; color: #ffffff; }
+.type-dark      { background: #4a4658; color: #ffffff; }
+.type-steel     { background: #8993a4; color: #14172b; }
+.type-fairy     { background: #eda3d0; color: #14172b; }
 
 .poke-card-body {
   padding: 4px 20px;
@@ -664,7 +677,7 @@ img {
 
 .poke-card-name {
   font-family: var(--font-display);
-  font-size: 1.3rem;
+  font-size: var(--text-xl);
   font-weight: 700;
   color: var(--color-white);
 }
@@ -672,7 +685,7 @@ img {
 .poke-card-id {
   color: var(--color-yellow);
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: var(--text-sm);
 }
 
 .poke-card-stats {
@@ -690,7 +703,7 @@ img {
 
 .poke-stat dt {
   color: var(--color-text-faint);
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   letter-spacing: 0.03em;
   min-width: 32px;
@@ -699,7 +712,7 @@ img {
 .poke-stat dd {
   color: var(--color-white);
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: var(--text-base);
 }
 
 /* ===== Footer (base.html) ===== */
@@ -709,12 +722,12 @@ footer {
   margin: 0 auto;
   padding: 32px 48px;
   color: var(--color-text-faint);
-  font-size: 0.9rem;
+  font-size: var(--text-sm);
   text-align: center;
 }
 
 .legal-section{
-  font-family: var(--font-legal);
+  font-family: var(--font-mono);
   color: var(--color-text-faint);
 }
 
@@ -829,7 +842,7 @@ footer {
 }
 
 .browse-card-type-icon {
-  font-size: 1.75rem;
+  font-size: var(--text-2xl);
   line-height: 1;
   margin-bottom: 16px;
   transition: transform var(--transition-fast);
@@ -841,7 +854,7 @@ footer {
 
 .browse-card-name {
   font-family: var(--font-display);
-  font-size: 1.1rem;
+  font-size: var(--text-lg);
   font-weight: 700;
   color: var(--color-heading-dark);
   margin-bottom: 8px;
@@ -855,7 +868,7 @@ footer {
 .browse-text {
   color: var(--color-body-dark);
   font-family: var(--font-body);
-  font-size: 0.95rem;
+  font-size: var(--text-base);
   line-height: 1.5;
   transition: color var(--transition-fast);
 }
@@ -880,8 +893,8 @@ footer {
   display: block;
   color: var(--color-white);
   font-size: clamp(1.3rem, 3.5vw, 1.75rem);
-  font-family: var(--font-footer);
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-weight: 700;
   margin-bottom: 10px;
 }
 
@@ -893,7 +906,7 @@ footer {
 
 .EOP-table td {
   color: var(--color-text-faint);
-  font-family: var(--font-footer);
+  font-family: var(--font-body);
 }
 
 
@@ -912,7 +925,7 @@ footer {
 .type-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 
 /* Eyebrow on the light "Browse" section needs a darker orange for 4.5:1 */
-.browse .eyebrow { color: #b93a20; }
+.browse .eyebrow { color: var(--color-red-strong); }
 
 /* Footer entries that don't link anywhere yet */
 .EOP-soon { color: var(--color-text-faint); cursor: default; }
@@ -940,11 +953,39 @@ footer {
   .browse-grid { grid-template-columns: 1fr; }
 }
 
-/* Seven nav links + search: tighten up between the collapse breakpoint and wide desktops. */
-@media (min-width: 992px) and (max-width: 1399px) {
-  .site-navbar { padding-inline: 24px; gap: 4px; }
-  .site-navbar a.home, .site-navbar a.pokedex, .site-navbar a.types, .site-navbar a.region,
-  .site-navbar a.abilities, .site-navbar a.moves, .site-navbar a.competitive, .site-navbar a.items { padding: 8px 10px; }
+/* Bootstrap gives .navbar-collapse flex: 1 1 100%, which reserved ~265px of dead space beside the links and
+   squeezed the search box. On desktop it should only be as wide as its links. */
+@media (min-width: 992px) {
+  .site-navbar .navbar-collapse { flex: 0 1 auto; }
   .search-nav { min-width: 0; flex: 0 1 auto; }
-  .search-input-nav { width: 9rem; min-width: 0; }
+  .search-input-nav { width: clamp(8rem, 12vw, 13.75rem); min-width: 0; }
 }
+/* Narrow desktops: the eight links need every pixel; tighten them, and below 1150px drop the wordmark (the logo stays). */
+@media (min-width: 992px) and (max-width: 1279px) {
+  .site-navbar { padding-inline: 16px; gap: 2px; }
+  .site-navbar a.home, .site-navbar a.pokedex, .site-navbar a.types, .site-navbar a.region,
+  .site-navbar a.abilities, .site-navbar a.moves, .site-navbar a.competitive, .site-navbar a.items { padding: 8px 8px; }
+}
+@media (min-width: 992px) and (max-width: 1149px) {
+  .logo-text { display: none; }
+}
+
+/* ===== Flash messages (search errors etc.): shown under the header, not in the footer ===== */
+.messages {
+  list-style: none;
+  max-width: 1100px;
+  margin: 16px auto 0;
+  padding: 0 20px;
+}
+.messages li {
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-panel-border);
+  border-left-width: 4px;
+  background: var(--color-panel);
+  color: var(--color-white);
+}
+.messages li + li { margin-top: 8px; }
+.messages li.error { border-color: var(--color-red); background: rgba(226, 73, 44, 0.14); }
+.messages li.warning, .messages li.info { border-color: var(--color-yellow); background: rgba(244, 196, 48, 0.1); }
+.messages li.success { border-color: #4caf50; background: rgba(76, 175, 80, 0.12); }

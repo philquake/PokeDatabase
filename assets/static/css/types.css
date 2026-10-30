@@ -1,6 +1,6 @@
 /* Types pages: chart, matchup cards, large chip. */
-.chip-lg { font-size: 1.1rem; padding: 6px 22px; }
-.chip.muted, .muted { color: var(--color-text-muted); font-size: 0.85rem; }
+.chip-lg { font-size: var(--text-lg); padding: 6px 22px; }
+.chip.muted, .muted { color: var(--color-text-muted); font-size: var(--text-sm); }
 .inline-link { color: var(--color-yellow); text-decoration: underline; }
 a.chip { transition: filter var(--transition-fast); }
 a.chip:hover { filter: brightness(1.12); }
@@ -8,22 +8,22 @@ a.chip:focus-visible { outline: 2px solid var(--color-yellow); outline-offset: 2
 
 .matchup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .matchup-card { padding: 18px 20px 22px; }
-.matchup-title { font-family: var(--font-display); font-size: 1.1rem; margin: 0 0 4px; }
-.matchup-label { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-muted); margin: 16px 0 8px; }
-.matchup-note { margin-top: 12px; font-size: 0.85rem; }
+.matchup-title { font-family: var(--font-display); font-size: var(--text-lg); margin: 0 0 4px; }
+.matchup-label { font-size: var(--text-sm); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-muted); margin: 16px 0 8px; }
+.matchup-note { margin-top: 12px; font-size: var(--text-sm); }
 
-.chart-key { display: flex; flex-wrap: wrap; gap: 6px 20px; list-style: none; margin: 12px 0; padding: 0; font-size: 0.85rem; color: var(--color-text-muted); }
+.chart-key { display: flex; flex-wrap: wrap; gap: 6px 20px; list-style: none; margin: 12px 0; padding: 0; font-size: var(--text-sm); color: var(--color-text-muted); }
 .chart-key li { display: inline-flex; align-items: center; gap: 8px; }
 
 .chart-scroll { overflow-x: auto; border: 1px solid var(--color-panel-border); border-radius: var(--radius-md); background: var(--color-panel); }
 .chart-scroll:focus-visible { outline: 2px solid var(--color-yellow); outline-offset: 2px; }
 .type-chart { border-collapse: separate; border-spacing: 3px; margin: 8px; }
 .type-chart th { font-weight: 400; padding: 0; }
-.type-chart thead th .chip { display: block; min-width: 38px; padding: 3px 0; text-align: center; font-size: 0.62rem; letter-spacing: 0.3px; }
+.type-chart thead th .chip { display: block; min-width: 38px; padding: 3px 0; text-align: center; font-size: var(--text-xs); letter-spacing: 0.3px; }
 .type-chart tbody th { position: sticky; left: 0; z-index: 1; background: var(--color-panel); padding-right: 6px; text-align: left; }
-.type-chart tbody th .chip { display: block; min-width: 92px; text-align: center; font-size: 0.7rem; }
+.type-chart tbody th .chip { display: block; min-width: 92px; text-align: center; font-size: var(--text-xs); }
 
-.mult { width: 38px; height: 30px; text-align: center; border-radius: 6px; font-family: var(--font-display); font-weight: 800; font-size: 0.85rem; background: rgba(255, 255, 255, 0.04); }
+.mult { width: 38px; height: 30px; text-align: center; border-radius: 6px; font-family: var(--font-display); font-weight: 800; font-size: var(--text-sm); background: rgba(255, 255, 255, 0.04); }
 .chart-key .mult { display: inline-flex; align-items: center; justify-content: center; }
 .mult-weak { background: #4caf50; color: #0a2e0a; }
 .mult-resist { background: #c9a227; color: #2a2205; }

@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
+    <link href="{% static 'css/listing.css' %}" rel="stylesheet">
     <link href="{% static 'css/pokedex.css' %}" rel="stylesheet">
 {% endblock %}
 
@@ -9,11 +10,11 @@
 
 {% block content %}
 
-<section class="pokedex-page">
-  <header class="pokedex-header">
-    <p class="pokedex-eyebrow">The complete National Dex</p>
-    <h1 class="pokedex-title">The Pokédex</h1>
-    <p class="pokedex-count">{{ pokemon_data|length }} pokemons catalogued</p>
+<section class="pokedex-page list-page">
+  <header class="list-header">
+    <p class="list-eyebrow">The complete National Dex</p>
+    <h1 class="list-title">The Pokédex</h1>
+    <p class="list-subtitle">{{ pokemon_data|length }} Pokémon catalogued</p>
   </header>
 
   <div class="pokemon-grid">
@@ -24,7 +25,7 @@
           <img src="{{ pokemon.image }}" alt="{{ pokemon.name }}" name="pokemon-image" loading="lazy">
         </div>
         <div class="pokemon-body">
-          <h2 class="pokemon-name pokemon-name">{{ pokemon.name }}</h2>
+          <h2 class="pokemon-name">{{ pokemon.name }}</h2>
           <div class="pokemon-types">
             {% for t in pokemon.types %}
               <span class="type-chip type-{{ t|lower }}">{{ t }}</span>

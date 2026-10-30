@@ -55,7 +55,7 @@
 .abilities-title{
     display: block;
     font-family: var(--font-display);
-    font-size: 1.8rem;
+    font-size: var(--text-2xl);
     margin: 0;
     text-transform: capitalize;
     color: #fff;
@@ -143,31 +143,14 @@
 .pokemon-type {
     padding: 6px 18px;
     border-radius: 50px;
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
     font-family: var(--font-display);
 }
 
-.type-fire      { background: #f2703c; color: #fff; }
-.type-water     { background: #4a90d9; color: #fff; }
-.type-grass     { background: #6fbf5c; color: #123; }
-.type-electric  { background: #f5d130; }
-.type-flying    { background: #93a9c9; color: #12162b; }
-.type-psychic   { background: #e85f95; color: #fff; }
-.type-ice       { background: #7fd6d6; color: #123; }
-.type-dragon    { background: #6a5bd6; color: #fff; }
-.type-dark      { background: #4a4658; color: #fff; }
-.type-fairy     { background: #eda3d0; color: #4a1a33; }
-.type-normal    { background: #a3a15a; color: #fff; }
-.type-fighting  { background: #b5502f; color: #fff; }
-.type-poison    { background: #8b3fc4; color: #fff; }
-.type-ground    { background: #c9973f; color: #2a1a05; }
-.type-rock      { background: #a89361; color: #241d0b; }
-.type-bug       { background: #8fb03e; color: #12210a; }
-.type-ghost     { background: #7b5ec4; color: #fff; }
-.type-steel     { background: #8993a4; color: #12162b; }
+/* .type-* colours live in styles.css */
 
 /* --- Right Column: Stats & Nav --- */
 .pokemon-hero-right {
@@ -186,8 +169,8 @@
 }
 
 .stats-title {
-    font-size: 1.8rem;
-    font-family: var(--font-body);
+    font-size: var(--text-2xl);
+    font-family: var(--font-display);
     margin-bottom: 20px;
     text-decoration: underline;
     -webkit-text-decoration-color: var(--color-yellow, #ffcb05); /* safari still uses vendor prefix */
@@ -203,7 +186,7 @@
 
 .hex-chart-total {
     margin-top: 8px;
-    font-size: 0.78rem;
+    font-size: var(--text-xs);
     color: var(--hex-muted);
     text-align: right;
 }
@@ -218,8 +201,8 @@
 }
 
 .weakness-title {
-    font-size: 1.8rem;
-    font-family: var(--font-body);
+    font-size: var(--text-2xl);
+    font-family: var(--font-display);
     margin-bottom: 15px;
     text-decoration: underline;
     -webkit-text-decoration-color: var(--color-yellow, #ffcb05); /* safari still uses vendor prefix */
@@ -230,7 +213,7 @@
 .weakness-type {
     padding: .3px 9px .3px;
     border-radius: 50px;
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -249,7 +232,7 @@
     color: var(--hex-text);
     text-decoration: none;
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: var(--text-base);
     font-family: var(--font-body);
     transition: color 0.2s ease;
 }
@@ -303,7 +286,7 @@
   background: rgba(255, 255, 255, 0.05);
   color: var(--hex-muted);
   font-family: var(--font-body);
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -345,8 +328,8 @@
 }
 
 .detail-card h3 {
-  font-family: var(--font-body);
-  font-size: 1.1rem;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
   margin: 0 0 12px;
   color: var(--hex-text);
   text-decoration: underline;
@@ -357,7 +340,7 @@
 .detail-empty {
   color: var(--hex-muted);
   font-family: var(--font-body);
-  font-size: 0.9rem;
+  font-size: var(--text-sm);
 }
 
 .kv-list { margin: 0; }
@@ -367,7 +350,7 @@
   padding: 8px 0;
   border-bottom: 1px solid var(--hex-grid);
   font-family: var(--font-body);
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
 }
 .kv-list > div:last-child { border-bottom: none; }
 .kv-list dt { color: var(--hex-muted); }
@@ -410,11 +393,11 @@
 .evo-node img { width: 56px; height: 56px; object-fit: contain; }
 .evo-node span {
   font-family: var(--font-body);
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--hex-text);
   text-transform: capitalize;
 }
-.evo-arrow { color: var(--hex-muted); font-size: 1.2rem; }
+.evo-arrow { color: var(--hex-muted); font-size: var(--text-xl); }
 
 /* ---- Stats (list version, distinct from the hero hex chart) ---- */
 .stat-rows { list-style: none; margin: 0; padding: 0; }
@@ -427,14 +410,14 @@
 }
 .stat-label {
   font-family: var(--font-body);
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--hex-muted);
 }
 .stat-val {
   font-family: var(--font-body);
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   font-weight: 700;
   color: var(--hex-text);
   text-align: right;
@@ -465,7 +448,7 @@
   justify-content: space-between;
   margin-top: 6px;
   font-family: var(--font-body);
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--hex-muted);
 }
 .egg-chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -475,7 +458,7 @@
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--hex-grid);
   font-family: var(--font-body);
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   font-weight: 700;
   color: var(--hex-text);
 }
@@ -485,7 +468,7 @@
    ============================================================ */
 @media (max-width: 767px) {
   .pdex-cornav { padding: 8px 12px; }
-  .pdex-cornav-item { font-size: 0.78rem; padding: 6px 14px; }
+  .pdex-cornav-item { font-size: var(--text-xs); padding: 6px 14px; }
   .stat-row { grid-template-columns: 90px 34px 1fr; }
 }
 
@@ -514,14 +497,14 @@
   padding-top: 12px;
   border-top: 1px solid var(--hex-grid);
   font-family: var(--font-body);
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   line-height: 1.5;
   color: var(--hex-muted);
 }
 
 .iv-boilerplate {
   font-family: var(--font-body);
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   line-height: 1.6;
   color: var(--hex-text);
   margin: 0;
@@ -535,7 +518,7 @@
 /* ---- Type defenses diagram (Bulbapedia-style grid) ---- */
 .type-eff-note {
   font-family: var(--font-body);
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--hex-muted);
   margin: 0 0 14px;
 }
@@ -555,10 +538,9 @@
 .type-def-type {
   padding: 6px 2px;
   font-family: var(--font-display);
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   font-weight: 800;
   letter-spacing: 0.3px;
-  color: #fff;
 }
 
 .type-def-mult {
@@ -567,7 +549,7 @@
   align-items: center;
   justify-content: center;
   font-family: var(--font-display);
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   font-weight: 800;
   background: #fff;
 }
@@ -579,7 +561,7 @@
 
 @media (max-width: 767px) {
   .type-def-table { grid-template-columns: repeat(6, 1fr); }
-  .type-def-type { font-size: 0.7rem; }
+  .type-def-type { font-size: var(--text-xs); }
 }
 @media (max-width: 480px) {
   .type-def-table { grid-template-columns: repeat(4, 1fr); }
@@ -591,7 +573,7 @@
   gap: 12px;
   padding: 0 0 6px;
   font-family: var(--font-body);
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--hex-muted);
@@ -603,7 +585,7 @@
 
 .stat-range {
   font-family: var(--font-body);
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   color: var(--hex-muted);
   text-align: right;
   white-space: nowrap;
@@ -614,7 +596,7 @@
   .stat-row {
     grid-template-columns: 90px 34px 1fr 80px;
   }
-  .stat-range { font-size: 0.75rem; }
+  .stat-range { font-size: var(--text-xs); }
 }
 /* ============================================================
    MOVES & LOCATIONS — generation tabs, game tabs, move cards
@@ -643,14 +625,14 @@
 .gen-tab {
   padding: 7px 16px;
   border-radius: 50px;
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
   text-transform: uppercase;
 }
 
 .game-tab {
   padding: 5px 12px;
   border-radius: 8px;
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
   background: transparent;
   border-color: var(--hex-grid);
 }
@@ -673,13 +655,13 @@
   width: 100%;
   border-collapse: collapse;
   font-family: var(--font-body);
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
 }
 
 .location-table th {
   text-align: left;
   padding: 8px 10px;
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--hex-muted);
@@ -695,7 +677,7 @@
 .location-table tbody tr:hover { background: rgba(255, 255, 255, 0.04); }
 
 @media (max-width: 600px) {
-  .location-table th, .location-table td { padding: 6px 4px; font-size: 0.78rem; }
+  .location-table th, .location-table td { padding: 6px 4px; font-size: var(--text-xs); }
 }
 
 /* ============================================================
