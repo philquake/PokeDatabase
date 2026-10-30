@@ -21,7 +21,7 @@
     max-width: 1100px;
     width: 100%;
     align-items: center;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0) 70%);
+    background: radial-gradient(circle, rgba(var(--hero-glow, 255,255,255), 0.16) 0%, rgba(0,0,0,0) 70%);
     border-radius: 50%;
 }
 
@@ -485,7 +485,7 @@
    ============================================================ */
 @media (max-width: 767px) {
   .pdex-cornav { padding: 8px 12px; }
-  .pdex-cornav-item { font-size: 0.72rem; padding: 6px 14px; }
+  .pdex-cornav-item { font-size: 0.78rem; padding: 6px 14px; }
   .stat-row { grid-template-columns: 90px 34px 1fr; }
 }
 
@@ -555,7 +555,7 @@
 .type-def-type {
   padding: 6px 2px;
   font-family: var(--font-display);
-  font-size: 0.62rem;
+  font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.3px;
   color: #fff;
@@ -579,7 +579,7 @@
 
 @media (max-width: 767px) {
   .type-def-table { grid-template-columns: repeat(6, 1fr); }
-  .type-def-type { font-size: 0.55rem; }
+  .type-def-type { font-size: 0.7rem; }
 }
 @media (max-width: 480px) {
   .type-def-table { grid-template-columns: repeat(4, 1fr); }
@@ -591,7 +591,7 @@
   gap: 12px;
   padding: 0 0 6px;
   font-family: var(--font-body);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--hex-muted);
@@ -614,7 +614,7 @@
   .stat-row {
     grid-template-columns: 90px 34px 1fr 80px;
   }
-  .stat-range { font-size: 0.68rem; }
+  .stat-range { font-size: 0.75rem; }
 }
 /* ============================================================
    MOVES & LOCATIONS — generation tabs, game tabs, move cards
@@ -697,7 +697,7 @@
 }
 
 .moves-count {
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   color: var(--hex-muted);
   background: rgba(255, 255, 255, 0.07);
   border-radius: 50px;
@@ -729,7 +729,7 @@
 .location-table th {
   text-align: left;
   padding: 8px 10px;
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--hex-muted);
@@ -792,11 +792,6 @@
   .game-tab { padding-inline: 14px; }
 }
 
-.type-def-type { min-width: 0; }
-@media (max-width: 767px) {
-  .type-def-type { font-size: 0.62rem; }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .pokemon-hero-img,
   .evolution-stage,
@@ -812,3 +807,23 @@
   .evo-node:hover,
   .evo-node:focus-visible { transform: none; }
 }
+
+/* Hero glow tinted by primary type (class set in pokemon_detail.html) */
+.hero-glow-normal { --hero-glow: 168,167,122; }
+.hero-glow-fire { --hero-glow: 242,112,60; }
+.hero-glow-water { --hero-glow: 74,144,217; }
+.hero-glow-electric { --hero-glow: 245,209,48; }
+.hero-glow-grass { --hero-glow: 111,191,92; }
+.hero-glow-ice { --hero-glow: 127,214,214; }
+.hero-glow-fighting { --hero-glow: 181,80,47; }
+.hero-glow-poison { --hero-glow: 139,63,196; }
+.hero-glow-ground { --hero-glow: 201,151,63; }
+.hero-glow-flying { --hero-glow: 147,169,201; }
+.hero-glow-psychic { --hero-glow: 232,95,149; }
+.hero-glow-bug { --hero-glow: 143,176,62; }
+.hero-glow-rock { --hero-glow: 168,147,97; }
+.hero-glow-ghost { --hero-glow: 123,94,196; }
+.hero-glow-dragon { --hero-glow: 106,91,214; }
+.hero-glow-dark { --hero-glow: 112,87,70; }
+.hero-glow-steel { --hero-glow: 137,147,164; }
+.hero-glow-fairy { --hero-glow: 237,163,208; }
