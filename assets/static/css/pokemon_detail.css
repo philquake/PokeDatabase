@@ -668,9 +668,9 @@
   .pdex-cornav-item,
   .gen-tab,
   .game-tab,
-  .pager-card, .defense-cell { transition: none; }
+  .pager-card, .defense-cell .chip { transition: none; }
 
-  .pager-card:hover, .defense-cell:hover { transform: none; }
+  .pager-card:hover { transform: none; }
   .pokemon-hero-img:hover,
   .evolution-stage:hover,
   .evolution-stage:focus-visible,
@@ -702,82 +702,49 @@
 
 
 /* ============================================================
-   TYPE DEFENSES — damage this Pokémon takes from each type
+   TYPE DEFENSES — same cells as the Types page chart:
+   3-letter type chip over a colour box (colours: .mult-* in styles.css).
    ============================================================ */
-.defense-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 18px;
-  list-style: none;
-  margin: 0 0 14px;
-  padding: 0;
-  font-family: var(--font-body);
-  font-size: var(--text-xs);
-  color: var(--hex-muted);
-}
-.defense-legend li { display: inline-flex; align-items: center; gap: 4px; }
-.defense-legend li .defense-mult + .defense-mult { margin-left: 2px; }
-
 .defense-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 8px 4px;
 }
 
 .defense-cell {
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  gap: 6px;
-  min-height: 64px;
-  padding: 6px 4px 8px;
-  border: 1px solid transparent;
+  gap: 3px;
+  min-width: 0;
+  padding: 2px;
   border-radius: var(--radius-sm, 8px);
-  background: rgba(255, 255, 255, 0.03);
-  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
 }
-.defense-cell:hover { transform: translateY(-2px); border-color: rgba(244, 196, 48, 0.5); background: rgba(255, 255, 255, 0.07); }
 .defense-cell:focus-visible { outline: 2px solid var(--color-yellow, #ffcb05); outline-offset: 2px; }
+.defense-cell:hover .chip { filter: brightness(1.12); }
 
-/* The type name (colours come from styles.css .type-*) */
 .defense-cell .chip {
   display: block;
-  padding: 3px 2px;
+  padding: 3px 0;
   border-radius: 50px;
   text-align: center;
   font-family: var(--font-display);
   font-size: var(--text-xs);
   font-weight: 700;
-  line-height: 1.3;
+  letter-spacing: 0.3px;
+  transition: filter 0.2s ease;
 }
 
-/* Multiplier pill: the number is always there, so colour is never the only signal */
-.defense-mult {
-  display: inline-flex;
+.defense-cell .mult {
+  display: flex;
   align-items: center;
   justify-content: center;
-  align-self: center;
-  min-width: 2.75rem;
-  padding: 1px 8px;
-  border-radius: 50px;
-  font-family: var(--font-display);
-  font-size: var(--text-sm);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
+  width: auto;          /* fill the column; the shared .mult is a fixed 38px */
 }
-.defense-mult.mult-x4      { background: #b93a20; color: #fff; }       /* 5.7:1 */
-.defense-mult.mult-x2      { background: #f0644a; color: #14172b; }    /* 5.6:1 */
-.defense-mult.mult-half    { background: #5cc16a; color: #14172b; }    /* 7.8:1 */
-.defense-mult.mult-quarter { background: #1f7a45; color: #fff; }       /* 5.4:1 */
-.defense-mult.mult-immune  { background: #05060d; color: #fff; box-shadow: inset 0 0 0 1px var(--hex-grid); }
-.defense-mult.mult-x1      { background: none; color: var(--hex-muted); font-weight: 500; }
 
-/* Cells that matter get a tinted border so the grid scans at a glance */
-.defense-cell.mult-x4      { border-color: rgba(226, 73, 44, 0.6); background: rgba(226, 73, 44, 0.12); }
-.defense-cell.mult-x2      { border-color: rgba(240, 100, 74, 0.35); background: rgba(240, 100, 74, 0.07); }
-.defense-cell.mult-half,
-.defense-cell.mult-quarter { border-color: rgba(92, 193, 106, 0.3); background: rgba(92, 193, 106, 0.06); }
-.defense-cell.mult-immune  { border-color: var(--hex-grid); background: rgba(0, 0, 0, 0.25); }
+/* Phones and touch devices: bigger cells (>= 44px wide), 3 even rows */
+@media (max-width: 560px), (pointer: coarse) {
+  .defense-grid { grid-template-columns: repeat(6, 1fr); }
+}
 
 /* Hero "Weakness" chips: 4x is marked with a divider in the chip's own label colour. The chip never splits across lines. */
 .weakness-type { display: inline-flex; align-items: center; white-space: nowrap; }
@@ -788,9 +755,6 @@
   font-weight: 800;
 }
 
-@media (max-width: 560px) {
-  .defense-grid { grid-template-columns: repeat(3, 1fr); }
-}
 
 /* ============================================================
    PAGER — previous / next Pokémon

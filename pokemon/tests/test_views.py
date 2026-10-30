@@ -119,17 +119,41 @@ class PokemonDetailDefensesTest(PokemonDataTestCase):
         self.assertContains(response, f'href="{reverse("type_detail", args=["rock"])}"')
         self.assertContains(response, 'aria-label="Rock: takes 4\u00d7 damage"')
         self.assertContains(response, 'aria-label="Ground: takes 0\u00d7 damage"')
-        self.assertContains(response, "defense-cell mult-x4")
-        self.assertContains(response, "defense-cell mult-quarter")
-        self.assertContains(response, "defense-cell mult-immune")
+        self.assertContains(response, "defense-cell state-x4")
+        self.assertContains(response, "defense-cell state-quarter")
+        self.assertContains(response, "defense-cell state-immune")
 
-    def test_neutral_cells_say_1x_instead_of_being_blank(self):
+    def test_boxes_use_the_same_mult_classes_as_the_types_page_chart(self):
+        response, _ = self.cells("Charizard")
+
+        for state in ("x4", "x2", "half", "quarter", "immune"):
+            self.assertContains(response, f'class="mult mult-{state}"')
+
+    def test_boxes_show_the_bare_multiplier_and_neutral_cells_are_blank(self):
+        response, _ = self.cells("Charizard")
+        html = response.content.decode()
+
+        self.assertIn('class="mult mult-x4">4</span>', html)
+        self.assertIn('class="mult mult-quarter">\u00bc</span>', html)
+        self.assertIn('class="mult mult-immune">0</span>', html)
+        self.assertIn('class="mult mult-x1"></span>', html)       # Ice: 1x, no label
+        self.assertNotIn(">4\u00d7</span>\n          </a>", html)  # the multiplication sign lives only in aria-label
+
+    def test_neutral_cells_still_say_1x_to_screen_readers(self):
         response, _ = self.cells("Kangaskhan")
         self.assertContains(response, 'aria-label="Fire: takes 1\u00d7 damage"')
 
-    def test_full_type_names_are_shown_not_abbreviations(self):
+    def test_chips_use_the_three_letter_abbreviations_with_full_names_on_hover(self):
         response, _ = self.cells("Charizard")
-        self.assertContains(response, ">Fighting<")
+
+        self.assertContains(response, ">FIG</span>")
+        self.assertContains(response, 'title="Fighting"')
+
+    def test_there_is_no_key_under_the_defense_grid(self):
+        response, _ = self.cells("Charizard")
+
+        self.assertNotContains(response, "defense-legend")
+        self.assertNotContains(response, "Chart key")
 
     def test_hero_weakness_chips_mark_quad_weaknesses(self):
         response, _ = self.cells("Charizard")

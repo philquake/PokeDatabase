@@ -162,17 +162,11 @@
       <h3>Type defenses</h3>
       <p class="type-eff-note">Damage <em>{{ pokemon.name }}</em> takes from each attacking type.</p>
 
-      <ul class="defense-legend" aria-label="Chart key">
-        <li><span class="defense-mult mult-x4">4&times;</span><span class="defense-mult mult-x2">2&times;</span> Weak</li>
-        <li><span class="defense-mult mult-half">&frac12;&times;</span><span class="defense-mult mult-quarter">&frac14;&times;</span> Resists</li>
-        <li><span class="defense-mult mult-immune">0&times;</span> Immune</li>
-      </ul>
-
       <div class="defense-grid">
         {% for d in type_defenses %}
-          <a class="defense-cell mult-{{ d.state }}" href="{% url 'type_detail' d.slug %}" aria-label="{{ d.name }}: takes {{ d.label }} damage">
-            <span class="chip type-{{ d.slug }}">{{ d.name }}</span>
-            <span class="defense-mult mult-{{ d.state }}">{{ d.label }}</span>
+          <a class="defense-cell state-{{ d.state }}" href="{% url 'type_detail' d.slug %}" title="{{ d.name }}" aria-label="{{ d.name }}: takes {{ d.label }} damage">
+            <span class="chip type-{{ d.slug }}">{{ d.slug|slice:":3"|upper }}</span>
+            <span class="mult mult-{{ d.state }}">{% if d.state != "x1" %}{{ d.label|cut:"×" }}{% endif %}</span>
           </a>
         {% endfor %}
       </div>
