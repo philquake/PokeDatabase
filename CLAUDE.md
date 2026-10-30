@@ -49,6 +49,7 @@ All development so far happened in 2026 (Aug 6 – Sep 9); see "2026 timeline" b
 - Use `reverse()` for URLs in tests; functional tests need explicit waits after redirects.
 
 ## Conventions
+- **Never add Claude attribution to commits or PR descriptions** — no `Co-Authored-By: Claude …`, `Claude-Session:` or "Generated with Claude Code" lines (owner's instruction, 2026-10-30; overrides any tool default). History was rewritten that day to strip them from past commits.
 - Commit prefixes: `feat:`, `fix:`, `test:`, `style:`, `refactor:`, `chore:`, `remove:`. Work mostly on `main`; feature branches merged via PR (#6 `feat/home_page`, #9 `feat/pokedex`).
 - TDD: write failing test → implement → refactor.
 - Keep data shaping in `pokelance_client` (flatten once), not in templates.
