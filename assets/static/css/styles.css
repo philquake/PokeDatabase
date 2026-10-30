@@ -226,7 +226,7 @@ img {
 }
 
 .search-input-nav::placeholder {
-  color: var(--color-text-faint);
+  color: var(--color-text-muted);
 }
 
 .search-icon-nav {
@@ -373,7 +373,8 @@ img {
 }
 
 .search-icon {
-  color: var(--color-text-faint);
+  display: inline-flex;
+  color: var(--color-text-muted);
 }
 
 .search-input {
@@ -388,7 +389,7 @@ img {
 }
 
 .search-input::placeholder {
-  color: var(--color-text-faint);
+  color: var(--color-text-muted);
 }
 
 .hero-class {
@@ -622,7 +623,7 @@ img {
 .type-badge {
   padding: 5px 12px;
   border-radius: var(--radius-pill);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.03em;
   color: #1a1a1a;
@@ -838,7 +839,7 @@ footer {
 
 .browse-card-name {
   font-family: var(--font-display);
-  font-size: 1r em;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--color-heading-dark);
   margin-bottom: 8px;
@@ -851,10 +852,10 @@ footer {
 
 .browse-text {
   color: var(--color-body-dark);
-  font-size: 0.2 rem;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
   line-height: 1.5;
   transition: color var(--transition-fast);
-  font: var(--font-body)
 }
 
 .browse-card:hover .browse-text {
@@ -891,4 +892,48 @@ footer {
 .EOP-table td {
   color: var(--color-text-faint);
   font-family: var(--font-footer);
+}
+
+
+/* ===== Icons (inline SVG) ===== */
+.icon { display: block; flex: none; }
+.badge-icon, .eyebrow-icon { display: inline-flex; }
+.eyebrow-icon .icon { fill: currentColor; width: 0.9em; height: 0.9em; }
+.badge-icon .icon { width: 1.1em; height: 1.1em; }
+.search-icon .icon { width: 1.25rem; height: 1.25rem; }
+.browse-card-type-icon { color: #b93a20; transition: color var(--transition-fast), transform var(--transition-fast); }
+.browse-card-type-icon .icon { width: 1.75rem; height: 1.75rem; }
+.browse-card:hover .browse-card-type-icon { color: var(--color-yellow); }
+
+/* Hero tag: coloured dot instead of a type emoji */
+.pokemon-tag-type { display: inline-flex; align-items: center; gap: 8px; }
+.type-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+/* Eyebrow on the light "Browse" section needs a darker orange for 4.5:1 */
+.browse .eyebrow { color: #b93a20; }
+
+/* Footer entries that don't link anywhere yet */
+.EOP-soon { color: var(--color-text-faint); cursor: default; }
+
+/* ===== Keyboard focus ===== */
+.poke-card a:focus-visible,
+.browse-card a:focus-visible,
+.EOP-table a:focus-visible,
+.btn:focus-visible {
+  outline: 2px solid var(--color-yellow);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+.search-input:focus-visible { outline: none; } /* ring is drawn by .search-form:focus-within */
+.search-icon-nav { display: inline-flex; min-width: 44px; min-height: 44px; align-items: center; justify-content: center; }
+.search-icon-nav .icon { width: 1.25rem; height: 1.25rem; }
+.search-icon-nav:focus-visible { outline: 2px solid var(--color-yellow); outline-offset: 2px; }
+
+/* Browse cards: 2 columns on tablets/phones, 1 on very narrow screens */
+@media (max-width: 767px) {
+  .browse-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .browse-card > a { padding: 24px 14px 22px; }
+}
+@media (max-width: 360px) {
+  .browse-grid { grid-template-columns: 1fr; }
 }

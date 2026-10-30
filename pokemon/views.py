@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, render
-from pokemon.models import Pokemon
+from pokemon.models import Pokemon, PokemonMove
 from pokemon.services.data import get_pokemon_by_name, pokemon_to_dict
 from pokemon.services.pokelance_client import sync_pokemon_data, PokelanceAPIError
 from pokemon.services.versions import (
@@ -51,6 +51,12 @@ def home(request):
 
     context = {
         "pokemon_count": pokemon_count,
+        "move_count": PokemonMove.objects.values("name").distinct().count(),
+        "ability_count": len({
+            ability["name"]
+            for abilities in Pokemon.objects.values_list("abilities", flat=True)
+            for ability in abilities
+        }),
         "hero": hero,
         "featured_pokemon": featured_pokemon,
         "explore_pokemon": explore_pokemon,

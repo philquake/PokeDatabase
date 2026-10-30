@@ -10,7 +10,7 @@ from pokemon.templatetags.pokemon_extras import get_item
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.template import Context, Template
-from pokemon.models import Pokemon
+from pokemon.models import Pokemon, PokemonMove
 from pokemon.tests.helpers import PokemonDataTestCase
 
 
@@ -446,8 +446,8 @@ class HomeViewTest(PokemonDataTestCase):
 
         required_keys = [
             "pokemon_count",
-            # "move_count",
-            # "ability_count",   
+            "move_count",
+            "ability_count",
             "explore_pokemon",
             "hero",
             "featured_pokemon",
@@ -461,8 +461,8 @@ class HomeViewTest(PokemonDataTestCase):
         context = response.context
 
         self.assertIsInstance(context["pokemon_count"], int)
-        # self.assertIsInstance(context["move_count"], int)
-        # self.assertIsInstance(context["ability_count"], int)
+        self.assertIsInstance(context["move_count"], int)
+        self.assertIsInstance(context["ability_count"], int)
         self.assertIsInstance(context["explore_pokemon"], str)
         self.assertIsInstance(context["hero"], dict)
         self.assertIsInstance(context["featured_pokemon"], list)
@@ -477,6 +477,19 @@ class HomeViewTest(PokemonDataTestCase):
         self.assertTrue(context["explore_pokemon"])
         self.assertTrue(context["pokemon_count"])
         
+    def test_home_counts_distinct_moves_and_abilities(self):
+        response = self.client.get(reverse("home"))
+        context = response.context
+
+        expected_moves = len({m.name for m in PokemonMove.objects.all()})
+        expected_abilities = {
+            a["name"] for p in Pokemon.objects.all() for a in p.abilities
+        }
+
+        self.assertGreater(expected_moves, 0)
+        self.assertEqual(context["move_count"], expected_moves)
+        self.assertEqual(context["ability_count"], len(expected_abilities))
+
     def test_home_has_correct_number_of_featured_pokemon(self):
         response = self.client.get(reverse("home"))
         context = response.context
@@ -492,6 +505,12 @@ class HomeViewEmptyDatabaseTest(TestCase):
         response = self.client.get(reverse("home"))
         self.assertEqual(response.context["featured_pokemon"], [])
         self.assertIsNone(response.context["hero"])
+
+    def test_home_counts_are_zero_when_no_pokemon(self):
+        response = self.client.get(reverse("home"))
+        self.assertEqual(response.context["pokemon_count"], 0)
+        self.assertEqual(response.context["move_count"], 0)
+        self.assertEqual(response.context["ability_count"], 0)
 
 class SearchViewTest(PokemonDataTestCase):
 
