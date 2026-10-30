@@ -74,3 +74,43 @@ class TypeMatchupsTest(SimpleTestCase):
         for key in ("super", "not_very", "no_effect"):
             names = type_matchups("normal")["attack"][key]
             self.assertEqual(names, sorted(names, key=order.get))
+
+
+class DefenseCellsTest(SimpleTestCase):
+
+    def cells(self, *types):
+        from pokemon.services.types import defense_cells
+        return {c["slug"]: c for c in defense_cells(types)}
+
+    def test_one_cell_per_type_in_standard_order(self):
+        from pokemon.services.types import defense_cells
+        self.assertEqual([c["slug"] for c in defense_cells(["normal"])], TYPES)
+
+    def test_dual_type_stacks_multipliers(self):
+        cells = self.cells("fire", "flying")
+
+        self.assertEqual(cells["rock"]["multiplier"], 4)        # weak to rock twice over
+        self.assertEqual(cells["rock"]["label"], "4×")
+        self.assertEqual(cells["rock"]["state"], "x4")
+        self.assertEqual(cells["water"]["multiplier"], 2)
+        self.assertEqual(cells["grass"]["multiplier"], 0.25)    # resisted by both types
+        self.assertEqual(cells["grass"]["label"], "¼×")
+        self.assertEqual(cells["grass"]["state"], "quarter")
+        self.assertEqual(cells["fire"]["multiplier"], 0.5)
+        self.assertEqual(cells["fire"]["state"], "half")
+        self.assertEqual(cells["ground"]["multiplier"], 0)      # flying is immune to ground
+        self.assertEqual(cells["ground"]["state"], "immune")
+        self.assertEqual(cells["ice"]["multiplier"], 1)         # 1/2 x 2
+        self.assertEqual(cells["ice"]["state"], "x1")
+        self.assertEqual(cells["ice"]["label"], "1×")
+
+    def test_single_type(self):
+        cells = self.cells("normal")
+        self.assertEqual(cells["fighting"]["multiplier"], 2)
+        self.assertEqual(cells["ghost"]["multiplier"], 0)
+        self.assertEqual(cells["fire"]["multiplier"], 1)
+
+    def test_names_are_title_case_and_unknown_types_are_ignored(self):
+        cells = self.cells("Fire", "Shadow")
+        self.assertEqual(cells["water"]["name"], "Water")
+        self.assertEqual(cells["water"]["multiplier"], 2)

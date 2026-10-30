@@ -10,7 +10,7 @@ from django.http import Http404
 from django.shortcuts import redirect, render
 from pokemon.models import GENERATION_REGIONS, Ability, Item, Move, Pokemon, PokemonMove
 from pokemon.services.data import get_move_info, get_pokemon_by_name, pokemon_to_dict
-from pokemon.services.types import TYPES, effectiveness, type_matchups
+from pokemon.services.types import TYPES, defense_cells, effectiveness, type_matchups
 from pokemon.services.pokelance_client import sync_pokemon_data, PokelanceAPIError
 from pokemon.services.versions import (
     GENERATION_DEX_RANGES,
@@ -91,6 +91,7 @@ def pokemon_detail(request, name):
 
     pokemon = pokemon_to_dict(current, include_related=True)
     learnt_hm, learnt_tm = group_hm_tm_moves(pokemon["moves"])
+    type_defenses = defense_cells(pokemon["types"])
 
     return render(request, 'pokemon_detail.html', {
         "pokemon": pokemon,
@@ -98,6 +99,7 @@ def pokemon_detail(request, name):
         "previous": pokemon_to_dict(previous) if previous else None,
         "evolution_chain": evolution_chain,
         "type_defense_order": TYPE_DEFENSE_ORDER,
+        "type_defenses": type_defenses,
         "stat_ranges": calculate_stat_range(pokemon["base_stats"]),
         "learnt_hm": learnt_hm,
         "learnt_tm": learnt_tm,

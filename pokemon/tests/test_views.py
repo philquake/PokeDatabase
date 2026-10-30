@@ -99,6 +99,77 @@ class PokemonDetailLazyMovesTest(PokemonDataTestCase):
         self.assertNotContains(response, f'data-src="{visible}"')
 
 
+class PokemonDetailDefensesTest(PokemonDataTestCase):
+
+    def cells(self, name):
+        response = self.client.get(reverse("pokemon_detail", args=[name]))
+        return response, {c["slug"]: c for c in response.context["type_defenses"]}
+
+    def test_context_has_real_multipliers_including_quad_and_quarter(self):
+        _, cells = self.cells("Charizard")
+
+        self.assertEqual(len(cells), 18)
+        self.assertEqual(cells["rock"]["multiplier"], 4)
+        self.assertEqual(cells["grass"]["multiplier"], 0.25)
+        self.assertEqual(cells["ground"]["multiplier"], 0)
+
+    def test_grid_cells_link_to_type_pages_and_name_the_damage(self):
+        response, _ = self.cells("Charizard")
+
+        self.assertContains(response, f'href="{reverse("type_detail", args=["rock"])}"')
+        self.assertContains(response, 'aria-label="Rock: takes 4\u00d7 damage"')
+        self.assertContains(response, 'aria-label="Ground: takes 0\u00d7 damage"')
+        self.assertContains(response, "defense-cell mult-x4")
+        self.assertContains(response, "defense-cell mult-quarter")
+        self.assertContains(response, "defense-cell mult-immune")
+
+    def test_neutral_cells_say_1x_instead_of_being_blank(self):
+        response, _ = self.cells("Kangaskhan")
+        self.assertContains(response, 'aria-label="Fire: takes 1\u00d7 damage"')
+
+    def test_full_type_names_are_shown_not_abbreviations(self):
+        response, _ = self.cells("Charizard")
+        self.assertContains(response, ">Fighting<")
+
+    def test_hero_weakness_chips_mark_quad_weaknesses(self):
+        response, _ = self.cells("Charizard")
+        self.assertContains(response, "weakness-quad")
+
+
+class PokemonDetailPagerTest(PokemonDataTestCase):
+
+    def get(self, name):
+        return self.client.get(reverse("pokemon_detail", args=[name]))
+
+    def test_both_links_show_image_number_and_name(self):
+        response = self.get("Charmeleon")
+
+        self.assertContains(response, 'rel="prev"')
+        self.assertContains(response, 'rel="next"')
+        self.assertContains(response, "#004")
+        self.assertContains(response, "Charmander")
+        self.assertContains(response, "#006")
+        self.assertContains(response, "Charizard")
+        self.assertContains(response, 'aria-label="Previous and next Pok')
+
+    def test_existing_class_hooks_are_kept(self):
+        response = self.get("Charmeleon")
+        self.assertContains(response, 'class="pager-card previous"')
+        self.assertContains(response, 'class="pager-card next"')
+
+    def test_first_pokemon_has_only_a_next_link(self):
+        response = self.get("Bulbasaur")
+
+        self.assertNotContains(response, 'rel="prev"')
+        self.assertContains(response, 'rel="next"')
+
+    def test_last_pokemon_has_only_a_previous_link(self):
+        response = self.get("Kangaskhan")
+
+        self.assertContains(response, 'rel="prev"')
+        self.assertNotContains(response, 'rel="next"')
+
+
 class PokemonDetailTest(PokemonDataTestCase):
 
     def test_pokemon_detail_url_resolves_to_correct_view(self):

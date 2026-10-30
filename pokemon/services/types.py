@@ -58,3 +58,31 @@ def type_matchups(type_name):
         "attack": {"super": attacking(2), "not_very": attacking(0.5), "no_effect": attacking(0)},
         "defend": {"weak": defending(2), "resist": defending(0.5), "immune": defending(0)},
     }
+
+
+# Defence-chart cell states by damage multiplier (a Pokémon has at most two types: 0, 1/4 ... 4).
+_DEFENSE_STATES = {4: "x4", 2: "x2", 1: "x1", 0.5: "half", 0.25: "quarter", 0: "immune"}
+_DEFENSE_LABELS = {4: "4×", 2: "2×", 1: "1×", 0.5: "½×", 0.25: "¼×", 0: "0×"}
+
+
+def defense_cells(defending_types):
+    """
+    One cell per attacking type (standard order) for a Pokémon with these type(s):
+    {"slug", "name", "multiplier", "label", "state"}. Multipliers stack across both
+    types, so a Fire/Flying Pokémon takes 4x from Rock and 1/4x from Grass. Names that
+    aren't real types are ignored.
+    """
+    defending = [t.lower() for t in defending_types if t.lower() in TYPE_CHART]
+    cells = []
+    for attacker in TYPES:
+        multiplier = 1
+        for defender in defending:
+            multiplier *= effectiveness(attacker, defender)
+        cells.append({
+            "slug": attacker,
+            "name": attacker.title(),
+            "multiplier": multiplier,
+            "label": _DEFENSE_LABELS[multiplier],
+            "state": _DEFENSE_STATES[multiplier],
+        })
+    return cells

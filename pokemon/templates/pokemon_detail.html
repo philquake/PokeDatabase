@@ -55,9 +55,9 @@
             </div>
             <div class="weakness">
               <h2 class="weakness-title">Weakness</h2>
-              {% for w in pokemon.type_effectiveness.weaknesses %}
-                <span class="weakness-type type-{{ w|lower }}">{{ w|upper }}</span>
-              {% endfor %}
+              {% for d in type_defenses %}{% if d.multiplier > 1 %}
+                <span class="weakness-type type-{{ d.slug }}">{{ d.slug|upper }}{% if d.multiplier == 4 %} <span class="weakness-quad" title="Takes 4&times; damage">4&times;</span>{% endif %}</span>
+              {% endif %}{% endfor %}
             </div>
           </div>
     </article>
@@ -160,25 +160,20 @@
 
       <div class="detail-card overview-weakness">
       <h3>Type defenses</h3>
-      <p class="type-eff-note">The effectiveness of each type on <em>{{ pokemon.name }}</em>.</p>
+      <p class="type-eff-note">Damage <em>{{ pokemon.name }}</em> takes from each attacking type.</p>
 
-      <div class="type-def-table">
-        {% for name, abbr in type_defense_order %}
-          {% with lname=name|lower %}
-          <div class="type-def-col" title="{{ name }}">
-            <div class="type-def-type type-{{ lname }}">{{ abbr }}</div>
-            <div class="type-def-mult
-              {% if lname in pokemon.type_effectiveness.weaknesses %}mult-weak
-              {% elif lname in pokemon.type_effectiveness.resistances %}mult-resist
-              {% elif lname in pokemon.type_effectiveness.immunities %}mult-immune
-              {% else %}mult-neutral{% endif %}">
-              {% if lname in pokemon.type_effectiveness.weaknesses %}2
-              {% elif lname in pokemon.type_effectiveness.resistances %}&frac12;
-              {% elif lname in pokemon.type_effectiveness.immunities %}0
-              {% else %}&nbsp;{% endif %}
-            </div>
-          </div>
-          {% endwith %}
+      <ul class="defense-legend" aria-label="Chart key">
+        <li><span class="defense-mult mult-x4">4&times;</span><span class="defense-mult mult-x2">2&times;</span> Weak</li>
+        <li><span class="defense-mult mult-half">&frac12;&times;</span><span class="defense-mult mult-quarter">&frac14;&times;</span> Resists</li>
+        <li><span class="defense-mult mult-immune">0&times;</span> Immune</li>
+      </ul>
+
+      <div class="defense-grid">
+        {% for d in type_defenses %}
+          <a class="defense-cell mult-{{ d.state }}" href="{% url 'type_detail' d.slug %}" aria-label="{{ d.name }}: takes {{ d.label }} damage">
+            <span class="chip type-{{ d.slug }}">{{ d.name }}</span>
+            <span class="defense-mult mult-{{ d.state }}">{{ d.label }}</span>
+          </a>
         {% endfor %}
       </div>
     </div>
@@ -246,16 +241,28 @@
 
 </div>
 
-<div class="pokemon-navigation">
+<nav class="pokemon-navigation" aria-label="Previous and next Pokémon">
   {% if previous %}
-    <a href="{% url 'pokemon_detail' previous.name %}" class="previous">&larr; Previous - {{previous.name}}</a>
+    <a href="{% url 'pokemon_detail' previous.name %}" class="pager-card previous" rel="prev">
+      <img src="{{ previous.image }}" alt="" width="64" height="64" loading="lazy">
+      <span class="pager-text">
+        <span class="pager-dir">&larr; Previous</span>
+        <span class="pager-name">{{ previous.name }}</span>
+        <span class="pager-num">#{{ previous.pokedex_number|stringformat:"03d" }}</span>
+      </span>
+    </a>
   {% endif %}
 
   {% if next %}
-    <a href="{% url 'pokemon_detail' next.name %}" class="next">Next - {{next.name}} &rarr;</a>
+    <a href="{% url 'pokemon_detail' next.name %}" class="pager-card next" rel="next">
+      <span class="pager-text">
+        <span class="pager-dir">Next &rarr;</span>
+        <span class="pager-name">{{ next.name }}</span>
+        <span class="pager-num">#{{ next.pokedex_number|stringformat:"03d" }}</span>
+      </span>
+      <img src="{{ next.image }}" alt="" width="64" height="64" loading="lazy">
+    </a>
   {% endif %}
-</div>
-
-
+</nav>
 
 {% endblock %}
