@@ -8,7 +8,7 @@ from pathlib import Path
 
 from django.db import transaction
 
-from pokemon.models import Move, Pokemon, PokemonEncounter, PokemonMove
+from pokemon.models import Ability, Item, Move, Pokemon, PokemonEncounter, PokemonMove
 
 FIXTURE_PATH = Path(__file__).resolve().parent.parent.parent / "assets" / "static" / "fixtures" / "pokemon.json"
 
@@ -20,6 +20,8 @@ POKEMON_FIELDS = [
 ]
 MOVE_FIELDS = ["name", "version", "level_learnt", "method"]
 MOVE_INFO_FIELDS = ["name", "type", "damage_class", "power", "accuracy", "pp", "generation", "effect"]
+ABILITY_FIELDS = ["name", "generation", "effect"]
+ITEM_FIELDS = ["name", "category", "cost", "effect", "sprite"]
 ENCOUNTER_FIELDS = ["location", "version", "method", "chance", "min_level", "max_level"]
 
 
@@ -97,4 +99,49 @@ def import_moves_json(path):
         entries = json.load(f)
     for entry in entries:
         save_move_entry(entry)
+    return len(entries)
+
+
+def ability_to_dict(ability):
+    return {field: getattr(ability, field) for field in ABILITY_FIELDS}
+
+
+def save_ability_entry(entry):
+    """Create or update an Ability by name; only the keys present in `entry` are written."""
+    defaults = {k: entry[k] for k in ABILITY_FIELDS if k in entry and k != "name"}
+    ability, _ = Ability.objects.update_or_create(name=entry["name"], defaults=defaults)
+    return ability
+
+
+def get_ability_info(names):
+    """{name: stats dict} for whichever of `names` have effect text stored."""
+    return {a.name: ability_to_dict(a) for a in Ability.objects.filter(name__in=set(names))}
+
+
+def import_abilities_json(path):
+    """Load (or refresh) ability effect text from a JSON list of ability dicts."""
+    with open(path, "r", encoding="utf-8") as f:
+        entries = json.load(f)
+    for entry in entries:
+        save_ability_entry(entry)
+    return len(entries)
+
+
+def item_to_dict(item):
+    return {field: getattr(item, field) for field in ITEM_FIELDS}
+
+
+def save_item_entry(entry):
+    """Create or update an Item by name; only the keys present in `entry` are written."""
+    defaults = {k: entry[k] for k in ITEM_FIELDS if k in entry and k != "name"}
+    item, _ = Item.objects.update_or_create(name=entry["name"], defaults=defaults)
+    return item
+
+
+def import_items_json(path):
+    """Load (or refresh) items from a JSON list of item dicts."""
+    with open(path, "r", encoding="utf-8") as f:
+        entries = json.load(f)
+    for entry in entries:
+        save_item_entry(entry)
     return len(entries)

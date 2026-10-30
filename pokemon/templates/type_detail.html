@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+    <link href="{% static 'css/listing.css' %}" rel="stylesheet">
+    <link href="{% static 'css/types.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block title %}{{ type_name }} type{% endblock %}
+
+{% block content %}
+<section class="list-page">
+  <p class="list-breadcrumb"><a href="{% url 'types' %}">&larr; All types</a></p>
+  <header class="list-header">
+    <p class="list-eyebrow">Type</p>
+    <h1 class="list-title"><span class="chip chip-lg type-{{ type_slug }}">{{ type_name }}</span></h1>
+    <p class="list-subtitle">
+      {{ pokemon|length }} Pokémon &middot;
+      <a class="inline-link" href="{% url 'moves' %}?type={{ type_name }}">{{ move_count }} move{{ move_count|pluralize }}</a>
+    </p>
+  </header>
+
+  <div class="matchup-grid">
+    <div class="list-card matchup-card">
+      <h2 class="matchup-title">{{ type_name }} moves are&hellip;</h2>
+      <h3 class="matchup-label">Super effective against</h3>
+      {% include "partials/type_chips.html" with slugs=matchups.attack.super %}
+      <h3 class="matchup-label">Not very effective against</h3>
+      {% include "partials/type_chips.html" with slugs=matchups.attack.not_very %}
+      <h3 class="matchup-label">No effect on</h3>
+      {% include "partials/type_chips.html" with slugs=matchups.attack.no_effect %}
+    </div>
+    <div class="list-card matchup-card">
+      <h2 class="matchup-title">{{ type_name }} Pokémon are&hellip;</h2>
+      <h3 class="matchup-label">Weak to</h3>
+      {% include "partials/type_chips.html" with slugs=matchups.defend.weak %}
+      <h3 class="matchup-label">Resistant to</h3>
+      {% include "partials/type_chips.html" with slugs=matchups.defend.resist %}
+      <h3 class="matchup-label">Immune to</h3>
+      {% include "partials/type_chips.html" with slugs=matchups.defend.immune %}
+    </div>
+  </div>
+  <p class="list-subtitle matchup-note">Single-type matchups. A dual-type Pokémon multiplies the effect of each of its types.</p>
+
+  <h2 class="list-section-title">{{ type_name }}-type Pokémon</h2>
+  {% if pokemon %}
+    <div class="mon-grid">
+      {% for p in pokemon %}{% include "partials/mon_card.html" %}{% endfor %}
+    </div>
+  {% else %}
+    <div class="list-empty"><h2>No {{ type_name }}-type Pokémon yet</h2><p>None of the Pokémon stored so far have this type.</p></div>
+  {% endif %}
+</section>
+{% endblock %}

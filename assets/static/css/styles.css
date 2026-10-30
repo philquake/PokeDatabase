@@ -161,14 +161,15 @@ img {
   color: var(--color-white);
 }
 
-/* nav links (Home / Pokédex / Types / Region / Abilities / Moves / Competitive) */
+/* nav links (Home / Pokédex / Types / Region / Abilities / Moves / Competitive / Items) */
 .site-navbar a.home,
 .site-navbar a.pokedex,
 .site-navbar a.types,
 .site-navbar a.region,
 .site-navbar a.abilities,
 .site-navbar a.moves,
-.site-navbar a.competitive {
+.site-navbar a.competitive,
+.site-navbar a.items {
   padding: 8px 14px;
   border-radius: var(--radius-sm);
   color: var(--color-text-muted);
@@ -183,7 +184,8 @@ img {
 .site-navbar a.region:hover,
 .site-navbar a.abilities:hover,
 .site-navbar a.moves:hover,
-.site-navbar a.competitive:hover {
+.site-navbar a.competitive:hover,
+.site-navbar a.items:hover {
   color: var(--color-white);
   background: rgba(255, 255, 255, 0.05);
 }
@@ -936,4 +938,13 @@ footer {
 }
 @media (max-width: 360px) {
   .browse-grid { grid-template-columns: 1fr; }
+}
+
+/* Seven nav links + search: tighten up between the collapse breakpoint and wide desktops. */
+@media (min-width: 992px) and (max-width: 1399px) {
+  .site-navbar { padding-inline: 24px; gap: 4px; }
+  .site-navbar a.home, .site-navbar a.pokedex, .site-navbar a.types, .site-navbar a.region,
+  .site-navbar a.abilities, .site-navbar a.moves, .site-navbar a.competitive, .site-navbar a.items { padding: 8px 10px; }
+  .search-nav { min-width: 0; flex: 0 1 auto; }
+  .search-input-nav { width: 9rem; min-width: 0; }
 }

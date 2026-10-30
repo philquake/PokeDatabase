@@ -31,15 +31,17 @@
           <a href="{% url 'pokedex' %}"
           class=" pokedex {% if request.resolver_match.url_name == 'pokedex' %}active{% endif %}">Pokédex</a>
           <a href="{% url 'types' %}"
-          class=" types {% if request.resolver_match.url_name == 'types' %}active{% endif %}">Types</a>
+          class=" types {% if request.resolver_match.url_name == 'types' or request.resolver_match.url_name == 'type_detail' %}active{% endif %}">Types</a>
           <a href="{% url 'region' %}"
-          class=" region {% if request.resolver_match.url_name == 'region' %}active{% endif %}">Region</a>
+          class=" region {% if request.resolver_match.url_name == 'region' or request.resolver_match.url_name == 'region_detail' %}active{% endif %}">Region</a>
           <a href="{% url 'abilities' %}"
-          class="abilities {% if request.resolver_match.url_name == 'abilities' %}active{% endif %}">Abilities</a>
+          class="abilities {% if request.resolver_match.url_name == 'abilities' or request.resolver_match.url_name == 'ability_detail' %}active{% endif %}">Abilities</a>
           <a href="{% url 'moves' %}"
           class="moves {% if request.resolver_match.url_name == 'moves' %}active{% endif %}">Moves</a>
           <a href="{% url 'competitive' %}"
           class="competitive {% if request.resolver_match.url_name == 'competitive' %}active{% endif %}">Competitive</a>
+          <a href="{% url 'items' %}"
+          class="items {% if request.resolver_match.url_name == 'items' %}active{% endif %}">Items</a>
       </div>
        <div class = "search-nav">
           <form class="search-form-nav" method="GET" action="{% url 'search' %}">

@@ -5,15 +5,19 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.paginator import Paginator
-from django.db.models import F
-from django.http import Http404, HttpResponse
+from django.db.models import Count, F
+from django.http import Http404
 from django.shortcuts import redirect, render
-from pokemon.models import Move, Pokemon, PokemonMove
+from pokemon.models import GENERATION_REGIONS, Ability, Item, Move, Pokemon, PokemonMove
 from pokemon.services.data import get_move_info, get_pokemon_by_name, pokemon_to_dict
+from pokemon.services.types import TYPES, effectiveness, type_matchups
 from pokemon.services.pokelance_client import sync_pokemon_data, PokelanceAPIError
 from pokemon.services.versions import (
+    GENERATION_DEX_RANGES,
+    GENERATION_GAMES,
     GROWTH_RATE_EXP_100,
     HM_NAMES,
+    ROMAN,
     build_location_generations,
     build_move_generations,
 )
@@ -153,18 +157,192 @@ def search(request):
     return redirect("home")
     
 def types(request):
-    return HttpResponse("Types page is not implemented yet.")
+    """All 18 types with Pokémon / move counts, plus the full effectiveness chart."""
+    pokemon_counts = {}
+    for type_list in Pokemon.objects.values_list("types", flat=True):
+        for type_name in type_list:
+            pokemon_counts[type_name.lower()] = pokemon_counts.get(type_name.lower(), 0) + 1
+    move_counts = {
+        row["type"].lower(): row["n"] for row in Move.objects.values("type").annotate(n=Count("id"))
+    }
+
+    tiles = [
+        {
+            "slug": slug, "name": slug.title(),
+            "pokemon_count": pokemon_counts.get(slug, 0),
+            "move_count": move_counts.get(slug, 0),
+        }
+        for slug in TYPES
+    ]
+    labels = {2: "2", 0.5: "\u00bd", 0: "0", 1: ""}
+    chart = [
+        {
+            "slug": attacker, "name": attacker.title(),
+            "cells": [
+                {
+                    "slug": defender, "multiplier": effectiveness(attacker, defender),
+                    "label": labels[effectiveness(attacker, defender)],
+                }
+                for defender in TYPES
+            ],
+        }
+        for attacker in TYPES
+    ]
+    return render(request, "types.html", {
+        "type_tiles": tiles, "chart": chart, "defenders": [{"slug": t, "abbr": t[:3].upper()} for t in TYPES],
+    })
+
+
+def type_detail(request, name):
+    """One type: what it hits / is hit by, the Pokémon with that type, and how many moves it has."""
+    slug = name.strip().lower()
+    if slug not in TYPES:
+        raise Http404(f"No type '{name}'")
+
+    pokemon = [
+        row for row in Pokemon.objects.values("pokedex_number", "name", "image", "types")
+        if slug in (t.lower() for t in row["types"])
+    ]
+    return render(request, "type_detail.html", {
+        "type_slug": slug,
+        "type_name": slug.title(),
+        "matchups": type_matchups(slug),
+        "pokemon": pokemon,
+        "move_count": Move.objects.filter(type=slug.title()).count(),
+    })
 
 def pokedex(request):
     pokemon_data = Pokemon.objects.all()
 
     return render(request, "pokedex.html", {"pokemon_data": pokemon_data})
 
+def _region_info(generation):
+    low, high = GENERATION_DEX_RANGES[generation]
+    return {
+        "name": GENERATION_REGIONS[generation],
+        "slug": GENERATION_REGIONS[generation].lower(),
+        "generation": generation,
+        "roman": ROMAN[generation],
+        "games": GENERATION_GAMES[generation],
+        "dex_range": f"#{low}\u2013#{high}",
+    }
+
+
 def region(request):
-    return HttpResponse("Region page is not implemented yet.")
+    """The nine regions, each with how many of its Pokémon are stored."""
+    counts = dict(Pokemon.objects.values_list("region").annotate(n=Count("id")))
+    tiles = [
+        {**_region_info(generation), "pokemon_count": counts.get(name, 0)}
+        for generation, name in GENERATION_REGIONS.items()
+    ]
+    return render(request, "regions.html", {"region_tiles": tiles})
+
+
+def region_detail(request, name):
+    """One region: its games, dex range and every stored Pokémon from it."""
+    generation = next(
+        (g for g, region_name in GENERATION_REGIONS.items() if region_name.lower() == name.strip().lower()),
+        None,
+    )
+    if generation is None:
+        raise Http404(f"No region '{name}'")
+
+    info = _region_info(generation)
+    pokemon = list(
+        Pokemon.objects.filter(region=info["name"]).values("pokedex_number", "name", "image", "types")
+    )
+    neighbours = [
+        _region_info(g) for g in (generation - 1, generation + 1) if g in GENERATION_REGIONS
+    ]
+    return render(request, "region_detail.html", {
+        "region": info, "pokemon": pokemon, "neighbours": neighbours,
+        "previous_region": next((n for n in neighbours if n["generation"] < generation), None),
+        "next_region": next((n for n in neighbours if n["generation"] > generation), None),
+    })
+
+def _slugify(name):
+    return name.lower().replace(" ", "-")
+
+
+def _ability_holders():
+    """{ability name: [(pokemon row, is_hidden), ...]} over every stored Pokémon, in dex order."""
+    holders = {}
+    for row in Pokemon.objects.values("pokedex_number", "name", "image", "types", "abilities"):
+        for ability in row["abilities"]:
+            holders.setdefault(ability["name"], []).append((row, ability["hidden"]))
+    return holders
+
+
+ABILITY_SORT_FIELDS = {"name": "Name", "pokemon": "Pok\u00e9mon"}
+
 
 def abilities(request):
-    return HttpResponse("Abilities page is not implemented yet.")
+    """Every ability with its effect text and how many stored Pokémon can have it."""
+    holders = _ability_holders()
+    info = {a.name: a for a in Ability.objects.all()}
+
+    rows = [
+        {
+            "name": name,
+            "slug": _slugify(name),
+            "pokemon_count": len(holders.get(name, [])),
+            "effect": info[name].effect if name in info else "",
+            "generation": info[name].generation if name in info else None,
+        }
+        for name in sorted(set(holders) | set(info))
+    ]
+    stored_count = len(rows)
+
+    q = request.GET.get("q", "").strip()
+    sort = request.GET.get("sort", "")
+    direction = "desc" if request.GET.get("dir") == "desc" else "asc"
+    if q:
+        rows = [r for r in rows if q.lower() in r["name"].lower()]
+    if sort == "pokemon":
+        rows.sort(key=lambda r: r["pokemon_count"], reverse=direction == "desc")  # stable: ties stay by name
+    else:
+        sort, direction = "", "asc"
+
+    filters = {"q": q} if q else {}
+    columns = [
+        {
+            "key": key, "label": label,
+            "query": urlencode({**filters, "sort": key, "dir": "desc" if sort == key and direction == "asc" else "asc"}),
+            "aria_sort": ("ascending" if direction == "asc" else "descending") if sort == key else "none",
+        }
+        for key, label in ABILITY_SORT_FIELDS.items()
+    ]
+    page_obj = Paginator(rows, 50).get_page(request.GET.get("page"))
+    return render(request, "abilities.html", {
+        "page_obj": page_obj,
+        "total": len(rows),
+        "stored_count": stored_count,
+        "q": q,
+        "columns": columns,
+        "selected_sort": sort,
+        "query": urlencode({**filters, **({"sort": sort, "dir": direction} if sort else {})}),
+        "filtering": bool(q),
+        "effects_missing": bool(stored_count) and not info,
+    })
+
+
+def ability_detail(request, slug):
+    """One ability: its effect and the Pokémon that have it, regular and hidden."""
+    name = slug.strip().replace("-", " ").title()
+    holders = _ability_holders().get(name, [])
+    ability = Ability.objects.filter(name=name).first()
+    if not holders and ability is None:
+        raise Http404(f"No ability '{slug}'")
+
+    return render(request, "ability_detail.html", {
+        "ability": {
+            "name": name,
+            "effect": ability.effect if ability else "",
+            "generation": ability.generation if ability else None,
+        },
+        "regular_pokemon": [row for row, hidden in holders if not hidden],
+        "hidden_pokemon": [row for row, hidden in holders if hidden],
+    })
 
 def pokemon_moves_fragment(request, name, version):
     """
@@ -252,11 +430,96 @@ def moves(request):
     })
 
 
+COMPETITIVE_STATS = [
+    ("total", "Total", None),
+    ("hp", "HP", "HP"),
+    ("attack", "Attack", "Attack"),
+    ("defense", "Defense", "Defense"),
+    ("special-attack", "Sp. Atk", "Special Attack"),
+    ("special-defense", "Sp. Def", "Special Defense"),
+    ("speed", "Speed", "Speed"),
+]
+
+
 def competitive(request):
-    return HttpResponse("Competitive Analysis page is not implemented yet.")
+    """Rank every stored Pokémon by base stat total, or by any single base stat."""
+    stat_slug, stat_label, stat_key = next(
+        (s for s in COMPETITIVE_STATS if s[0] == request.GET.get("stat")), COMPETITIVE_STATS[0]
+    )
+    type_name = request.GET.get("type", "")
+    if type_name not in {name for name, _ in TYPE_DEFENSE_ORDER}:
+        type_name = ""
+
+    rows = [
+        {
+            "pokedex_number": p["pokedex_number"], "name": p["name"], "image": p["image"],
+            "types": p["types"], "stats": p["base_stats"],
+            "total": p["stat_total"],
+            "value": p["stat_total"] if stat_key is None else p["base_stats"].get(stat_key, 0),
+        }
+        for p in Pokemon.objects.values("pokedex_number", "name", "image", "types", "base_stats", "stat_total")
+    ]
+    stored_count = len(rows)
+    if type_name:
+        rows = [r for r in rows if type_name in r["types"]]
+
+    rows.sort(key=lambda r: (-r["value"], r["pokedex_number"]))
+    top = rows[0]["value"] if rows else 0
+    for index, row in enumerate(rows):
+        # Competition ranking: ties share a rank and the next rank skips (1, 2, 2, 4).
+        row["rank"] = rows[index - 1]["rank"] if index and row["value"] == rows[index - 1]["value"] else index + 1
+        row["bar"] = round(row["value"] / top * 100) if top else 0
+
+    filters = {"type": type_name} if type_name else {}
+    stat_links = [
+        {"slug": slug, "label": label, "active": slug == stat_slug, "query": urlencode({"stat": slug, **filters})}
+        for slug, label, _ in COMPETITIVE_STATS
+    ]
+    page_obj = Paginator(rows, 50).get_page(request.GET.get("page"))
+    return render(request, "competitive.html", {
+        "page_obj": page_obj,
+        "total": len(rows),
+        "stored_count": stored_count,
+        "stat": {"slug": stat_slug, "label": stat_label},
+        "stat_links": stat_links,
+        "selected_type": type_name,
+        "type_names": [name for name, _ in TYPE_DEFENSE_ORDER],
+        "stat_columns": [(label, key) for slug, label, key in COMPETITIVE_STATS if key],
+        "query": urlencode({"stat": stat_slug, **filters}),
+    })
+
+
+ITEMS_PER_PAGE = 48
+
 
 def items(request):
-    return HttpResponse("Items page is not implemenets yet")
+    """Browse bag items: search by name, filter by category."""
+    stored = Item.objects.all()
+    results = stored
+
+    q = request.GET.get("q", "").strip()
+    categories = list(stored.order_by("category").values_list("category", flat=True).distinct())
+    category = request.GET.get("category", "")
+    if category not in categories:
+        category = ""
+
+    if q:
+        results = results.filter(name__icontains=q)
+    if category:
+        results = results.filter(category=category)
+
+    filters = {k: v for k, v in (("q", q), ("category", category)) if v}
+    page_obj = Paginator(results, ITEMS_PER_PAGE).get_page(request.GET.get("page"))
+    return render(request, "items.html", {
+        "page_obj": page_obj,
+        "total": page_obj.paginator.count,
+        "stored_count": stored.count(),
+        "q": q,
+        "selected_category": category,
+        "category_choices": [(c, c.replace("-", " ").title()) for c in categories if c],
+        "query": urlencode(filters),
+        "filtering": bool(filters),
+    })
 
 
 def _is_staff(user):

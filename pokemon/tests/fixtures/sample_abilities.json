@@ -1,0 +1,8 @@
+[
+  {"name": "Overgrow", "generation": 3, "effect": "Strengthens grass moves to inflict 1.5× damage at 1/3 max HP or less."},
+  {"name": "Blaze", "generation": 3, "effect": "Strengthens fire moves to inflict 1.5× damage at 1/3 max HP or less."},
+  {"name": "Chlorophyll", "generation": 3, "effect": "Doubles Speed during strong sunlight."},
+  {"name": "Solar Power", "generation": 4, "effect": "Boosts Special Attack by 50% but costs HP each turn during strong sunlight."},
+  {"name": "Levitate", "generation": 3, "effect": "Gives full immunity to all Ground-type moves."},
+  {"name": "Static", "generation": 3, "effect": "Has a 30% chance of paralyzing attacking Pokemon on contact."}
+]

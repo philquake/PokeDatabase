@@ -667,27 +667,220 @@ class AdminSyncViewTest(TestCase):
         self.assertEqual(response.context["sync_error"], "upstream API unavailable")
         self.assertNotIn("sync_success", response.context)
           
-class TypesViewTest(TestCase):
-    
+class TypesViewTest(PokemonDataTestCase):
+
     def test_types_view_returns_200(self):
         response = self.client.get(reverse("types"))
-        
-        self.assertEqual(response.status_code, 200)
 
-class RegionViewTest(TestCase):
-    
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "types.html")
+
+    def test_lists_all_eighteen_types_with_counts(self):
+        response = self.client.get(reverse("types"))
+        tiles = {t["slug"]: t for t in response.context["type_tiles"]}
+
+        self.assertEqual(len(tiles), 18)
+        self.assertEqual(tiles["fire"]["pokemon_count"], 3)   # Charmander, Charmeleon, Charizard
+        self.assertEqual(tiles["fire"]["move_count"], 3)      # Ember, Flamethrower, Fire Blast
+        self.assertEqual(tiles["fairy"]["pokemon_count"], 0)
+        self.assertContains(response, reverse("type_detail", args=["fire"]))
+
+    def test_chart_has_a_row_per_attacking_type(self):
+        response = self.client.get(reverse("types"))
+        chart = response.context["chart"]
+
+        self.assertEqual(len(chart), 18)
+        fire_row = next(r for r in chart if r["slug"] == "fire")
+        grass_cell = next(c for c in fire_row["cells"] if c["slug"] == "grass")
+        self.assertEqual(grass_cell["multiplier"], 2)
+        self.assertEqual(grass_cell["label"], "2")
+        self.assertContains(response, "mult-weak")
+        self.assertContains(response, "mult-immune")
+
+
+class TypesViewEmptyTest(TestCase):
+
+    def test_renders_without_any_pokemon(self):
+        response = self.client.get(reverse("types"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["type_tiles"][0]["pokemon_count"], 0)
+
+
+class TypeDetailViewTest(PokemonDataTestCase):
+
+    def test_shows_matchups_and_pokemon_of_the_type(self):
+        response = self.client.get(reverse("type_detail", args=["fire"]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "type_detail.html")
+        self.assertEqual(response.context["matchups"]["attack"]["super"], ["grass", "ice", "bug", "steel"])
+        self.assertEqual(
+            [p["name"] for p in response.context["pokemon"]],
+            ["Charmander", "Charmeleon", "Charizard"],
+        )
+        self.assertEqual(response.context["move_count"], 3)
+
+    def test_includes_dual_types(self):
+        response = self.client.get(reverse("type_detail", args=["flying"]))
+        self.assertEqual([p["name"] for p in response.context["pokemon"]], ["Charizard"])
+
+    def test_name_is_case_insensitive(self):
+        self.assertEqual(self.client.get(reverse("type_detail", args=["FIRE"])).status_code, 200)
+
+    def test_unknown_type_is_404(self):
+        self.assertEqual(self.client.get(reverse("type_detail", args=["banana"])).status_code, 404)
+
+    def test_type_with_no_pokemon_still_renders(self):
+        response = self.client.get(reverse("type_detail", args=["fairy"]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "No Fairy-type Pokémon")
+
+
+class RegionViewTest(PokemonDataTestCase):
+
     def test_region_view_returns_200(self):
         response = self.client.get(reverse("region"))
-        
+
         self.assertEqual(response.status_code, 200)
-        
-class AbilitiesViewTest(TestCase):
-    
+        self.assertTemplateUsed(response, "regions.html")
+
+    def test_lists_nine_regions_in_order_with_counts(self):
+        response = self.client.get(reverse("region"))
+        tiles = response.context["region_tiles"]
+
+        self.assertEqual([t["name"] for t in tiles], [
+            "Kanto", "Johto", "Hoenn", "Sinnoh", "Unova", "Kalos", "Alola", "Galar", "Paldea",
+        ])
+        self.assertEqual(tiles[0]["pokemon_count"], 12)
+        self.assertEqual(tiles[0]["dex_range"], "#1\u2013#151")
+        self.assertEqual(tiles[1]["pokemon_count"], 0)
+        self.assertContains(response, reverse("region_detail", args=["kanto"]))
+
+
+class RegionViewEmptyTest(TestCase):
+
+    def test_renders_without_any_pokemon(self):
+        self.assertEqual(self.client.get(reverse("region")).status_code, 200)
+
+
+class RegionDetailViewTest(PokemonDataTestCase):
+
+    def test_lists_the_regions_pokemon_and_games(self):
+        response = self.client.get(reverse("region_detail", args=["kanto"]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "region_detail.html")
+        self.assertEqual(response.context["region"]["name"], "Kanto")
+        self.assertEqual(len(response.context["pokemon"]), 12)
+        self.assertEqual(response.context["pokemon"][0]["name"], "Bulbasaur")
+        self.assertEqual(response.context["region"]["games"], ["Red/Blue", "Yellow"])
+        self.assertContains(response, "Charizard")
+
+    def test_name_is_case_insensitive(self):
+        self.assertEqual(self.client.get(reverse("region_detail", args=["KANTO"])).status_code, 200)
+
+    def test_unknown_region_is_404(self):
+        self.assertEqual(self.client.get(reverse("region_detail", args=["narnia"])).status_code, 404)
+
+    def test_region_without_pokemon_explains_itself(self):
+        response = self.client.get(reverse("region_detail", args=["johto"]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "No Johto Pokémon")
+
+    def test_links_to_neighbouring_regions(self):
+        response = self.client.get(reverse("region_detail", args=["johto"]))
+        self.assertContains(response, reverse("region_detail", args=["kanto"]))
+        self.assertContains(response, reverse("region_detail", args=["hoenn"]))
+
+
+class AbilitiesViewTest(PokemonDataTestCase):
+
+    def rows(self, response):
+        return {r["name"]: r for r in response.context["page_obj"]}
+
     def test_abilities_view_returns_200(self):
         response = self.client.get(reverse("abilities"))
-        
+
         self.assertEqual(response.status_code, 200)
-        
+        self.assertTemplateUsed(response, "abilities.html")
+
+    def test_lists_each_ability_once_with_counts_and_effect(self):
+        response = self.client.get(reverse("abilities"))
+        rows = self.rows(response)
+
+        self.assertEqual(response.context["total"], 15)
+        self.assertEqual(rows["Blaze"]["pokemon_count"], 3)
+        self.assertEqual(rows["Solar Power"]["pokemon_count"], 3)
+        self.assertEqual(rows["Blaze"]["effect"], "Strengthens fire moves to inflict 1.5\u00d7 damage at 1/3 max HP or less.")
+        self.assertEqual(rows["Blaze"]["slug"], "blaze")
+        self.assertEqual(rows["Rock Head"]["effect"], "")      # no stored effect text
+        self.assertContains(response, reverse("ability_detail", args=["solar-power"]))
+
+    def test_default_order_is_by_name(self):
+        names = [r["name"] for r in self.client.get(reverse("abilities")).context["page_obj"]]
+        self.assertEqual(names, sorted(names))
+
+    def test_search_by_name(self):
+        response = self.client.get(reverse("abilities"), {"q": "SOLAR"})
+        self.assertEqual(list(self.rows(response)), ["Solar Power"])
+
+    def test_sort_by_pokemon_count(self):
+        response = self.client.get(reverse("abilities"), {"sort": "pokemon", "dir": "desc"})
+        counts = [r["pokemon_count"] for r in response.context["page_obj"]]
+        self.assertEqual(counts, sorted(counts, reverse=True))
+
+    def test_no_matches_message(self):
+        self.assertContains(self.client.get(reverse("abilities"), {"q": "zzzz"}), "No abilities match")
+
+
+class AbilitiesViewWithoutEffectsTest(TestCase):
+
+    def test_missing_effect_text_points_at_sync_abilities(self):
+        from pokemon.models import Pokemon
+        Pokemon.objects.create(pokedex_number=1, name="Bulbasaur", abilities=[{"name": "Overgrow", "hidden": False}])
+
+        response = self.client.get(reverse("abilities"))
+
+        self.assertContains(response, "Overgrow")
+        self.assertContains(response, "sync_abilities")
+
+
+class AbilitiesViewEmptyTest(TestCase):
+
+    def test_renders_without_any_pokemon(self):
+        self.assertEqual(self.client.get(reverse("abilities")).status_code, 200)
+
+
+class AbilityDetailViewTest(PokemonDataTestCase):
+
+    def test_shows_effect_and_pokemon_split_by_hidden(self):
+        response = self.client.get(reverse("ability_detail", args=["chlorophyll"]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "ability_detail.html")
+        self.assertEqual(response.context["ability"]["name"], "Chlorophyll")
+        self.assertEqual(response.context["ability"]["effect"], "Doubles Speed during strong sunlight.")
+        self.assertEqual(response.context["ability"]["generation"], 3)
+        self.assertEqual([p["name"] for p in response.context["hidden_pokemon"]], ["Bulbasaur", "Ivysaur", "Venusaur"])
+        self.assertEqual(response.context["regular_pokemon"], [])
+
+    def test_regular_abilities_are_listed_separately(self):
+        response = self.client.get(reverse("ability_detail", args=["blaze"]))
+        self.assertEqual([p["name"] for p in response.context["regular_pokemon"]], ["Charmander", "Charmeleon", "Charizard"])
+
+    def test_ability_without_effect_text_still_renders(self):
+        response = self.client.get(reverse("ability_detail", args=["rock-head"]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Onix")
+
+    def test_unknown_ability_is_404(self):
+        self.assertEqual(self.client.get(reverse("ability_detail", args=["nope"])).status_code, 404)
+
+
 class MovesViewTest(TestCase):
     
     def test_moves_view_returns_200(self):
@@ -695,19 +888,181 @@ class MovesViewTest(TestCase):
         
         self.assertEqual(response.status_code, 200)
         
-class CompetitiveViewTest(TestCase):
-    
+class CompetitiveViewTest(PokemonDataTestCase):
+
+    def rows(self, response):
+        return list(response.context["page_obj"])
+
     def test_competitive_view_returns_200(self):
         response = self.client.get(reverse("competitive"))
-        
+
         self.assertEqual(response.status_code, 200)
-        
+        self.assertTemplateUsed(response, "competitive.html")
+
+    def test_ranks_by_base_stat_total_by_default(self):
+        response = self.client.get(reverse("competitive"))
+        rows = self.rows(response)
+
+        self.assertEqual([r["name"] for r in rows[:4]], ["Charizard", "Venusaur", "Gengar", "Kangaskhan"])
+        self.assertEqual(rows[0]["value"], 534)
+        self.assertEqual(response.context["stat"]["slug"], "total")
+
+    def test_tied_pokemon_share_a_rank(self):
+        rows = self.rows(self.client.get(reverse("competitive")))
+        by_name = {r["name"]: r["rank"] for r in rows}
+
+        self.assertEqual(by_name["Ivysaur"], 5)
+        self.assertEqual(by_name["Haunter"], 5)
+        self.assertEqual(by_name["Charmeleon"], 5)
+        self.assertEqual(by_name["Onix"], 8)    # next rank skips the tie
+
+    def test_ranks_by_a_single_stat(self):
+        response = self.client.get(reverse("competitive"), {"stat": "speed"})
+        rows = self.rows(response)
+
+        self.assertEqual(rows[0]["name"], "Gengar")
+        self.assertEqual(rows[0]["value"], 110)
+        self.assertEqual(response.context["stat"]["label"], "Speed")
+
+    def test_rows_carry_every_stat_and_a_bar_width(self):
+        row = self.rows(self.client.get(reverse("competitive")))[0]
+
+        self.assertEqual(row["stats"]["Attack"], 84)
+        self.assertEqual(row["types"], ["Fire", "Flying"])
+        self.assertEqual(row["bar"], 100)           # the top Pokémon fills the bar
+        self.assertTrue(0 < self.rows(self.client.get(reverse("competitive")))[-1]["bar"] < 100)
+
+    def test_filters_by_type(self):
+        response = self.client.get(reverse("competitive"), {"type": "Ghost"})
+        self.assertEqual({r["name"] for r in self.rows(response)}, {"Gastly", "Haunter", "Gengar"})
+        self.assertEqual(self.rows(response)[0]["rank"], 1)     # ranks are within the filtered list
+
+    def test_unknown_stat_and_type_are_ignored(self):
+        response = self.client.get(reverse("competitive"), {"stat": "luck", "type": "Banana"})
+
+        self.assertEqual(response.context["stat"]["slug"], "total")
+        self.assertEqual(response.context["total"], 12)
+
+    def test_every_stat_has_a_link_that_keeps_the_type_filter(self):
+        response = self.client.get(reverse("competitive"), {"type": "Fire"})
+        self.assertContains(response, "stat=speed&amp;type=Fire")
+
+    def test_no_matches_message(self):
+        response = self.client.get(reverse("competitive"), {"type": "Dragon"})
+        self.assertContains(response, "No Pok")
+
+
+class CompetitivePaginationTest(TestCase):
+
+    def test_fifty_per_page(self):
+        from pokemon.models import Pokemon
+        for i in range(1, 61):
+            Pokemon.objects.create(
+                pokedex_number=i, name=f"Mon{i}", types=["Normal"],
+                base_stats={"HP": i, "Attack": 1, "Defense": 1, "Special Attack": 1, "Special Defense": 1, "Speed": 1},
+                stat_total=i + 5,
+            )
+        first = self.client.get(reverse("competitive"))
+        second = self.client.get(reverse("competitive"), {"page": 2})
+
+        self.assertEqual(len(first.context["page_obj"]), 50)
+        self.assertEqual(len(second.context["page_obj"]), 10)
+        self.assertEqual(second.context["page_obj"][0]["rank"], 51)
+
+
+class CompetitiveEmptyTest(TestCase):
+
+    def test_explains_how_to_load_pokemon(self):
+        response = self.client.get(reverse("competitive"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "import_pokemon_json")
+
+
 class ItemsViewTest(TestCase):
-    
+
+    def setUp(self):
+        from pokemon.tests.helpers import load_sample_items
+        load_sample_items()
+
+    def names(self, response):
+        return [i.name for i in response.context["page_obj"]]
+
     def test_items_view_returns_200(self):
         response = self.client.get(reverse("items"))
-        
+
         self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "items.html")
+
+    def test_lists_items_with_cost_effect_and_category(self):
+        response = self.client.get(reverse("items"))
+
+        self.assertEqual(response.context["total"], 6)
+        self.assertEqual(self.names(response), sorted(self.names(response)))
+        self.assertContains(response, "Restores 20 HP.")
+        self.assertContains(response, "Standard Balls")
+        self.assertContains(response, "10,000")
+
+    def test_unsold_or_unpriced_items_show_a_dash_not_a_cost(self):
+        response = self.client.get(reverse("items"), {"q": "master"})
+        self.assertNotContains(response, ">0<")
+        self.assertContains(response, "Not sold")
+
+    def test_filters_by_category(self):
+        response = self.client.get(reverse("items"), {"category": "healing"})
+        self.assertEqual(self.names(response), ["Potion", "Super Potion"])
+
+    def test_searches_by_name(self):
+        response = self.client.get(reverse("items"), {"q": "POTION"})
+        self.assertEqual(self.names(response), ["Potion", "Super Potion"])
+
+    def test_filters_combine(self):
+        response = self.client.get(reverse("items"), {"category": "healing", "q": "super"})
+        self.assertEqual(self.names(response), ["Super Potion"])
+
+    def test_unknown_category_is_ignored(self):
+        self.assertEqual(self.client.get(reverse("items"), {"category": "nope"}).context["total"], 6)
+
+    def test_category_choices_come_from_stored_items(self):
+        response = self.client.get(reverse("items"))
+
+        self.assertContains(response, '<option value="vitamins"')
+        self.assertContains(response, ">Standard Balls<")
+        self.assertNotContains(response, '<option value="held-items"')
+
+    def test_items_without_a_sprite_still_render(self):
+        response = self.client.get(reverse("items"), {"q": "mystery"})
+
+        self.assertEqual(self.names(response), ["Mystery Item"])
+        self.assertContains(response, "Mystery Item")
+
+    def test_no_matches_message(self):
+        self.assertContains(self.client.get(reverse("items"), {"q": "zzzz"}), "No items match")
+
+
+class ItemsPaginationTest(TestCase):
+
+    def test_forty_eight_per_page_and_links_keep_filters(self):
+        from pokemon.models import Item
+        for i in range(60):
+            Item.objects.create(name=f"Item {i:02d}", category="healing")
+
+        first = self.client.get(reverse("items"), {"category": "healing"})
+        second = self.client.get(reverse("items"), {"page": 2})
+
+        self.assertEqual(len(first.context["page_obj"]), 48)
+        self.assertEqual(len(second.context["page_obj"]), 12)
+        self.assertContains(first, "category=healing&amp;page=2")
+
+
+class ItemsEmptyTest(TestCase):
+
+    def test_explains_how_to_load_items(self):
+        response = self.client.get(reverse("items"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "sync_items")
+
 
 class MovesListViewTest(PokemonDataTestCase):
 

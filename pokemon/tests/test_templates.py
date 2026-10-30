@@ -71,3 +71,19 @@ class ApiSync(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "admin_sync.html")
+
+
+class NavbarTest(TestCase):
+
+    def test_navbar_links_to_every_section(self):
+        response = self.client.get(reverse("home"))
+
+        for name in ("types", "region", "abilities", "moves", "competitive", "items"):
+            self.assertContains(response, f'href="{reverse(name)}"')
+
+    def test_detail_pages_highlight_their_section(self):
+        response = self.client.get(reverse("type_detail", args=["fire"]))
+        self.assertContains(response, 'class=" types active"')
+
+        response = self.client.get(reverse("region_detail", args=["kanto"]))
+        self.assertContains(response, 'class=" region active"')

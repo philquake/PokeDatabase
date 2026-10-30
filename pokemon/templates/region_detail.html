@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+    <link href="{% static 'css/listing.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block title %}{{ region.name }} region{% endblock %}
+
+{% block content %}
+<section class="list-page">
+  <p class="list-breadcrumb"><a href="{% url 'region' %}">&larr; All regions</a></p>
+  <header class="list-header">
+    <p class="list-eyebrow">Generation {{ region.roman }}</p>
+    <h1 class="list-title">{{ region.name }}</h1>
+    <p class="list-subtitle">
+      National Dex {{ region.dex_range }} &middot; {{ pokemon|length }} stored<br>
+      Games: {{ region.games|join:", " }}
+    </p>
+  </header>
+
+  {% if pokemon %}
+    <div class="mon-grid">
+      {% for p in pokemon %}{% include "partials/mon_card.html" with note=p.types|join:" / " %}{% endfor %}
+    </div>
+  {% else %}
+    <div class="list-empty">
+      <h2>No {{ region.name }} Pokémon yet</h2>
+      <p>None of the Pokémon stored so far are from this region. Run <code>python manage.py sync_pokemon</code> to add more.</p>
+    </div>
+  {% endif %}
+
+  <nav class="list-pagination" aria-label="Neighbouring regions">
+    {% if previous_region %}<a href="{% url 'region_detail' previous_region.slug %}" rel="prev">&larr; {{ previous_region.name }}</a>{% endif %}
+    {% if next_region %}<a href="{% url 'region_detail' next_region.slug %}" rel="next">{{ next_region.name }} &rarr;</a>{% endif %}
+  </nav>
+</section>
+{% endblock %}

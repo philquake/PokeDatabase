@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+    <link href="{% static 'css/listing.css' %}" rel="stylesheet">
+    <link href="{% static 'css/types.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block title %}Types{% endblock %}
+
+{% block content %}
+<section class="list-page">
+  <header class="list-header">
+    <p class="list-eyebrow">Battle reference</p>
+    <h1 class="list-title">Types</h1>
+    <p class="list-subtitle">Every Pokémon has one or two of 18 types. Pick a type to see what it beats, what beats it, and which Pokémon have it.</p>
+  </header>
+
+  <div class="tile-grid">
+    {% for tile in type_tiles %}
+      <a class="tile" href="{% url 'type_detail' tile.slug %}">
+        <span class="chip type-{{ tile.slug }}">{{ tile.name }}</span>
+        <span class="tile-meta">{{ tile.pokemon_count }} Pokémon &middot; {{ tile.move_count }} move{{ tile.move_count|pluralize }}</span>
+      </a>
+    {% endfor %}
+  </div>
+
+  <h2 class="list-section-title">Effectiveness chart</h2>
+  <p class="list-subtitle">Rows are the attacking move's type, columns the defending Pokémon's type. For a dual-type Pokémon, multiply the two columns.</p>
+  <ul class="chart-key" aria-label="Chart key">
+    <li><span class="mult mult-weak">2</span> Super effective</li>
+    <li><span class="mult mult-resist">&frac12;</span> Not very effective</li>
+    <li><span class="mult mult-immune">0</span> No effect</li>
+  </ul>
+
+  <div class="chart-scroll" tabindex="0" role="region" aria-label="Type effectiveness chart">
+    <table class="type-chart">
+      <caption class="visually-hidden">Damage multiplier by attacking type (rows) and defending type (columns)</caption>
+      <thead>
+        <tr>
+          <td></td>
+          {% for d in defenders %}<th scope="col"><span class="chip type-{{ d.slug }}" title="{{ d.slug|title }}">{{ d.abbr }}</span></th>{% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in chart %}
+          <tr>
+            <th scope="row"><a class="chip type-{{ row.slug }}" href="{% url 'type_detail' row.slug %}">{{ row.name }}</a></th>
+            {% for cell in row.cells %}
+              <td class="mult {% if cell.multiplier == 2 %}mult-weak{% elif cell.multiplier == 0.5 %}mult-resist{% elif cell.multiplier == 0 %}mult-immune{% endif %}"{% if cell.label %} title="{{ row.name }} &rarr; {{ cell.slug|title }}: {{ cell.label }}&times;"{% endif %}>{{ cell.label }}</td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

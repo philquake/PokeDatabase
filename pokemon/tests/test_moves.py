@@ -97,3 +97,70 @@ class SyncMovesCommandTest(TestCase):
     def test_api_failure_becomes_a_command_error(self, mock_sync):
         with self.assertRaises(CommandError):
             call_command("sync_moves", stdout=StringIO())
+
+
+class AbilityDataTest(TestCase):
+
+    def test_save_and_read_back(self):
+        from pokemon.models import Ability
+        from pokemon.services.data import ability_to_dict, get_ability_info, save_ability_entry
+
+        entry = {"name": "Blaze", "generation": 3, "effect": "Strengthens fire moves."}
+        save_ability_entry(entry)
+        save_ability_entry({"name": "Blaze", "effect": "Updated."})
+
+        self.assertEqual(Ability.objects.count(), 1)
+        self.assertEqual(ability_to_dict(Ability.objects.get()), {**entry, "effect": "Updated."})
+        self.assertEqual(set(get_ability_info(["Blaze", "Nope"])), {"Blaze"})
+
+
+class SyncAbilitiesCommandTest(TestCase):
+
+    @patch("pokemon.management.commands.sync_abilities.sync_ability_data")
+    def test_passes_options_and_reports_result(self, mock_sync):
+        mock_sync.return_value = {"added": [{"name": "Blaze"}], "updated": []}
+        out = StringIO()
+
+        call_command("sync_abilities", "--only-known", stdout=out)
+
+        mock_sync.assert_called_once_with(only_known=True, refresh=False)
+        self.assertIn("Added 1 abilities", out.getvalue())
+
+    @patch("pokemon.management.commands.sync_abilities.sync_ability_data", side_effect=PokelanceAPIError("down"))
+    def test_api_failure_becomes_a_command_error(self, mock_sync):
+        with self.assertRaises(CommandError):
+            call_command("sync_abilities", stdout=StringIO())
+
+
+class ItemDataTest(TestCase):
+
+    def test_save_import_and_read_back(self):
+        from pokemon.models import Item
+        from pokemon.services.data import import_items_json, item_to_dict, save_item_entry
+        from pokemon.tests.helpers import SAMPLE_ITEMS_PATH
+
+        entry = {"name": "Potion", "category": "healing", "cost": 200, "effect": "Restores 20 HP.", "sprite": ""}
+        save_item_entry(entry)
+        save_item_entry({"name": "Potion", "cost": 300})
+
+        self.assertEqual(item_to_dict(Item.objects.get(name="Potion")), {**entry, "cost": 300})
+        self.assertEqual(import_items_json(SAMPLE_ITEMS_PATH), 6)
+        self.assertEqual(Item.objects.count(), 6)
+
+
+class SyncItemsCommandTest(TestCase):
+
+    @patch("pokemon.management.commands.sync_items.sync_item_data")
+    def test_passes_options_and_reports_result(self, mock_sync):
+        mock_sync.return_value = {"added": [{"name": "Potion"}], "updated": []}
+        out = StringIO()
+
+        call_command("sync_items", "--max", "25", "--refresh", stdout=out)
+
+        mock_sync.assert_called_once_with(max_count=25, refresh=True)
+        self.assertIn("Added 1 items", out.getvalue())
+
+    @patch("pokemon.management.commands.sync_items.sync_item_data", side_effect=PokelanceAPIError("down"))
+    def test_api_failure_becomes_a_command_error(self, mock_sync):
+        with self.assertRaises(CommandError):
+            call_command("sync_items", stdout=StringIO())

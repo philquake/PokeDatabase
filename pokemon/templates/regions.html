@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+    <link href="{% static 'css/listing.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block title %}Regions{% endblock %}
+
+{% block content %}
+<section class="list-page">
+  <header class="list-header">
+    <p class="list-eyebrow">Explore</p>
+    <h1 class="list-title">Regions</h1>
+    <p class="list-subtitle">One region for each generation of the main series. Open a region to see the Pokémon it introduced and the games they debuted in.</p>
+  </header>
+
+  <div class="tile-grid">
+    {% for region in region_tiles %}
+      <a class="tile" href="{% url 'region_detail' region.slug %}">
+        <span class="tile-meta">Generation {{ region.roman }}</span>
+        <span class="tile-title">{{ region.name }}</span>
+        <span class="tile-meta">{{ region.dex_range }}</span>
+        <span class="tile-meta">{{ region.pokemon_count }} Pokémon stored</span>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% load static %}
+{% load pokemon_extras %}
+
+{% block extra_css %}
+    <link href="{% static 'css/listing.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block title %}Competitive rankings{% endblock %}
+
+{% block content %}
+<section class="list-page">
+  <header class="list-header">
+    <p class="list-eyebrow">Competitive</p>
+    <h1 class="list-title">Rankings</h1>
+    <p class="list-subtitle">The strongest Pokémon by base stats. Pick a stat to rank by, and optionally narrow to one type. Base stats are a starting point: moves, abilities and held items decide real battles.</p>
+  </header>
+
+  {% if not stored_count %}
+    <div class="list-empty">
+      <h2>No Pokémon to rank yet</h2>
+      <p>Run <code>python manage.py migrate &amp;&amp; python manage.py import_pokemon_json</code> to load the Pokédex.</p>
+    </div>
+  {% else %}
+
+    <nav class="stat-tabs" aria-label="Rank by">
+      {% for link in stat_links %}
+        <a href="?{{ link.query }}" class="stat-tab{% if link.active %} active{% endif %}"{% if link.active %} aria-current="page"{% endif %}>{{ link.label }}</a>
+      {% endfor %}
+    </nav>
+
+    <form class="list-filters filters-rank" method="get" action="{% url 'competitive' %}">
+      <input type="hidden" name="stat" value="{{ stat.slug }}">
+      <div class="list-field">
+        <label for="rk-type">Type</label>
+        <select id="rk-type" name="type">
+          <option value="">All types</option>
+          {% for type_name in type_names %}
+            <option value="{{ type_name }}"{% if type_name == selected_type %} selected{% endif %}>{{ type_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="list-actions">
+        <button type="submit" class="btn btn-primary">Apply</button>
+        {% if selected_type %}<a class="list-reset" href="?stat={{ stat.slug }}">Reset</a>{% endif %}
+      </div>
+    </form>
+
+    {% if page_obj %}
+      <p class="rank-summary">Ranked by <strong>{{ stat.label }}</strong>{% if selected_type %} &middot; {{ selected_type }} type{% endif %} &middot; {{ total }} Pokémon</p>
+      <div class="list-card">
+        <table class="list-table rank-table">
+          <thead>
+            <tr>
+              <th scope="col" class="num rank-col">#</th>
+              <th scope="col">Pokémon</th>
+              <th scope="col" class="col-types">Types</th>
+              {% for label, key in stat_columns %}
+                <th scope="col" class="num col-stat{% if stat.label == label %} is-sorted{% endif %}">{{ label }}</th>
+              {% endfor %}
+              <th scope="col" class="num col-stat{% if stat.slug == 'total' %} is-sorted{% endif %}">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in page_obj %}
+              <tr>
+                <td class="num rank-col"><span class="rank-badge rank-{{ row.rank }}">{{ row.rank }}</span></td>
+                <td class="rank-mon">
+                  <a href="{% url 'pokemon_detail' row.name %}">
+                    <img src="{{ row.image }}" alt="" width="40" height="40" loading="lazy">
+                    <span>{{ row.name }}</span>
+                  </a>
+                  <span class="rank-bar" aria-hidden="true"><span style="width:{{ row.bar }}%"></span></span>
+                </td>
+                <td class="col-types"><span class="chip-row">{% for t in row.types %}<span class="chip type-{{ t|lower }}">{{ t }}</span>{% endfor %}</span></td>
+                {% for label, key in stat_columns %}
+                  <td class="num col-stat{% if stat.label == label %} is-sorted{% endif %}">{{ row.stats|get_item:key }}</td>
+                {% endfor %}
+                <td class="num col-stat rank-total{% if stat.slug == 'total' %} is-sorted{% endif %}">{{ row.total }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% include "partials/pagination.html" %}
+    {% else %}
+      <div class="list-empty">
+        <h2>No Pokémon match</h2>
+        <p>None of the stored Pokémon have the {{ selected_type }} type. <a href="?stat={{ stat.slug }}">Show all types</a>.</p>
+      </div>
+    {% endif %}
+
+  {% endif %}
+</section>
+{% endblock %}

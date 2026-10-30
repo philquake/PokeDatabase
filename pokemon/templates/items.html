@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+    <link href="{% static 'css/listing.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block title %}Items{% endblock %}
+
+{% block content %}
+<section class="list-page">
+  <header class="list-header">
+    <p class="list-eyebrow">Bag</p>
+    <h1 class="list-title">Items</h1>
+    <p class="list-subtitle">
+      {% if filtering %}{{ total }} of {{ stored_count }} items{% else %}{{ stored_count }} items{% endif %}
+      &middot; balls, medicine, vitamins, held items and more.
+    </p>
+  </header>
+
+  {% if not stored_count %}
+    <div class="list-empty">
+      <h2>No items yet</h2>
+      <p>Items are loaded from PokéAPI. Run <code>python manage.py sync_items --max 200</code> to fetch the first 200 (there are about 2,000; run it again to fetch more).</p>
+    </div>
+  {% else %}
+
+    <form class="list-filters filters-items" method="get" action="{% url 'items' %}">
+      <div class="list-field">
+        <label for="it-q">Name</label>
+        <input id="it-q" type="search" name="q" value="{{ q }}" placeholder="e.g. Potion" autocomplete="off">
+      </div>
+      <div class="list-field">
+        <label for="it-category">Category</label>
+        <select id="it-category" name="category">
+          <option value="">All categories</option>
+          {% for value, label in category_choices %}
+            <option value="{{ value }}"{% if value == selected_category %} selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="list-actions">
+        <button type="submit" class="btn btn-primary">Apply</button>
+        {% if filtering %}<a class="list-reset" href="{% url 'items' %}">Reset</a>{% endif %}
+      </div>
+    </form>
+
+    {% if page_obj %}
+      <ul class="item-grid">
+        {% for item in page_obj %}
+          <li class="item-card">
+            <div class="item-card-head">
+              {% if item.sprite %}<img src="{{ item.sprite }}" alt="" width="40" height="40" loading="lazy">{% else %}<span class="item-noimg" aria-hidden="true"></span>{% endif %}
+              <div>
+                <h2 class="item-name">{{ item.name }}</h2>
+                <span class="item-category">{{ item.category_label }}</span>
+              </div>
+            </div>
+            {% if item.effect %}<p class="item-effect">{{ item.effect }}</p>{% endif %}
+            <p class="item-cost">
+              {% if item.cost is None %}<span class="move-none">&mdash;</span>{% elif item.cost == 0 %}Not sold{% else %}<span class="item-cost-label">Cost</span> &#8381;{{ item.cost|floatformat:"0g" }}{% endif %}
+            </p>
+          </li>
+        {% endfor %}
+      </ul>
+      {% include "partials/pagination.html" %}
+    {% else %}
+      <div class="list-empty">
+        <h2>No items match</h2>
+        <p>Try a different name, or <a href="{% url 'items' %}">reset the filters</a>.</p>
+      </div>
+    {% endif %}
+
+  {% endif %}
+</section>
+{% endblock %}

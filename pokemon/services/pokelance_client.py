@@ -21,12 +21,17 @@ duration of a single sync() call since many Pokémon share types.
 
 import requests
 
-from pokemon.models import Move, Pokemon, PokemonMove
-from pokemon.services.data import move_to_dict, pokemon_to_dict, save_move_entry, save_pokemon_entry
+from pokemon.models import Ability, Item, Move, Pokemon, PokemonMove
+from pokemon.services.data import (
+    ability_to_dict, item_to_dict, move_to_dict, pokemon_to_dict,
+    save_ability_entry, save_item_entry, save_move_entry, save_pokemon_entry,
+)
 
 
 POKEAPI_BASE_URL = "https://pokeapi.co/api/v2/pokemon"
 POKEAPI_MOVE_URL = "https://pokeapi.co/api/v2/move"
+POKEAPI_ABILITY_URL = "https://pokeapi.co/api/v2/ability"
+POKEAPI_ITEM_URL = "https://pokeapi.co/api/v2/item"
 POKEAPI_POKEMON_SPECIES_URL = "https://pokeapi.co/api/v2/pokemon-species" 
 REQUEST_TIMEOUT_SECONDS = 5
 
@@ -420,6 +425,42 @@ def _to_move_entry(raw):
     }
 
 
+def _sync_named_resources(list_url, label, existing, to_entry, save, wanted=None, refresh=False,
+                          max_count=None, limit=3000):
+    """
+    Shared loop for PokéAPI "list then fetch each" resources (moves, abilities, items).
+
+    existing: {display name: stored entry dict}; to_entry: raw PokéAPI dict -> entry dict;
+    save: stores one entry. wanted: optional set of display names to restrict to.
+    Stored resources are skipped unless `refresh`; with `refresh`, only entries that
+    changed are saved. `max_count` stops after that many fetches. Each entry is saved
+    as soon as it's fetched, so a failure keeps progress.
+    Returns {"added": [...], "updated": [...]}.
+    """
+    listing = _get(f"{list_url}?limit={limit}", f"{label} list")["results"]
+
+    added, updated, fetched = [], [], 0
+    for item in listing:
+        name = _move_display_name(item["name"])
+        if wanted is not None and name not in wanted:
+            continue
+        if name in existing and not refresh:
+            continue
+        if max_count is not None and fetched >= max_count:
+            break
+
+        entry = to_entry(_get(item["url"], f"{label} {name}"))
+        fetched += 1
+        if name not in existing:
+            save(entry)
+            added.append(entry)
+        elif entry != existing[name]:
+            save(entry)
+            updated.append(entry)
+
+    return {"added": added, "updated": updated}
+
+
 def sync_move_data(only_known=False, refresh=False):
     """
     Fetch move stats (type, damage class, power, accuracy, PP, effect text) from
@@ -429,28 +470,97 @@ def sync_move_data(only_known=False, refresh=False):
     refresh:    re-fetch moves already stored and patch the ones that changed;
                 otherwise stored moves are skipped, so a sync can be resumed.
 
-    Each move is saved as soon as it's fetched, so a failure keeps progress.
     Returns {"added": [...], "updated": [...]} of move dicts. Raises
     PokelanceAPIError if PokéAPI can't be reached or returns something unusable.
     """
-    listing = _get(f"{POKEAPI_MOVE_URL}?limit=2000", "move list")["results"]
-    existing = _existing_moves()
-    known = _known_move_names() if only_known else None
+    return _sync_named_resources(
+        POKEAPI_MOVE_URL, "move", _existing_moves(), _to_move_entry, _save_move,
+        wanted=_known_move_names() if only_known else None, refresh=refresh, limit=2000,
+    )
 
-    added, updated = [], []
-    for item in listing:
-        name = _move_display_name(item["name"])
-        if known is not None and name not in known:
-            continue
-        if name in existing and not refresh:
-            continue
 
-        entry = _to_move_entry(_get(item["url"], f"move {name}"))
-        if name not in existing:
-            _save_move(entry)
-            added.append(entry)
-        elif entry != existing[name]:
-            _save_move(entry)
-            updated.append(entry)
+# --- Abilities ---------------------------------------------------------------
 
-    return {"added": added, "updated": updated}
+def _existing_abilities():
+    return {a.name: ability_to_dict(a) for a in Ability.objects.all()}
+
+
+def _known_ability_names():
+    """Names of abilities that at least one stored Pokémon can have."""
+    return {
+        ability["name"]
+        for abilities in Pokemon.objects.values_list("abilities", flat=True)
+        for ability in abilities
+    }
+
+
+def _save_ability(entry):
+    save_ability_entry(entry)
+
+
+def _english_short_effect(raw):
+    return next(
+        (e.get("short_effect", "") for e in raw.get("effect_entries", []) if e["language"]["name"] == "en"),
+        "",
+    )
+
+
+def _generation_number(raw):
+    generation = GENERATIONS.get(raw["generation"]["name"])
+    if generation is None:
+        raise PokelanceAPIError(f"Unknown generation '{raw['generation']['name']}' for {raw['name']}")
+    return generation
+
+
+def _to_ability_entry(raw):
+    """Flatten a PokéAPI ability into the dict stored on Ability."""
+    return {
+        "name": _move_display_name(raw["name"]),
+        "generation": _generation_number(raw),
+        "effect": _english_short_effect(raw),
+    }
+
+
+def sync_ability_data(only_known=False, refresh=False):
+    """
+    Fetch ability effect text from PokéAPI into Ability rows. only_known restricts it
+    to abilities some stored Pokémon has; stored abilities are skipped unless `refresh`.
+    Returns {"added": [...], "updated": [...]}.
+    """
+    return _sync_named_resources(
+        POKEAPI_ABILITY_URL, "ability", _existing_abilities(), _to_ability_entry, _save_ability,
+        wanted=_known_ability_names() if only_known else None, refresh=refresh, limit=1000,
+    )
+
+
+# --- Items -------------------------------------------------------------------
+
+def _existing_items():
+    return {i.name: item_to_dict(i) for i in Item.objects.all()}
+
+
+def _save_item(entry):
+    save_item_entry(entry)
+
+
+def _to_item_entry(raw):
+    """Flatten a PokéAPI item into the dict stored on Item."""
+    return {
+        "name": _move_display_name(raw["name"]),
+        "category": raw["category"]["name"],
+        "cost": raw.get("cost"),
+        "effect": _english_short_effect(raw),
+        "sprite": (raw.get("sprites") or {}).get("default") or "",
+    }
+
+
+def sync_item_data(refresh=False, max_count=None):
+    """
+    Fetch items from PokéAPI into Item rows. There are ~2,000, one request each, so
+    `max_count` caps how many are fetched per run; stored items are skipped unless
+    `refresh`, so repeated runs work through the list. Returns {"added", "updated"}.
+    """
+    return _sync_named_resources(
+        POKEAPI_ITEM_URL, "item", _existing_items(), _to_item_entry, _save_item,
+        refresh=refresh, max_count=max_count, limit=3000,
+    )

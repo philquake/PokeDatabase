@@ -1,0 +1,8 @@
+[
+  {"name": "Poke Ball", "category": "standard-balls", "cost": 200, "effect": "Tries to catch a wild Pokemon.", "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"},
+  {"name": "Master Ball", "category": "standard-balls", "cost": 0, "effect": "Catches a wild Pokemon every time.", "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png"},
+  {"name": "Potion", "category": "healing", "cost": 200, "effect": "Restores 20 HP.", "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/potion.png"},
+  {"name": "Super Potion", "category": "healing", "cost": 700, "effect": "Restores 60 HP.", "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/super-potion.png"},
+  {"name": "Hp Up", "category": "vitamins", "cost": 10000, "effect": "Raises the HP effort value by 10.", "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/hp-up.png"},
+  {"name": "Mystery Item", "category": "all-mail", "cost": null, "effect": "", "sprite": ""}
+]

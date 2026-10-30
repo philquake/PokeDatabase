@@ -55,6 +55,24 @@ VERSION_GROUPS = [
 VERSION_INFO = {slug: (label, gen) for slug, label, gen in VERSION_GROUPS}
 VERSION_ORDER = {slug: i for i, (slug, _, _) in enumerate(VERSION_GROUPS)}
 
+# Main-series games introduced in each generation, and the national dex range of the
+# Pokémon each generation introduced (what Pokemon.region is derived from).
+GENERATION_GAMES = {
+    1: ["Red/Blue", "Yellow"],
+    2: ["Gold/Silver", "Crystal"],
+    3: ["Ruby/Sapphire", "Emerald", "FireRed/LeafGreen"],
+    4: ["Diamond/Pearl", "Platinum", "HeartGold/SoulSilver"],
+    5: ["Black/White", "Black 2/White 2"],
+    6: ["X/Y", "Omega Ruby/Alpha Sapphire"],
+    7: ["Sun/Moon", "Ultra Sun/Ultra Moon", "Let's Go Pikachu/Eevee"],
+    8: ["Sword/Shield", "Brilliant Diamond/Shining Pearl", "Legends: Arceus"],
+    9: ["Scarlet/Violet"],
+}
+GENERATION_DEX_RANGES = {
+    1: (1, 151), 2: (152, 251), 3: (252, 386), 4: (387, 493), 5: (494, 649),
+    6: (650, 721), 7: (722, 809), 8: (810, 905), 9: (906, 1025),
+}
+
 # PokéAPI only says "machine" for both, so HMs are identified by name.
 HM_NAMES = {
     "Cut", "Fly", "Surf", "Strength", "Flash", "Whirlpool",

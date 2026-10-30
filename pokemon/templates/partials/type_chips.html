@@ -1,0 +1,4 @@
+{# Row of type chips linking to each type's page. Needs: slugs (list of lowercase type names). #}
+<div class="chip-row">
+  {% for slug in slugs %}<a class="chip type-{{ slug }}" href="{% url 'type_detail' slug %}">{{ slug }}</a>{% empty %}<span class="muted">None</span>{% endfor %}
+</div>

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+    <link href="{% static 'css/listing.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block title %}{{ ability.name }}{% endblock %}
+
+{% block content %}
+<section class="list-page">
+  <p class="list-breadcrumb"><a href="{% url 'abilities' %}">&larr; All abilities</a></p>
+  <header class="list-header">
+    <p class="list-eyebrow">Ability{% if ability.generation %} &middot; Generation {{ ability.generation }}{% endif %}</p>
+    <h1 class="list-title">{{ ability.name }}</h1>
+    {% if ability.effect %}
+      <p class="list-subtitle">{{ ability.effect }}</p>
+    {% else %}
+      <p class="list-subtitle">No effect text stored yet. Run <code>python manage.py sync_abilities --only-known</code>.</p>
+    {% endif %}
+  </header>
+
+  <h2 class="list-section-title">Pokémon with {{ ability.name }}</h2>
+  {% if regular_pokemon %}
+    <div class="mon-grid">
+      {% for p in regular_pokemon %}{% include "partials/mon_card.html" %}{% endfor %}
+    </div>
+  {% endif %}
+
+  {% if hidden_pokemon %}
+    <h2 class="list-section-title">As a hidden ability</h2>
+    <div class="mon-grid">
+      {% for p in hidden_pokemon %}{% include "partials/mon_card.html" with note="Hidden ability" %}{% endfor %}
+    </div>
+  {% endif %}
+
+  {% if not regular_pokemon and not hidden_pokemon %}
+    <div class="list-empty"><h2>No stored Pokémon have this ability</h2><p>It appears here once a Pokémon that has it is stored.</p></div>
+  {% endif %}
+</section>
+{% endblock %}

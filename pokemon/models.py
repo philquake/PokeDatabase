@@ -116,3 +116,41 @@ class Move(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Ability(models.Model):
+    """
+    Effect text for one ability. Which Pokémon have it lives in Pokemon.abilities
+    (joined by display name), so this table only holds what PokéAPI says it does.
+    """
+
+    name = models.CharField(max_length=50, unique=True)  # display name, e.g. "Solar Power"
+    generation = models.PositiveSmallIntegerField(null=True, blank=True)
+    effect = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name_plural = "abilities"
+
+    def __str__(self):
+        return self.name
+
+
+class Item(models.Model):
+    """A bag item (ball, potion, vitamin, held item ...) as described by PokéAPI."""
+
+    name = models.CharField(max_length=60, unique=True)  # display name, e.g. "Master Ball"
+    category = models.CharField(max_length=40, blank=True)  # PokéAPI slug, e.g. "standard-balls"
+    cost = models.PositiveIntegerField(null=True, blank=True)  # 0 / None = not sold in shops
+    effect = models.TextField(blank=True)
+    sprite = models.URLField(max_length=300, blank=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def category_label(self):
+        return self.category.replace("-", " ").title()

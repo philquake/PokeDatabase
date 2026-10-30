@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+    <link href="{% static 'css/listing.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block title %}Abilities{% endblock %}
+
+{% block content %}
+<section class="list-page">
+  <header class="list-header">
+    <p class="list-eyebrow">Battle reference</p>
+    <h1 class="list-title">Abilities</h1>
+    <p class="list-subtitle">
+      {% if filtering %}{{ total }} of {{ stored_count }} abilities{% else %}{{ stored_count }} abilities{% endif %}
+      &middot; each Pokémon has one or two regular abilities and sometimes a hidden one.
+    </p>
+  </header>
+
+  {% if not stored_count %}
+    <div class="list-empty">
+      <h2>No abilities yet</h2>
+      <p>Abilities come from the Pokémon you've stored. Run <code>python manage.py sync_pokemon</code> or <code>import_pokemon_json</code> first.</p>
+    </div>
+  {% else %}
+
+    {% if effects_missing %}
+      <p class="list-notice">Effect text isn't loaded yet. Run <code>python manage.py sync_abilities --only-known</code> to fetch it.</p>
+    {% endif %}
+
+    <form class="list-filters filters-abilities" method="get" action="{% url 'abilities' %}">
+      <div class="list-field">
+        <label for="ab-q">Name</label>
+        <input id="ab-q" type="search" name="q" value="{{ q }}" placeholder="e.g. Levitate" autocomplete="off">
+      </div>
+      <div class="list-field">
+        <label for="ab-sort">Sort by</label>
+        <select id="ab-sort" name="sort">
+          <option value="">Name</option>
+          <option value="pokemon"{% if selected_sort == "pokemon" %} selected{% endif %}>Number of Pokémon</option>
+        </select>
+      </div>
+      <div class="list-actions">
+        <button type="submit" class="btn btn-primary">Apply</button>
+        {% if filtering or query %}<a class="list-reset" href="{% url 'abilities' %}">Reset</a>{% endif %}
+      </div>
+    </form>
+
+    {% if page_obj %}
+      <div class="list-card">
+        <table class="list-table ability-table">
+          <thead>
+            <tr>
+              <th scope="col" aria-sort="{{ columns.0.aria_sort }}"><a href="?{{ columns.0.query }}">Ability</a></th>
+              <th scope="col" class="num" aria-sort="{{ columns.1.aria_sort }}"><a href="?{{ columns.1.query }}">Pokémon</a></th>
+              <th scope="col" class="col-effect">Effect</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ability in page_obj %}
+              <tr>
+                <td class="ability-name"><a href="{% url 'ability_detail' ability.slug %}">{{ ability.name }}</a></td>
+                <td class="num ability-count">{{ ability.pokemon_count }}</td>
+                <td class="col-effect">{{ ability.effect }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% include "partials/pagination.html" %}
+    {% else %}
+      <div class="list-empty">
+        <h2>No abilities match</h2>
+        <p>Try a different name, or <a href="{% url 'abilities' %}">reset the search</a>.</p>
+      </div>
+    {% endif %}
+
+  {% endif %}
+</section>
+{% endblock %}

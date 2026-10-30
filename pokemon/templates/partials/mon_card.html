@@ -1,0 +1,7 @@
+{# Small Pokémon card. Needs: p (dict with name, pokedex_number, image). Optional: note. #}
+<a class="mon-card" href="{% url 'pokemon_detail' p.name %}">
+  <img src="{{ p.image }}" alt="" loading="lazy" width="96" height="96">
+  <span class="mon-card-num">#{{ p.pokedex_number|stringformat:"03d" }}</span>
+  <span class="mon-card-name">{{ p.name }}</span>
+  {% if note %}<span class="mon-card-note">{{ note }}</span>{% endif %}
+</a>
