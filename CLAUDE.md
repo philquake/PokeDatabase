@@ -7,7 +7,7 @@ All development so far happened in 2026 (Aug 6 – Sep 9); see "2026 timeline" b
 ## Stack
 - Python 3.14 (CI pins 3.14.2), Django 6.0.7, SQLite (only used for auth/admin), Bootstrap 5.3.5 (vendored in `assets/static/bootstrap-5.3.5-dist`), vanilla JS (`assets/static/js/main.js`).
 - `requests` for PokéAPI; Selenium for functional tests; `coverage` for CI.
-- `requirements.txt` is **UTF-16 LE with CRLF** — keep that encoding (or convert deliberately) when editing; also contains unused dev packages (jupyter, matplotlib, pandas, djangorestframework).
+- `requirements.txt` is plain UTF-8 (was UTF-16 until 2026-10-30); also contains unused dev packages (jupyter, matplotlib, pandas, djangorestframework).
 
 ## Commands
 - Run: `python manage.py runserver` → `/` redirects to `/pokemon/`
@@ -37,7 +37,7 @@ All development so far happened in 2026 (Aug 6 – Sep 9); see "2026 timeline" b
 ## Tests
 - `pokemon/tests/`: `test_views.py`, `test_urls.py`, `test_templates.py` (templates extend base, have titles, 404 via `override_settings(DEBUG=False)`), `services/test_pokelance_client.py` (all HTTP mocked with `@patch("pokemon.services.pokelance_client._get")` / `requests.get`).
 - `functional_test/`: Selenium tests for home, navigation, pokedex, pokemon_detail, search, api_sync.
-- **Tests must never write the real fixture** — patch `_save_fixture`/`_load_fixture` (this bug happened on 2026-08-23).
+- **Tests must never write the real fixture or hit PokéAPI** — patch `_save_fixture`/`_load_fixture` and every `_fetch_*` the code path calls (fixture-write bug on 2026-08-23; unmocked `_fetch_locations` in `SyncPokemonDataTest` fixed 2026-10-30). Check with the network blocked: `HTTPS_PROXY=http://127.0.0.1:9 python manage.py test pokemon.tests`.
 - Use `reverse()` for URLs in tests; functional tests need explicit waits after redirects.
 
 ## Conventions
@@ -46,8 +46,8 @@ All development so far happened in 2026 (Aug 6 – Sep 9); see "2026 timeline" b
 - Keep data shaping in `pokelance_client` (flatten once), not in templates.
 
 ## Gotchas
-- `.gitignore` ignores `__init__.py`, so packages (`pokemon/`, `pokemon/tests/`, `templatetags/`, etc.) have no `__init__.py` in a fresh clone — be aware when test discovery or template tag loading misbehaves.
-- `.gitignore` also ignores `db.sqlite3` and personal `outline` notes; README mentions `outline.txt`/`db.sqlite3` that aren't in the repo.
+- `__init__.py` files used to be gitignored, which broke `manage.py test pokemon.tests` on fresh clones (incl. CI). Fixed 2026-10-30 — keep every package's `__init__.py` committed.
+- `.gitignore` ignores `db.sqlite3` and personal `outline` notes; run `migrate` locally before using admin.
 
 ## 2026 timeline
 - **Aug 6–7** — Project start: `pokemon_detail` page, dummy JSON data instead of hardcoded, first URL/view/search tests, error-message section.
@@ -62,7 +62,8 @@ All development so far happened in 2026 (Aug 6 – Sep 9); see "2026 timeline" b
 - **Aug 24** — Moves + locations on detail page, apisync & admin sync URL tests, templatetag redundancy reduction, Pokelance client unit tests.
 - **Aug 25–26** — Sync adds missing info + moves for all Pokémon, generation fetch tests, `get_item` tests, encounter locations loaded and displayed.
 - **Aug 27** — Sync reports added vs updated, variable renames, GitHub Actions coverage gate (80%), requirements updated, `django.yml` fix.
-- **Sep 9** — README restructured for clarity (last commit to date).
+- **Sep 9** — README restructured for clarity.
+- **Oct 30** — Added CLAUDE.md; pitfall fixes: committed `__init__.py` files (un-ignored), requirements.txt → UTF-8, mocked network call in sync test, README structure no longer lists untracked files.
 
 ## Roadmap (from README, not built)
 Types/region/abilities/moves/competitive/items pages; richer per-Pokémon data (forms, growth rates); competitive tools (team builder, coverage, comparisons); user accounts/favorites/teams; REST API (`/api/pokemon/`, `/api/types/`, …).

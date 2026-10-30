@@ -6,7 +6,6 @@ __pycache__/
 __pycache__
 *.py[cod]
 *$py.class
-__init__.py
 
 # Environment variables
 .env

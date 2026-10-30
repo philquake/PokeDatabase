@@ -90,13 +90,10 @@ PokeDatabase/
 │   ├── test_pokedex.py
 │   ├── test_pokemon_detail.py
 │   └── test_search.py
-├── db.sqlite3
 ├── manage.py
-├── outline.txt
 ├── requirements.txt
 ├── LICENSE
-├── README.md
-└── pokemonCollection-1787721228542.json
+└── README.md
 ```
 
 ## Local Setup

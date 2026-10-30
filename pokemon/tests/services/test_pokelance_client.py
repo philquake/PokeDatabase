@@ -630,6 +630,7 @@ class ToFixtureEntryMovesTest(SimpleTestCase):
 class SyncPokemonDataTest(SimpleTestCase):
     @patch("pokemon.services.pokelance_client._save_fixture")
     @patch("pokemon.services.pokelance_client._to_fixture_entry")
+    @patch("pokemon.services.pokelance_client._fetch_locations")
     @patch("pokemon.services.pokelance_client._fetch_type_matchups")
     @patch("pokemon.services.pokelance_client._fetch_evolution_chain")
     @patch("pokemon.services.pokelance_client._fetch_species")
@@ -642,6 +643,7 @@ class SyncPokemonDataTest(SimpleTestCase):
         mock_fetch_species,
         mock_fetch_evolution_chain,
         mock_fetch_type_matchups,
+        mock_fetch_locations,
         mock_to_fixture_entry,
         mock_save,
     ):
@@ -653,6 +655,7 @@ class SyncPokemonDataTest(SimpleTestCase):
         mock_fetch_type_matchups.return_value = {
             "weaknesses": [], "resistances": [], "immunities": []
         }
+        mock_fetch_locations.return_value = []
         mock_to_fixture_entry.return_value = {"pokedex_number": 999, "name": "Dummy"}
 
         count = 5
