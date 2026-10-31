@@ -1,10 +1,5 @@
 /* ===== Pokemon Detail Page Styles ===== */
 
-:root {
-  --hex-grid: #343a48;   /* ring/axis line color */
-  --hex-muted: #8b93a7;  /* stat label color */
-  --hex-text: #eef0f5;   /* stat value color */
-}
 /* This container centers the whole detail view on the screen */
 .pokemon-hero-container {
     display: flex;
@@ -44,7 +39,7 @@
     font-size: 5.5rem;
     margin: 0;
     text-transform: capitalize;
-    color: #fff
+    color: var(--color-white);
 }
 
 .abilities-section{
@@ -58,10 +53,10 @@
     font-size: var(--text-2xl);
     margin: 0;
     text-transform: capitalize;
-    color: #fff;
+    color: var(--color-white);
     text-decoration: underline;
-    -webkit-text-decoration-color: var(--color-yellow, #ffcb05); /* safari still uses vendor prefix */
-    text-decoration-color:  var(--color-yellow, #ffcb05);
+    -webkit-text-decoration-color: var(--color-yellow); /* safari still uses vendor prefix */
+    text-decoration-color:  var(--color-yellow);
     padding-bottom: 15px;
 }
 
@@ -173,8 +168,8 @@
     font-family: var(--font-display);
     margin-bottom: 20px;
     text-decoration: underline;
-    -webkit-text-decoration-color: var(--color-yellow, #ffcb05); /* safari still uses vendor prefix */
-    text-decoration-color:  var(--color-yellow, #ffcb05);
+    -webkit-text-decoration-color: var(--color-yellow); /* safari still uses vendor prefix */
+    text-decoration-color:  var(--color-yellow);
     display: inline-block;
 }
 
@@ -205,8 +200,8 @@
     font-family: var(--font-display);
     margin-bottom: 15px;
     text-decoration: underline;
-    -webkit-text-decoration-color: var(--color-yellow, #ffcb05); /* safari still uses vendor prefix */
-    text-decoration-color:  var(--color-yellow, #ffcb05);
+    -webkit-text-decoration-color: var(--color-yellow); /* safari still uses vendor prefix */
+    text-decoration-color:  var(--color-yellow);
     display: block;
 }
 
@@ -278,8 +273,8 @@
 .pdex-cornav-item:hover { color: var(--hex-text); }
 
 .pdex-cornav-item.active {
-  background: var(--color-yellow, #ffcb05);
-  color: #1a1a1a;
+  background: var(--color-yellow);
+  color: var(--color-ink);
 }
 
 /* ============================================================
@@ -313,8 +308,8 @@
   margin: 0 0 12px;
   color: var(--hex-text);
   text-decoration: underline;
-  -webkit-text-decoration-color: var(--color-yellow, #ffcb05);
-  text-decoration-color: var(--color-yellow, #ffcb05);
+  -webkit-text-decoration-color: var(--color-yellow);
+  text-decoration-color: var(--color-yellow);
 }
 
 .detail-empty {
@@ -368,7 +363,7 @@
 }
 .evo-node.current {
   opacity: 1;
-  border: 1px solid var(--color-yellow, #ffcb05);
+  border: 1px solid var(--color-yellow);
 }
 .evo-node img { width: 56px; height: 56px; object-fit: contain; }
 .evo-node span {
@@ -411,7 +406,7 @@
 .stat-bar-fill {
   height: 100%;
   border-radius: 3px;
-  background: var(--color-yellow, #ffcb05);
+  background: var(--color-yellow);
 }
 
 /* ---- Breeding ---- */
@@ -579,13 +574,13 @@
 .game-tab:hover { color: var(--hex-text); }
 
 .gen-tab.active {
-  background: var(--color-yellow, #ffcb05);
-  color: #1a1a1a;
+  background: var(--color-yellow);
+  color: var(--color-ink);
 }
 
 .game-tab.active {
-  color: var(--color-yellow, #ffcb05);
-  border-color: var(--color-yellow, #ffcb05);
+  color: var(--color-yellow);
+  border-color: var(--color-yellow);
   background: rgba(255, 203, 5, 0.08);
 }
 
@@ -643,7 +638,7 @@
 .pdex-cornav-item:focus-visible,
 .gen-tab:focus-visible,
 .game-tab:focus-visible {
-  outline: 2px solid var(--color-yellow, #ffcb05);
+  outline: 2px solid var(--color-yellow);
   outline-offset: 2px;
 }
 
@@ -651,7 +646,7 @@
 .gen-tab:hover,
 .game-tab:hover { background-color: rgba(255, 255, 255, 0.1); }
 
-.pdex-cornav-item.active:hover { background: var(--color-yellow, #ffcb05); }
+.pdex-cornav-item.active:hover { background: var(--color-yellow); }
 
 /* 44px minimum tap target on touch devices */
 @media (pointer: coarse) {
@@ -719,7 +714,7 @@
   padding: 2px;
   border-radius: var(--radius-sm, 8px);
 }
-.defense-cell:focus-visible { outline: 2px solid var(--color-yellow, #ffcb05); outline-offset: 2px; }
+.defense-cell:focus-visible { outline: 2px solid var(--color-yellow); outline-offset: 2px; }
 .defense-cell:hover .chip { filter: brightness(1.12); }
 
 .defense-cell .chip {
@@ -777,8 +772,8 @@
   padding: 12px 18px;
   color: var(--hex-text);
   text-decoration: none;
-  background: var(--color-panel, #1b2244);
-  border: 1px solid var(--color-panel-border, #2b3363);
+  background: var(--color-panel);
+  border: 1px solid var(--color-panel-border);
   border-radius: var(--radius-md, 14px);
   transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
 }
@@ -786,7 +781,7 @@
 .pager-card.next { grid-column: 2; justify-content: flex-end; text-align: right; }
 
 .pager-card:hover { transform: translateY(-3px); border-color: rgba(244, 196, 48, 0.5); }
-.pager-card:focus-visible { outline: 2px solid var(--color-yellow, #ffcb05); outline-offset: 3px; }
+.pager-card:focus-visible { outline: 2px solid var(--color-yellow); outline-offset: 3px; }
 
 .pager-card img {
   flex: none;
@@ -803,7 +798,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-yellow, #ffcb05);
+  color: var(--color-yellow);
 }
 .pager-name {
   overflow: hidden;
@@ -812,7 +807,7 @@
   font-family: var(--font-display);
   font-size: var(--text-xl);
   font-weight: 600;
-  color: var(--color-white, #fff);
+  color: var(--color-white);
 }
 .pager-num { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--hex-muted); }
 

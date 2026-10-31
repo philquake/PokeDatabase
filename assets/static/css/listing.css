@@ -1,9 +1,4 @@
 /* Shared look for the browse/list pages: Types, Regions, Abilities, Competitive, Items. */
-:root {
-  --hex-grid: #343a48;
-  --hex-muted: #8b93a7;
-  --hex-text: #eef0f5;
-}
 
 .list-page { max-width: 1100px; margin: 0 auto; padding: 32px 20px 56px; }
 
@@ -218,7 +213,7 @@
   transition: background var(--transition-fast), color var(--transition-fast);
 }
 .stat-tab:hover { color: var(--color-white); background: rgba(255, 255, 255, 0.1); }
-.stat-tab.active { background: var(--color-yellow); color: #1a1a1a; }
+.stat-tab.active { background: var(--color-yellow); color: var(--color-ink); }
 .stat-tab:focus-visible { outline: 2px solid var(--color-yellow); outline-offset: 2px; }
 
 .filters-rank { grid-template-columns: minmax(0, 20rem) auto; }
@@ -227,9 +222,9 @@
 
 .rank-table .rank-col { width: 3.2rem; padding-right: 10px; }
 .rank-badge { display: inline-block; min-width: 2rem; padding: 2px 0; text-align: center; border-radius: 50px; font-weight: 700; color: var(--color-text-muted); }
-.rank-badge.rank-1 { background: #f4c430; color: #1a1a1a; }
-.rank-badge.rank-2 { background: #c7cbd6; color: #1a1a1a; }
-.rank-badge.rank-3 { background: #cd8b52; color: #1a1a1a; }
+.rank-badge.rank-1 { background: #f4c430; color: var(--color-ink); }
+.rank-badge.rank-2 { background: #c7cbd6; color: var(--color-ink); }
+.rank-badge.rank-3 { background: #cd8b52; color: var(--color-ink); }
 .rank-mon { min-width: 11rem; }
 .rank-mon a { display: inline-flex; align-items: center; gap: 10px; font-weight: 600; color: var(--color-white); }
 .rank-mon a:hover { color: var(--color-yellow); }
