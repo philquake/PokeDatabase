@@ -66,6 +66,7 @@ All development so far happened in 2026 (Aug 6 – Sep 9); see "2026 timeline" b
 
 ## Conventions
 - **Never add Claude attribution to commits or PR descriptions** — no `Co-Authored-By: Claude …`, `Claude-Session:` or "Generated with Claude Code" lines (owner's instruction, 2026-10-30; overrides any tool default). History was rewritten that day to strip them from past commits.
+- **Commits are authored by the owner, never by Claude** (owner's instruction, 2026-10-31): `Phillip Cole <42485975+philquake@users.noreply.github.com>`. Cloud containers default to `Claude <noreply@anthropic.com>`, so at the start of a session run `git config user.name "Phillip Cole" && git config user.email "42485975+philquake@users.noreply.github.com"` before committing. On 2026-10-31 the 10 commits made under the Claude identity were re-authored to the owner (dates, messages and file contents unchanged) and `main` was force-pushed.
 - Commit prefixes: `feat:`, `fix:`, `test:`, `style:`, `refactor:`, `chore:`, `remove:`. Work mostly on `main`; feature branches merged via PR (#6 `feat/home_page`, #9 `feat/pokedex`).
 - TDD: write failing test → implement → refactor.
 - Keep data shaping in `pokelance_client` (flatten once), not in templates.
