@@ -19,6 +19,8 @@ requests per Pokémon than before. Type-matchup lookups are cached for the
 duration of a single sync() call since many Pokémon share types.
 """
 
+from itertools import islice
+
 import requests
 
 from pokemon.models import Ability, Item, Move, Pokemon, PokemonMove
@@ -50,6 +52,9 @@ ALL_TYPE_NAMES = [
     "poison", "ground", "flying", "psychic", "bug", "rock", "ghost",
     "dragon", "dark", "steel", "fairy",
 ]
+
+# shortcut: last Gen IX dex number; raise it (and add to GENERATIONS) when a new generation ships.
+NATIONAL_DEX_SIZE = 1025
 
 GENERATIONS = {
     "generation-i": 1,
@@ -331,8 +336,8 @@ def _to_fixture_entry(raw, species, evolution_chain, type_matchups, locations):
 def sync_pokemon_data(count=5, update_existing=True):
     """
     Fetch up to `count` new Pokémon from PokéAPI that aren't already in the
-    database and store them; then, if `update_existing`, re-fetch every stored
-    Pokémon and patch any fields that are missing or have drifted.
+    database (lowest missing dex numbers first, up to NATIONAL_DEX_SIZE) and
+    store them; then, if `update_existing`, re-fetch every stored Pokémon and patch any fields that are missing or have drifted.
 
     Each Pokémon is saved as soon as it's fetched, so if the sync fails part
     way through, everything fetched before the failure is kept.
@@ -345,26 +350,16 @@ def sync_pokemon_data(count=5, update_existing=True):
     """
     known_numbers = _existing_numbers()
     existing_numbers = sorted(known_numbers)
-    highest_known = max(known_numbers, default=0)
 
     type_matchup_cache = {}
     new_entries = []
     updated_entries = []
-    next_number = highest_known + 1
-    attempts = 0
-    max_attempts = count * 3  # room for skipped/duplicate numbers without looping forever
+    missing_numbers = (n for n in range(1, NATIONAL_DEX_SIZE + 1) if n not in known_numbers)
 
-    while len(new_entries) < count and attempts < max_attempts:
-        attempts += 1
-        if next_number in known_numbers:
-            next_number += 1
-            continue
-
-        entry = _fetch_and_build_entry(next_number, type_matchup_cache)
+    for number in islice(missing_numbers, count):
+        entry = _fetch_and_build_entry(number, type_matchup_cache)
         _save_entry(entry)
         new_entries.append(entry)
-        known_numbers.add(next_number)
-        next_number += 1
 
     # --- Pass 2: patch existing Pokémon whose data has drifted ---
     if update_existing:

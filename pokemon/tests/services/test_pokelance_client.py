@@ -733,6 +733,18 @@ class SyncPokemonDataDatabaseTest(TestCase):
         )
         self.assertEqual(Pokemon.objects.get(name="Mon1").moves.count(), 1)
 
+    @patch("pokemon.services.pokelance_client.NATIONAL_DEX_SIZE", 5)
+    @patch("pokemon.services.pokelance_client._fetch_and_build_entry")
+    def test_fills_gaps_first_and_stops_at_last_dex_number(self, mock_fetch):
+        from pokemon.services.data import save_pokemon_entry
+        save_pokemon_entry(_entry(1, "Mon1"))
+        save_pokemon_entry(_entry(3, "Mon3"))
+        mock_fetch.side_effect = lambda number, cache: _entry(number, f"Mon{number}")
+
+        result = sync_pokemon_data(count=10, update_existing=False)
+
+        self.assertEqual([p["pokedex_number"] for p in result["added"]], [2, 4, 5])
+
     @patch("pokemon.services.pokelance_client._fetch_and_build_entry")
     def test_progress_is_kept_when_sync_fails_part_way(self, mock_fetch):
         def fetch(number, cache):
