@@ -1,9 +1,4 @@
 /* Same palette tokens the Pokémon page defines, so the move tables look identical on both pages. */
-:root {
-  --hex-grid: #343a48;
-  --hex-muted: #8b93a7;
-  --hex-text: #eef0f5;
-}
 
 /* Shared move components: used by the Pokémon page's Moves tab and the Moves list page. */
 .move-type {
@@ -21,8 +16,8 @@
 
 .move-cat { display: inline-flex; vertical-align: middle; }
 .move-cat-physical { color: var(--color-red-hover); }
-.move-cat-special { color: #6b9bff; }
-.move-cat-status { color: #a6adc9; }
+.move-cat-special { color: var(--color-special); }
+.move-cat-status { color: var(--color-text-muted); }
 
 .move-legend {
   display: flex;
@@ -56,14 +51,23 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 0 0 8px;
+  margin: 0;
+  cursor: pointer;
+  min-height: 44px;
   font-family: var(--font-body);
   font-size: var(--text-sm);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--color-yellow, #ffcb05);
+  color: var(--color-yellow);
 }
+
+.moves-card-title::before { content: "▾"; order: -1; margin-right: 8px; font-size: var(--text-base); transition: transform 0.15s; }
+.moves-card:not([open]) > .moves-card-title::before { transform: rotate(-90deg); }
+.moves-card-title { justify-content: flex-start; }
+.moves-card-title::-webkit-details-marker { display: none; }
+.moves-card[open] > .moves-card-title { margin-bottom: 8px; }
+.moves-card-title:focus-visible { outline: 2px solid var(--color-yellow); outline-offset: 2px; }
 
 .moves-count {
   font-size: var(--text-xs);

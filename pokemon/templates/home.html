@@ -67,7 +67,7 @@
         </div>
         <div class="pokemon-tag pokemon-tag-id">{{ hero.name}} #{{ hero.pokedex_number|stringformat:"03d" }}</div>
  
-        <div class="pokemon-image-wrap">
+        <a href="{% url 'pokemon_detail' hero.name %}" class="pokemon-image-wrap" aria-label="View {{ hero.name }}">
           <img
             src="{{ hero.image }}"
             alt="{{ hero.name }} official artwork"
@@ -76,7 +76,7 @@
             height="800"
             loading="eager"
           >
-        </div>
+        </a>
  
         <div class="pokemon-tag pokemon-tag-stats">
           {% for stat_name, stat_value in hero.top_stats %}{% if not forloop.first %} · {% endif %}{{ stat_name }} {{ stat_value }}{% endfor %}

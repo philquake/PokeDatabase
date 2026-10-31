@@ -12,6 +12,10 @@
   --color-yellow: #f4c430;
   --color-yellow-hover: #ffd54a;
   --color-white: #ffffff;
+  --color-ink: #14172b;            /* dark label on yellow/light chips */
+  --hex-grid: #343a48;
+  --hex-muted: var(--color-text-muted);
+  --hex-text: #eef0f5;
   --color-text-muted: #a6adc9;
   --color-text-faint: #7a82a8;
 
@@ -19,6 +23,7 @@
   --color-fire-text: #f4c430;
 
   /* Poké-red: the second brand accent (Poké Ball). Use it for emphasis and tags; yellow stays the primary action colour. */
+  --color-special: #6b9bff;
   --color-red: #e2492c;
   --color-red-hover: #f0644a;
   --color-red-strong: #b93a20;     /* carries white text (5.7:1) and sits on light surfaces (5.0:1) */
@@ -89,7 +94,7 @@ img {
 
 .btn-primary {
   background: var(--color-yellow);
-  color: #1a1a1a;
+  color: var(--color-ink);
   padding: 10px 20px;
 }
 
@@ -496,7 +501,7 @@ img {
 .home-divider {
   width: 100%;
   height: 20px;
-  background: #f0f4ff;
+  background: var(--color-panel);
   clip-path: ellipse(55% 100% at 50% 100%);
   margin-top: 1rem;
 }
@@ -854,6 +859,7 @@ footer {
   font-size: var(--text-2xl);
   line-height: 1;
   margin-bottom: 16px;
+  color: var(--color-red-strong); /* cards are white; inherited body colour is white too */
   transition: transform var(--transition-fast);
 }
 

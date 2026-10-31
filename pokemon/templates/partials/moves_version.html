@@ -1,8 +1,8 @@
 {# One game's move tables. Needs: version (a build_move_generations version dict). #}
 <div class="moves-grid">
   {% for section in version.sections %}
-    <div class="moves-card">
-      <h4 class="moves-card-title">{{ section.title }} <span class="moves-count">{{ section.moves|length }}</span></h4>
+    <details class="moves-card" open>
+      <summary class="moves-card-title"><span>{{ section.title }} <span class="moves-count">{{ section.moves|length }}</span></span></summary>
       <table class="moves-table{% if not section.show_level %} no-level{% endif %}">
         <thead>
           <tr>
@@ -31,6 +31,6 @@
           {% endfor %}
         </tbody>
       </table>
-    </div>
+    </details>
   {% endfor %}
 </div>
