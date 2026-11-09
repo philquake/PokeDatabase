@@ -315,7 +315,8 @@ function initLazyMovePanels() {
     if (!pane) return;
     // The shown pane is either a game pane, or a generation pane whose active game may still be unloaded.
     pane.querySelectorAll('.moves-lazy[data-src]').forEach((el) => {
-      if (el.closest('.tab-pane').classList.contains('active')) loadPane(el);
+      // Active AND on screen: every generation has an "active" first game, but only the shown generation's is visible.
+      if (el.closest('.tab-pane').classList.contains('active') && el.offsetParent !== null) loadPane(el);
     });
   });
 }
