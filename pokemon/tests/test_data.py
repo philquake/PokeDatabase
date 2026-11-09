@@ -62,7 +62,8 @@ class SavePokemonEntryTest(TestCase):
 
         result = pokemon_to_dict(Pokemon.objects.get(pokedex_number=94), include_related=True)
 
-        self.assertEqual({k: v for k, v in result.items() if k != "region"}, entry)
+        # A Pokémon with no alternate forms round-trips with an empty "forms" list.
+        self.assertEqual({k: v for k, v in result.items() if k != "region"}, {**entry, "forms": []})
 
     def test_region_is_derived_from_generation(self):
         save_pokemon_entry(_entry(generation=9))

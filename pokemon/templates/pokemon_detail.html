@@ -7,8 +7,8 @@
     <link href="{% static 'css/pokemon_detail.css' %}" rel="stylesheet">
 {% endblock %}
 
-{% block header_text %}{{pokemon.pokedex_number}}, {{pokemon.name}}{% endblock %}
-{% block title %}Pokedex Entry - #{{pokemon.pokedex_number}} {{pokemon.name}}{% endblock %}
+{% block header_text %}{{pokemon.pokedex_number}}, {{ display_name }}{% endblock %}
+{% block title %}Pokedex Entry - #{{pokemon.pokedex_number}} {{ display_name }}{% endblock %}
 
 {% block content %}
 {% include "partials/move_sprite.html" %}
@@ -18,7 +18,7 @@
     <!-- Left Column: Name, Type, Ability -->
     <article class="hero-card">
       <div class="pokemon-hero-left">
-        <h1 class="pokemon-hero-name">{{ pokemon.name }}</h1>
+        <h1 class="pokemon-hero-name{% if display_name|length > 11 %} is-long{% endif %}">{{ display_name }}</h1>
         <div class="pokemon-hero-types">
           {% for type in pokemon.types %}
             <span class="pokemon-type type-{{ type|lower }}">{{ type|upper }}</span>
@@ -39,7 +39,7 @@
     <!-- Center Column: Image -->
     <article class="hero-card">
       <div class="pokemon-hero-center">
-        <img class="pokemon-hero-img" src="{{ pokemon.image }}" alt="Official artwork of {{ pokemon.name }}">
+        <img class="pokemon-hero-img" src="{{ pokemon.image }}" alt="Official artwork of {{ display_name }}">
       </div>
     </article>
 
@@ -69,6 +69,8 @@
      SECTION NAV — sticky tab bar, pins under the site navbar
      once scrolled past the hero
      ============================================================ -->
+{% include "partials/form_switcher.html" %}
+
 <nav class="pdex-cornav" aria-label="Pokémon detail sections">
   <div class="pdex-cornav-items" id="tabList" role="tablist">
 
@@ -84,9 +86,11 @@
             data-bs-target="#panel-evolution" type="button" role="tab"
             aria-controls="panel-evolution" aria-selected="false">Evolution</button>
 
+    {% if not active_form %}
     <button class="pdex-cornav-item" id="tab-location" data-bs-toggle="tab"
             data-bs-target="#panel-location" type="button" role="tab"
             aria-controls="panel-location" aria-selected="false">Location</button>
+    {% endif %}
 
     <button class="pdex-cornav-item" id="tab-breeding" data-bs-toggle="tab"
             data-bs-target="#panel-breeding" type="button" role="tab"
@@ -160,7 +164,7 @@
 
       <div class="detail-card overview-weakness">
       <h3>Type defenses</h3>
-      <p class="type-eff-note">Damage <em>{{ pokemon.name }}</em> takes from each attacking type.</p>
+      <p class="type-eff-note">Damage <em>{{ display_name }}</em> takes from each attacking type.</p>
 
       <div class="defense-grid">
         {% for d in type_defenses %}
@@ -178,11 +182,14 @@
   <section class="panel tab-pane fade" id="panel-moves" role="tabpanel" aria-labelledby="tab-moves">
     <div class="detail-card">
       <h3>Moves</h3>
+      {% if moves_from_base %}
+        <p class="detail-note">{{ active_form.label }} uses {{ pokemon.name }}&rsquo;s move list.</p>
+      {% endif %}
       {% include "partials/move_legend.html" %}
       {% if move_generations %}
         {% include "partials/game_tabs.html" with generations=move_generations prefix="mv" kind="moves" %}
       {% else %}
-        <p class="detail-empty">No move data for {{ pokemon.name }} yet.</p>
+        <p class="detail-empty">No move data for {{ display_name }} yet.</p>
       {% endif %}
     </div>
   </section>
@@ -194,6 +201,7 @@
       {% include "partials/evolution_chain.html" with container_class="tab-evolution" %}    </div>
   </section>
 
+  {% if not active_form %}
   <!-- LOCATION -->
   <section class="panel tab-pane fade" id="panel-location" role="tabpanel" aria-labelledby="tab-location">
     <div class="detail-card">
@@ -205,6 +213,7 @@
       {% endif %}
     </div>
   </section>
+  {% endif %}
 
   <!-- BREEDING -->
   <section class="panel tab-pane fade" id="panel-breeding" role="tabpanel" aria-labelledby="tab-breeding">

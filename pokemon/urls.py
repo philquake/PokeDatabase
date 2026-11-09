@@ -7,6 +7,7 @@ urlpatterns = [
     path("", views.home, name="home"),
     path("search/", views.search, name="search"),
     path("pokedex/", views.pokedex, name="pokedex"), 
+    path("forms/", views.forms, name="forms"),
     path("types/", views.types, name="types"),
     path("region/", views.region, name="region"),
     path("abilities/", views.abilities, name="abilities"),

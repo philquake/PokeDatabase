@@ -74,6 +74,55 @@ class PokemonMove(models.Model):
         return f"{self.pokemon.name}: {self.name} ({self.version}, {self.method})"
 
 
+class PokemonForm(models.Model):
+    """
+    An alternate form of a Pokémon: a regional variant (Alolan Rattata), a Mega (Mega Charizard X),
+    Gigantamax and so on. PokéAPI lists these as extra pokemon resources (ids 10001+) of the same
+    species. They hold what differs per form (types, stats, abilities, artwork, moves); species-level
+    data (category, gender, egg groups, evolution chain ...) stays on the base Pokemon.
+    """
+
+    pokemon = models.ForeignKey(Pokemon, on_delete=models.CASCADE, related_name="forms")
+    slug = models.CharField(max_length=60)  # the part after the species name: "mega-x", "alola"
+    pokeapi_id = models.PositiveIntegerField(unique=True)
+    kind = models.CharField(max_length=10)  # regional / mega / gmax / other (see services/forms.py)
+    label = models.CharField(max_length=80)  # "Mega Charizard X"
+    image = models.URLField(max_length=300, blank=True)
+    types = models.JSONField(default=list)
+    base_stats = models.JSONField(default=dict)
+    stat_total = models.PositiveIntegerField(default=0)
+    abilities = models.JSONField(default=list)
+    height_m = models.FloatField(null=True, blank=True)
+    weight_kg = models.FloatField(null=True, blank=True)
+    base_experience = models.PositiveSmallIntegerField(null=True, blank=True)
+    ev_yield = models.JSONField(default=dict)
+    held_items = models.JSONField(default=list)
+
+    class Meta:
+        ordering = ["pokeapi_id"]
+        constraints = [models.UniqueConstraint(fields=["pokemon", "slug"], name="unique_form_slug_per_pokemon")]
+
+    def __str__(self):
+        return self.label
+
+
+class FormMove(models.Model):
+    """One (move, game version, learn method, level) row for a form. Many forms (Megas) have none and use the base moves."""
+
+    form = models.ForeignKey(PokemonForm, on_delete=models.CASCADE, related_name="moves")
+    name = models.CharField(max_length=50)
+    version = models.CharField(max_length=50)
+    level_learnt = models.PositiveSmallIntegerField(default=0)
+    method = models.CharField(max_length=30)
+
+    class Meta:
+        ordering = ["id"]
+        indexes = [models.Index(fields=["form", "version"])]
+
+    def __str__(self):
+        return f"{self.form.label}: {self.name} ({self.version}, {self.method})"
+
+
 class PokemonEncounter(models.Model):
     """One wild encounter (location area, game version, method) for a Pokémon."""
 

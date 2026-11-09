@@ -14,7 +14,10 @@
   <header class="list-header">
     <p class="list-eyebrow">The complete National Dex</p>
     <h1 class="list-title">The Pokédex</h1>
-    <p class="list-subtitle">{{ pokemon_data|length }} Pokémon catalogued</p>
+    <p class="list-subtitle">
+      {{ pokemon_data|length }} Pokémon catalogued
+      {% if form_count %}&middot; <a class="inline-link" href="{% url 'forms' %}">{{ form_count }} alternate form{{ form_count|pluralize }}</a>{% endif %}
+    </p>
   </header>
 
   <div class="pokemon-grid">

@@ -29,7 +29,7 @@
               {% if gen.active and version.active %}
                 {% include "partials/moves_version.html" %}
               {% else %}
-                <div class="moves-lazy" data-src="{% url 'pokemon_moves_fragment' pokemon.name version.slug %}" aria-live="polite">
+                <div class="moves-lazy" data-src="{% url 'pokemon_moves_fragment' pokemon.name version.slug %}{% if active_form %}?form={{ active_form.slug }}{% endif %}" aria-live="polite">
                   <p class="detail-empty">Loading moves&hellip;</p>
                 </div>
               {% endif %}

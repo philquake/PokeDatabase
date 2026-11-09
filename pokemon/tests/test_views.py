@@ -10,7 +10,7 @@ from pokemon.templatetags.pokemon_extras import get_item
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.template import Context, Template
-from pokemon.models import Move, Pokemon, PokemonMove
+from pokemon.models import Move, Pokemon, PokemonForm, PokemonMove
 from pokemon.tests.helpers import PokemonDataTestCase
 
 
@@ -192,6 +192,160 @@ class PokemonDetailPagerTest(PokemonDataTestCase):
 
         self.assertContains(response, 'rel="prev"')
         self.assertNotContains(response, 'rel="next"')
+
+
+class PokemonDetailFormsTest(PokemonDataTestCase):
+
+    def get(self, name="Charizard", form=None):
+        url = reverse("pokemon_detail", args=[name])
+        return self.client.get(url, {"form": form} if form else {})
+
+    # --- the switcher
+    def test_pokemon_with_forms_get_a_switcher_listing_base_then_forms(self):
+        response = self.get()
+
+        options = response.context["form_options"]
+        self.assertEqual([o["slug"] for o in options], ["", "mega-x", "mega-y", "gmax"])
+        self.assertEqual([o["label"] for o in options],
+                         ["Charizard", "Mega Charizard X", "Mega Charizard Y", "Gigantamax Charizard"])
+        self.assertEqual([o["active"] for o in options], [True, False, False, False])
+        self.assertContains(response, 'class="form-switcher"')
+        self.assertContains(response, "?form=mega-x")
+
+    def test_pokemon_without_forms_have_no_switcher(self):
+        response = self.get("Bulbasaur")
+
+        self.assertEqual(response.context["form_options"], [])
+        self.assertNotContains(response, "form-switcher")
+
+    def test_the_active_option_is_marked_for_assistive_tech(self):
+        response = self.get(form="mega-y")
+        self.assertContains(response, 'aria-current="page"', count=1)
+
+    # --- viewing a form
+    def test_a_form_overrides_types_stats_abilities_and_artwork(self):
+        response = self.get(form="mega-x")
+        pokemon = response.context["pokemon"]
+
+        self.assertEqual(pokemon["types"], ["Fire", "Dragon"])
+        self.assertEqual(pokemon["base_stats"]["Attack"], 130)
+        self.assertEqual(pokemon["stat_total"], 634)
+        self.assertEqual(pokemon["abilities"], [{"name": "Tough Claws", "hidden": False}])
+        self.assertTrue(pokemon["image"].endswith("/10034.png"))
+        self.assertEqual(pokemon["height_m"], 1.7)
+
+    def test_species_level_data_stays_the_bases(self):
+        pokemon = self.get(form="mega-x").context["pokemon"]
+
+        self.assertEqual(pokemon["name"], "Charizard")
+        self.assertEqual(pokemon["pokedex_number"], 6)
+        self.assertEqual(pokemon["catch_rate"], 45)
+        self.assertEqual(pokemon["egg_groups"], ["Monster", "Dragon"])
+
+    def test_the_page_is_titled_with_the_forms_label(self):
+        response = self.get(form="mega-x")
+
+        self.assertEqual(response.context["display_name"], "Mega Charizard X")
+        self.assertContains(response, "<title>Pokedex Entry - #6 Mega Charizard X</title>", html=False)
+        self.assertContains(response, ">Mega Charizard X</h1>")
+
+    def test_the_base_page_is_unchanged(self):
+        response = self.get()
+
+        self.assertEqual(response.context["display_name"], "Charizard")
+        self.assertIsNone(response.context["active_form"])
+        self.assertEqual(response.context["pokemon"]["types"], ["Fire", "Flying"])
+
+    def test_type_defenses_use_the_forms_types(self):
+        cells = {c["slug"]: c for c in self.get(form="mega-x").context["type_defenses"]}
+
+        self.assertEqual(cells["grass"]["multiplier"], 0.25)    # fire and dragon both resist grass
+        self.assertEqual(cells["rock"]["multiplier"], 2)         # no longer 4x: dragon is neutral to rock
+        self.assertEqual(cells["ground"]["multiplier"], 2)       # no longer immune: not flying
+
+    def test_stat_ranges_follow_the_forms_stats(self):
+        base = self.get().context["stat_ranges"]["Attack"]
+        mega = self.get(form="mega-x").context["stat_ranges"]["Attack"]
+        self.assertGreater(mega["max"], base["max"])
+
+    def test_an_unknown_form_is_404(self):
+        self.assertEqual(self.get(form="mega-z").status_code, 404)
+        self.assertEqual(self.get("Bulbasaur", form="mega").status_code, 404)
+
+    def test_form_slug_is_case_insensitive(self):
+        self.assertEqual(self.get(form="MEGA-X").status_code, 200)
+
+    # --- moves
+    def move_names(self, response):
+        return {
+            move["name"]
+            for generation in response.context["move_generations"]
+            for version in generation["versions"]
+            for section in version["sections"]
+            for move in section["moves"]
+        }
+
+    def test_a_form_with_its_own_moves_shows_only_those(self):
+        response = self.get("Voltorb", form="hisui")
+
+        self.assertFalse(response.context["moves_from_base"])
+        self.assertEqual(self.move_names(response), {"Tackle", "Thunder Shock", "Charge", "Chloroblast"})
+
+    def test_a_form_without_moves_falls_back_to_the_bases_and_says_so(self):
+        base = self.move_names(self.get())
+        response = self.get(form="mega-x")
+
+        self.assertTrue(response.context["moves_from_base"])
+        self.assertEqual(self.move_names(response), base)
+        self.assertContains(response, "Mega Charizard X uses Charizard")
+
+    def test_lazy_move_tabs_carry_the_form_so_the_right_moves_load(self):
+        response = self.get(form="mega-x")
+        lazy = reverse("pokemon_moves_fragment", args=["Charizard", "red-blue"])
+        self.assertContains(response, f'data-src="{lazy}?form=mega-x"')
+
+    def test_base_lazy_tabs_have_no_form_param(self):
+        response = self.get()
+        lazy = reverse("pokemon_moves_fragment", args=["Charizard", "red-blue"])
+        self.assertContains(response, f'data-src="{lazy}"')
+
+    # --- locations
+    def test_forms_hide_the_location_tab_because_encounters_are_not_tracked(self):
+        response = self.get(form="mega-x")
+
+        self.assertNotContains(response, 'id="tab-location"')
+        self.assertNotContains(response, 'id="panel-location"')
+        self.assertContains(self.get(), 'id="tab-location"')
+
+    # --- navigation is by species
+    def test_previous_and_next_still_point_at_other_species(self):
+        response = self.get("Kangaskhan", form="mega")
+        self.assertEqual(response.context["previous"]["name"], "Voltorb")
+
+
+class PokemonMovesFragmentFormsTest(PokemonDataTestCase):
+
+    def url(self, name, version, form=None):
+        url = reverse("pokemon_moves_fragment", args=[name, version])
+        return f"{url}?form={form}" if form else url
+
+    def test_a_forms_own_moves_for_a_game(self):
+        response = self.client.get(self.url("Voltorb", "legends-arceus", "hisui"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Chloroblast")
+
+    def test_a_form_with_its_own_moves_has_none_for_other_games(self):
+        self.assertEqual(self.client.get(self.url("Voltorb", "red-blue", "hisui")).status_code, 404)
+
+    def test_a_form_without_moves_serves_the_bases(self):
+        response = self.client.get(self.url("Charizard", "red-blue", "mega-x"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Flamethrower")
+
+    def test_unknown_form_is_404(self):
+        self.assertEqual(self.client.get(self.url("Charizard", "red-blue", "mega-z")).status_code, 404)
 
 
 class PokemonDetailTest(PokemonDataTestCase):
@@ -1246,3 +1400,92 @@ class MovesListEmptyTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "sync_moves")
+
+
+class FormsListViewTest(PokemonDataTestCase):
+
+    def labels(self, response):
+        return [f.label for f in response.context["page_obj"]]
+
+    def test_lists_every_form_ordered_by_species_then_id(self):
+        response = self.client.get(reverse("forms"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "forms.html")
+        self.assertEqual(response.context["total"], 5)
+        self.assertEqual(self.labels(response), [
+            "Mega Charizard X", "Mega Charizard Y", "Gigantamax Charizard",
+            "Hisuian Voltorb", "Mega Kangaskhan",
+        ])
+
+    def test_cards_link_to_the_form_on_the_pokemon_page(self):
+        response = self.client.get(reverse("forms"))
+
+        self.assertContains(response, f'href="{reverse("pokemon_detail", args=["Charizard"])}?form=mega-x"')
+        self.assertContains(response, f'href="{reverse("pokemon_detail", args=["Voltorb"])}?form=hisui"')
+
+    def test_cards_show_types_and_base_stat_total(self):
+        response = self.client.get(reverse("forms"), {"q": "mega charizard x"})
+
+        self.assertContains(response, "type-dragon")
+        self.assertContains(response, "634")
+
+    def test_kind_tabs_carry_counts(self):
+        tabs = {t["slug"]: t for t in self.client.get(reverse("forms")).context["kind_tabs"]}
+
+        self.assertEqual({k: t["count"] for k, t in tabs.items()},
+                         {"": 5, "regional": 1, "mega": 3, "gmax": 1, "other": 0})
+        self.assertTrue(tabs[""]["active"])
+
+    def test_filters_by_kind(self):
+        response = self.client.get(reverse("forms"), {"kind": "mega"})
+
+        self.assertEqual(self.labels(response), ["Mega Charizard X", "Mega Charizard Y", "Mega Kangaskhan"])
+        self.assertTrue({t["slug"]: t for t in response.context["kind_tabs"]}["mega"]["active"])
+
+    def test_unknown_kind_is_ignored(self):
+        self.assertEqual(self.client.get(reverse("forms"), {"kind": "banana"}).context["total"], 5)
+
+    def test_searches_by_label_or_pokemon_name(self):
+        self.assertEqual(self.labels(self.client.get(reverse("forms"), {"q": "HISUI"})), ["Hisuian Voltorb"])
+        self.assertEqual(len(self.labels(self.client.get(reverse("forms"), {"q": "charizard"}))), 3)
+
+    def test_search_and_kind_combine(self):
+        response = self.client.get(reverse("forms"), {"kind": "mega", "q": "charizard"})
+        self.assertEqual(self.labels(response), ["Mega Charizard X", "Mega Charizard Y"])
+
+    def test_no_matches_message(self):
+        self.assertContains(self.client.get(reverse("forms"), {"q": "zzzz"}), "No forms match")
+
+    def test_pokedex_page_links_to_the_forms_page_with_a_count(self):
+        response = self.client.get(reverse("pokedex"))
+
+        self.assertContains(response, f'href="{reverse("forms")}"')
+        self.assertContains(response, "5 alternate forms")
+
+
+class FormsListPaginationTest(TestCase):
+
+    def test_forty_eight_per_page_and_links_keep_filters(self):
+        pokemon = Pokemon.objects.create(pokedex_number=1, name="Mon")
+        for i in range(60):
+            PokemonForm.objects.create(pokemon=pokemon, slug=f"f{i}", pokeapi_id=10001 + i, kind="other", label=f"Form {i}")
+
+        first = self.client.get(reverse("forms"), {"kind": "other"})
+        second = self.client.get(reverse("forms"), {"page": 2})
+
+        self.assertEqual(len(first.context["page_obj"]), 48)
+        self.assertEqual(len(second.context["page_obj"]), 12)
+        self.assertContains(first, "kind=other&amp;page=2")
+
+
+class FormsListEmptyTest(TestCase):
+
+    def test_explains_how_to_get_forms(self):
+        response = self.client.get(reverse("forms"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "sync_pokemon")
+
+    def test_pokedex_page_has_no_forms_link_when_there_are_none(self):
+        self.assertNotContains(self.client.get(reverse("pokedex")), "alternate form")

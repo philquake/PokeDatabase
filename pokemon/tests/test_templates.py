@@ -87,3 +87,6 @@ class NavbarTest(TestCase):
 
         response = self.client.get(reverse("region_detail", args=["kanto"]))
         self.assertContains(response, 'class=" region active"')
+
+        response = self.client.get(reverse("forms"))
+        self.assertContains(response, 'class=" pokedex active"')

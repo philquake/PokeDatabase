@@ -8,7 +8,9 @@ from pathlib import Path
 
 from django.db import transaction
 
-from pokemon.models import Ability, Item, Move, Pokemon, PokemonEncounter, PokemonMove
+from pokemon.models import (
+    Ability, FormMove, Item, Move, Pokemon, PokemonEncounter, PokemonForm, PokemonMove,
+)
 
 FIXTURE_PATH = Path(__file__).resolve().parent.parent.parent / "assets" / "static" / "fixtures" / "pokemon.json"
 
@@ -22,16 +24,33 @@ MOVE_FIELDS = ["name", "version", "level_learnt", "method"]
 MOVE_INFO_FIELDS = ["name", "type", "damage_class", "power", "accuracy", "pp", "generation", "effect"]
 ABILITY_FIELDS = ["name", "generation", "effect"]
 ITEM_FIELDS = ["name", "category", "cost", "effect", "sprite"]
+FORM_FIELDS = [
+    "slug", "pokeapi_id", "kind", "label", "image", "types", "base_stats", "stat_total",
+    "abilities", "height_m", "weight_kg", "base_experience", "ev_yield", "held_items",
+]
 ENCOUNTER_FIELDS = ["location", "version", "method", "chance", "min_level", "max_level"]
 
 
-def pokemon_to_dict(pokemon, include_related=False):
-    """Fixture-shaped dict for a Pokemon; moves/locations only when asked for."""
+def pokemon_to_dict(pokemon, include_related=False, form_moves=True):
+    """
+    Fixture-shaped dict for a Pokemon; moves/locations/forms only when asked for. `form_moves=False`
+    leaves each form's move rows out (the sync needs them to detect drift, a page render does not).
+    """
     data = {field: getattr(pokemon, field) for field in POKEMON_FIELDS}
     data["region"] = pokemon.region
     if include_related:
         data["moves"] = list(pokemon.moves.values(*MOVE_FIELDS))
         data["locations"] = list(pokemon.locations.values(*ENCOUNTER_FIELDS))
+        forms = pokemon.forms.prefetch_related("moves") if form_moves else pokemon.forms.all()
+        data["forms"] = [form_to_dict(form, include_moves=form_moves) for form in forms]
+    return data
+
+
+def form_to_dict(form, include_moves=False):
+    """Dict of one PokemonForm (fixture shape: the same keys the sync builds)."""
+    data = {field: getattr(form, field) for field in FORM_FIELDS}
+    if include_moves:
+        data["moves"] = [{f: getattr(m, f) for f in MOVE_FIELDS} for m in form.moves.all()]
     return data
 
 
@@ -64,7 +83,24 @@ def save_pokemon_entry(entry):
             PokemonEncounter(pokemon=pokemon, **{k: e[k] for k in ENCOUNTER_FIELDS})
             for e in entry["locations"]
         )
+    if "forms" in entry:
+        _replace_forms(pokemon, entry["forms"])
     return pokemon
+
+
+def _replace_forms(pokemon, forms):
+    """Make `pokemon`'s forms match `forms` (upsert by slug, delete the rest). A form's moves are replaced only if it has a "moves" key."""
+    keep = []
+    for entry in forms:
+        defaults = {k: entry[k] for k in FORM_FIELDS if k in entry and k != "slug"}
+        form, _ = PokemonForm.objects.update_or_create(pokemon=pokemon, slug=entry["slug"], defaults=defaults)
+        keep.append(form.pk)
+        if "moves" in entry:
+            form.moves.all().delete()
+            FormMove.objects.bulk_create(
+                FormMove(form=form, **{k: m[k] for k in MOVE_FIELDS}) for m in entry["moves"]
+            )
+    pokemon.forms.exclude(pk__in=keep).delete()
 
 
 def import_pokemon_json(path=FIXTURE_PATH):

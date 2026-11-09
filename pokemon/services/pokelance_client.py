@@ -24,6 +24,7 @@ from itertools import islice
 import requests
 
 from pokemon.models import Ability, Item, Move, Pokemon, PokemonMove
+from pokemon.services.forms import classify_form
 from pokemon.services.data import (
     ability_to_dict, item_to_dict, move_to_dict, pokemon_to_dict,
     save_ability_entry, save_item_entry, save_move_entry, save_pokemon_entry,
@@ -244,7 +245,8 @@ def _fetch_and_build_entry(pokedex_number, type_matchup_cache):
         [t["type"]["name"] for t in raw["types"]], type_matchup_cache
     )
     locations = _fetch_locations(pokedex_number)
-    return _to_fixture_entry(raw, species, evolution_chain, type_matchups, locations)
+    forms = _fetch_forms(species, raw["name"].capitalize())
+    return _to_fixture_entry(raw, species, evolution_chain, type_matchups, locations, forms)
 
 def _diff_fields(existing_entry, fresh_entry):
     """
@@ -259,14 +261,74 @@ def _diff_fields(existing_entry, fresh_entry):
         if key not in IDENTITY_FIELDS and existing_entry.get(key) != fresh_value
     }
     
-def _to_fixture_entry(raw, species, evolution_chain, type_matchups, locations):
+def _pokemon_level_fields(raw):
+    """What PokéAPI stores per pokemon resource (so per form too): types, stats, abilities, size, EVs, held items."""
+    base_stats = {
+        STAT_NAME_LOOKUP[stat["stat"]["name"]]: stat["base_stat"]
+        for stat in raw["stats"]
+        if stat["stat"]["name"] in STAT_NAME_LOOKUP
+    }
+    return {
+        "types": [t["type"]["name"].capitalize() for t in raw["types"]],
+        "base_stats": base_stats,
+        "stat_total": sum(base_stats.values()),
+        "abilities": [
+            {"name": a["ability"]["name"].replace("-", " ").title(), "hidden": a["is_hidden"]}
+            for a in raw["abilities"]
+        ],
+        "height_m": raw["height"] / 10,
+        "weight_kg": raw["weight"] / 10,
+        "ev_yield": {
+            STAT_NAME_LOOKUP[stat["stat"]["name"]]: stat["effort"]
+            for stat in raw["stats"]
+            if stat["stat"]["name"] in STAT_NAME_LOOKUP and stat.get("effort")
+        },
+        "held_items": sorted(
+            {item["item"]["name"].replace("-", " ").title() for item in raw.get("held_items", [])}
+        ),
+    }
+
+
+def _form_image(raw):
+    sprites = raw.get("sprites") or {}
+    artwork = ((sprites.get("other") or {}).get("official-artwork") or {}).get("front_default")
+    return artwork or sprites.get("front_default") or ""
+
+
+def _to_form_entry(base_name, species_slug, raw):
+    """Flatten a form's pokemon resource (e.g. charizard-mega-x) into the dict stored on PokemonForm."""
+    try:
+        return {
+            **classify_form(base_name, species_slug, raw["name"]),
+            "pokeapi_id": raw["id"],
+            "image": _form_image(raw),
+            **_pokemon_level_fields(raw),
+            "base_experience": raw.get("base_experience"),
+            "moves": _fetch_moves(raw),
+        }
+    except (KeyError, TypeError) as exc:
+        raise PokelanceAPIError(f"Pokelance API returned an unexpected payload shape for a form: {exc}") from exc
+
+
+def _fetch_forms(species, base_name):
+    """
+    Every non-default variety of a species (regional forms, Megas, Gigantamax ...) as form entries,
+    ordered by PokéAPI id. One request per form; a species with a single variety makes none.
+    """
+    forms = []
+    for variety in species.get("varieties", []):
+        if variety.get("is_default"):
+            continue
+        pokemon = variety["pokemon"]
+        raw = _get(pokemon["url"], f"form {pokemon['name']}")
+        forms.append(_to_form_entry(base_name, species.get("name", ""), raw))
+    return sorted(forms, key=lambda form: form["pokeapi_id"])
+
+
+def _to_fixture_entry(raw, species, evolution_chain, type_matchups, locations, forms=None):
     """Convert raw PokéAPI data into PokeDatabase's fixture shape."""
     try:
-        base_stats = {
-            STAT_NAME_LOOKUP[stat["stat"]["name"]]: stat["base_stat"]
-            for stat in raw["stats"]
-            if stat["stat"]["name"] in STAT_NAME_LOOKUP
-        }
+        level_fields = _pokemon_level_fields(raw)
 
         english_genus = next(
             (g["genus"] for g in species["genera"] if g["language"]["name"] == "en"),
@@ -291,18 +353,7 @@ def _to_fixture_entry(raw, species, evolution_chain, type_matchups, locations):
             "image": raw["sprites"]["other"]["official-artwork"]["front_default"],
             "category": english_genus,
             "generation": _fetch_generation(species),
-            "types": [t["type"]["name"].capitalize() for t in raw["types"]],
-            "base_stats": base_stats,
-            "stat_total": sum(base_stats.values()),
-            "abilities": [
-                {
-                    "name": a["ability"]["name"].replace("-", " ").title(),
-                    "hidden": a["is_hidden"],
-                }
-                for a in raw["abilities"]
-            ],
-            "height_m": raw["height"] / 10,
-            "weight_kg": raw["weight"] / 10,
+            **{k: level_fields[k] for k in ("types", "base_stats", "stat_total", "abilities", "height_m", "weight_kg")},
             "gender": gender_info,
             "egg_groups": [
                 eg["name"].replace("-", " ").title() for eg in species["egg_groups"]
@@ -312,20 +363,12 @@ def _to_fixture_entry(raw, species, evolution_chain, type_matchups, locations):
             "base_happiness": species["base_happiness"],
             "type_effectiveness": type_matchups,
             "evolution_chain": evolution_chain,
-            "ev_yield": {
-                STAT_NAME_LOOKUP[stat["stat"]["name"]]: stat["effort"]
-                for stat in raw["stats"]
-                if stat["stat"]["name"] in STAT_NAME_LOOKUP and stat.get("effort")
-            },
+            "ev_yield": level_fields["ev_yield"],
             "growth_rate": species.get("growth_rate", {}).get("name", ""),
-            "held_items": sorted(
-                {
-                    item["item"]["name"].replace("-", " ").title()
-                    for item in raw.get("held_items", [])
-                }
-            ),
+            "held_items": level_fields["held_items"],
             "moves": _fetch_moves(raw),
             "locations": locations,
+            "forms": forms or [],
         }
     except (KeyError, TypeError) as exc:
         raise PokelanceAPIError(

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+    <link href="{% static 'css/listing.css' %}" rel="stylesheet">
+    <link href="{% static 'css/types.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block title %}Alternate forms{% endblock %}
+
+{% block content %}
+<section class="list-page">
+  <p class="list-breadcrumb"><a href="{% url 'pokedex' %}">&larr; Pokédex</a></p>
+  <header class="list-header">
+    <p class="list-eyebrow">Pokédex</p>
+    <h1 class="list-title">Alternate forms</h1>
+    <p class="list-subtitle">
+      {% if filtering %}{{ total }} of {{ stored_count }} forms{% else %}{{ stored_count }} forms{% endif %}
+      &middot; regional variants, Megas, Gigantamax and other forms, each with its own types, stats and artwork.
+    </p>
+  </header>
+
+  {% if not stored_count %}
+    <div class="list-empty">
+      <h2>No alternate forms yet</h2>
+      <p>Forms come from PokéAPI. Run <code>python manage.py sync_pokemon</code> (without <code>--no-update</code>) to fetch the forms of the Pokémon you've stored.</p>
+    </div>
+  {% else %}
+
+    <nav class="stat-tabs" aria-label="Kind of form">
+      {% for tab in kind_tabs %}
+        <a href="?{{ tab.query }}" class="stat-tab{% if tab.active %} active{% endif %}"{% if tab.active %} aria-current="page"{% endif %}>{{ tab.label }} <span class="tab-count">{{ tab.count }}</span></a>
+      {% endfor %}
+    </nav>
+
+    <form class="list-filters filters-forms" method="get" action="{% url 'forms' %}">
+      {% if kind %}<input type="hidden" name="kind" value="{{ kind }}">{% endif %}
+      <div class="list-field">
+        <label for="fm-q">Name</label>
+        <input id="fm-q" type="search" name="q" value="{{ q }}" placeholder="e.g. Alolan or Mega" autocomplete="off">
+      </div>
+      <div class="list-actions">
+        <button type="submit" class="btn btn-primary">Search</button>
+        {% if filtering %}<a class="list-reset" href="{% url 'forms' %}">Reset</a>{% endif %}
+      </div>
+    </form>
+
+    {% if page_obj %}
+      <div class="mon-grid">
+        {% for form in page_obj %}
+          <a class="mon-card form-card" href="{% url 'pokemon_detail' form.pokemon.name %}?form={{ form.slug }}">
+            <img src="{{ form.image }}" alt="" loading="lazy" width="96" height="96">
+            <span class="mon-card-num">#{{ form.pokemon.pokedex_number|stringformat:"03d" }}</span>
+            <span class="mon-card-name">{{ form.label }}</span>
+            <span class="chip-row">{% for t in form.types %}<span class="chip type-{{ t|lower }}">{{ t }}</span>{% endfor %}</span>
+            <span class="mon-card-note">Base stats {{ form.stat_total }}</span>
+          </a>
+        {% endfor %}
+      </div>
+      {% include "partials/pagination.html" %}
+    {% else %}
+      <div class="list-empty">
+        <h2>No forms match</h2>
+        <p>Try a different name, or <a href="{% url 'forms' %}">reset the filters</a>.</p>
+      </div>
+    {% endif %}
+
+  {% endif %}
+</section>
+{% endblock %}

@@ -5,11 +5,12 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.paginator import Paginator
-from django.db.models import Count, F
+from django.db.models import Count, F, Q
 from django.http import Http404
 from django.shortcuts import redirect, render
-from pokemon.models import GENERATION_REGIONS, Ability, Item, Move, Pokemon, PokemonMove
-from pokemon.services.data import get_move_info, get_pokemon_by_name, pokemon_to_dict
+from pokemon.models import GENERATION_REGIONS, Ability, Item, Move, Pokemon, PokemonForm, PokemonMove
+from pokemon.services.data import MOVE_FIELDS, form_to_dict, get_move_info, get_pokemon_by_name, pokemon_to_dict
+from pokemon.services.forms import FORM_KINDS
 from pokemon.services.types import TYPES, defense_cells, effectiveness, type_matchups
 from pokemon.services.pokelance_client import sync_pokemon_data, PokelanceAPIError
 from pokemon.services.versions import (
@@ -62,6 +63,23 @@ def home(request):
     }
     return render(request, "home.html", context)
 
+FORM_OVERRIDES = (
+    "image", "types", "base_stats", "stat_total", "abilities", "height_m", "weight_kg",
+    "base_experience", "ev_yield", "held_items",
+)
+
+
+def _select_form(request, forms):
+    """The form named by ?form=<slug> (case-insensitive), None for the base Pokémon; unknown slug -> 404."""
+    slug = request.GET.get("form", "").strip().lower()
+    if not slug:
+        return None
+    for form in forms:
+        if form.slug == slug:
+            return form
+    raise Http404(f"No form '{slug}'")
+
+
 def pokemon_detail(request, name):
     if not name.strip():
         messages.error(request, "Pokémon name required")
@@ -89,7 +107,30 @@ def pokemon_detail(request, name):
         if evo_name.lower() in by_name
     ]
 
-    pokemon = pokemon_to_dict(current, include_related=True)
+    pokemon = pokemon_to_dict(current, include_related=True, form_moves=False)
+    forms = list(current.forms.all())
+    active_form = _select_form(request, forms)
+    display_name = current.name
+    moves_from_base = False
+    form_options = []
+    if forms:
+        form_options = [{"slug": "", "label": current.name, "image": current.image, "kind": "base",
+                         "active": active_form is None}] + [
+            {"slug": f.slug, "label": f.label, "image": f.image, "kind": f.kind, "active": f is active_form}
+            for f in forms
+        ]
+    if active_form is not None:
+        # Species-level data (category, gender, egg groups, evolution ...) stays the base Pokémon's;
+        # what differs per form is overlaid. PokéAPI doesn't give encounters for forms, so none are shown.
+        form_data = form_to_dict(active_form)
+        pokemon.update({k: form_data[k] for k in FORM_OVERRIDES})
+        pokemon["locations"] = []
+        display_name = active_form.label
+        own_moves = list(active_form.moves.values(*MOVE_FIELDS))
+        if own_moves:
+            pokemon["moves"] = own_moves
+        else:
+            moves_from_base = True    # Megas and the like have no move list of their own
     learnt_hm, learnt_tm = group_hm_tm_moves(pokemon["moves"])
     type_defenses = defense_cells(pokemon["types"])
 
@@ -100,6 +141,11 @@ def pokemon_detail(request, name):
         "evolution_chain": evolution_chain,
         "type_defense_order": TYPE_DEFENSE_ORDER,
         "type_defenses": type_defenses,
+        "display_name": display_name,
+        "active_form": {"slug": active_form.slug, "label": active_form.label, "kind": active_form.kind}
+                       if active_form else None,
+        "form_options": form_options,
+        "moves_from_base": moves_from_base,
         "stat_ranges": calculate_stat_range(pokemon["base_stats"]),
         "learnt_hm": learnt_hm,
         "learnt_tm": learnt_tm,
@@ -216,7 +262,52 @@ def type_detail(request, name):
 def pokedex(request):
     pokemon_data = Pokemon.objects.all()
 
-    return render(request, "pokedex.html", {"pokemon_data": pokemon_data})
+    return render(request, "pokedex.html", {
+        "pokemon_data": pokemon_data,
+        "form_count": PokemonForm.objects.count(),
+    })
+
+
+FORMS_PER_PAGE = 48
+
+
+def forms(request):
+    """Every alternate form (regional variants, Megas, Gigantamax ...), filterable by kind and name."""
+    stored = PokemonForm.objects.select_related("pokemon")
+    kind_counts = {row["kind"]: row["n"] for row in stored.values("kind").annotate(n=Count("id"))}
+
+    kind = request.GET.get("kind", "")
+    if kind not in dict(FORM_KINDS):
+        kind = ""
+    q = request.GET.get("q", "").strip()
+
+    results = stored
+    if kind:
+        results = results.filter(kind=kind)
+    if q:
+        results = results.filter(Q(label__icontains=q) | Q(pokemon__name__icontains=q))
+    results = results.order_by("pokemon__pokedex_number", "pokeapi_id")
+
+    filters = {k: v for k, v in (("kind", kind), ("q", q)) if v}
+    kind_tabs = [
+        {
+            "slug": slug, "label": label, "active": slug == kind,
+            "count": sum(kind_counts.values()) if not slug else kind_counts.get(slug, 0),
+            "query": urlencode({**({"q": q} if q else {}), **({"kind": slug} if slug else {})}),
+        }
+        for slug, label in [("", "All")] + FORM_KINDS
+    ]
+    page_obj = Paginator(results, FORMS_PER_PAGE).get_page(request.GET.get("page"))
+    return render(request, "forms.html", {
+        "page_obj": page_obj,
+        "total": page_obj.paginator.count,
+        "stored_count": sum(kind_counts.values()),
+        "kind_tabs": kind_tabs,
+        "kind": kind,
+        "q": q,
+        "query": urlencode(filters),
+        "filtering": bool(filters),
+    })
 
 def _region_info(generation):
     low, high = GENERATION_DEX_RANGES[generation]
@@ -356,7 +447,11 @@ def pokemon_moves_fragment(request, name, version):
     if pokemon is None:
         raise Http404(f"No Pokémon found match '{name}'")
 
-    rows = list(pokemon.moves.filter(version=version).values("name", "version", "level_learnt", "method"))
+    moves = pokemon.moves
+    form = _select_form(request, list(pokemon.forms.all()))
+    if form is not None and form.moves.exists():
+        moves = form.moves          # a form with its own move list; Megas and the like fall back to the base's
+    rows = list(moves.filter(version=version).values("name", "version", "level_learnt", "method"))
     if not rows:
         raise Http404(f"{pokemon.name} has no moves for '{version}'")
 

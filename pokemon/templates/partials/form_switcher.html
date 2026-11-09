@@ -1,0 +1,17 @@
+{# Chips to switch between a Pokémon's base form and its alternate forms (?form=slug). Needs: form_options, pokemon. #}
+{% if form_options %}
+<nav class="form-switcher" aria-label="Forms of {{ pokemon.name }}">
+  <span class="form-switcher-label">Forms</span>
+  <ul>
+    {% for opt in form_options %}
+      <li>
+        <a class="form-chip kind-{{ opt.kind }}{% if opt.active %} active{% endif %}"
+           href="{% url 'pokemon_detail' pokemon.name %}{% if opt.slug %}?form={{ opt.slug }}{% endif %}"{% if opt.active %} aria-current="page"{% endif %}>
+          <img src="{{ opt.image }}" alt="" width="36" height="36" loading="lazy">
+          <span>{{ opt.label }}</span>
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+</nav>
+{% endif %}
