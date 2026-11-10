@@ -56,7 +56,7 @@
     </form>
 
     {% if page_obj %}
-      <p class="rank-summary">Ranked by <strong>{% if speed_mode %}{{ speed_label }}{% else %}{{ stat.label }}{% endif %}</strong>{% if selected_type %} &middot; {{ selected_type }} type{% endif %} &middot; {{ base_count }} base Pokémon + {{ form_count }} forms ({{ total }} candidates)</p>
+      <p class="rank-summary">Ranked by <strong>{% if speed_mode %}{{ speed_label }}{% else %}{{ stat.label }}{% endif %}</strong>{% if selected_type %} &middot; {{ selected_type }} type{% endif %} &middot; {{ base_count }} base Pokémon{% if include_forms %} + {{ form_count }} forms ({{ total }} candidates){% endif %}</p>
       {% if speed_mode %}
         <div class="list-notice rank-speed-note">
           All calculations use 31 IVs. Max: 252 EVs and a +Speed nature; Neutral: 252 EVs and a neutral nature; Uninvested: 0 EVs and a neutral nature; +Speed nature: 0 EVs. Choice Scarf is 1.5× Max Speed, rounded down. No other battle modifiers are included.
