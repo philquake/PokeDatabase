@@ -32,11 +32,11 @@
         {% for slot in comparison_slots %}
           <div class="list-field">
             <label for="compare-pokemon-{{ forloop.counter }}">Pokémon {{ forloop.counter }}{% if forloop.counter < 3 %} <span aria-hidden="true">*</span>{% endif %}</label>
-            <select id="compare-pokemon-{{ forloop.counter }}" name="p"{% if forloop.counter < 3 %} required{% endif %}{% if slot.errors %} aria-invalid="true" aria-describedby="compare-help compare-pokemon-error-{{ forloop.counter }}"{% else %} aria-describedby="compare-help"{% endif %}>
+            <select data-pokemon-picker id="compare-pokemon-{{ forloop.counter }}" name="p"{% if forloop.counter < 3 %} required{% endif %}{% if slot.errors %} aria-invalid="true" aria-describedby="compare-help compare-pokemon-error-{{ forloop.counter }}"{% else %} aria-describedby="compare-help"{% endif %}>
               <option value="">Choose a Pokémon</option>
               {% if slot.unknown %}<option value="{{ slot.value }}" selected>{{ slot.value }} (not found)</option>{% endif %}
               {% for option in slot.options %}
-                <option value="{{ option.name }}"{% if option.selected %} selected{% endif %}>#{{ option.pokedex_number|stringformat:"03d" }} {{ option.name }}</option>
+                <option value="{{ option.name }}" data-image="{{ option.image }}"{% if option.selected %} selected{% endif %}>#{{ option.pokedex_number|stringformat:"03d" }} {{ option.name }}</option>
               {% endfor %}
             </select>
             {% if slot.errors %}

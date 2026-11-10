@@ -723,6 +723,7 @@ def comparison(request):
                 {
                     "name": pokemon.name,
                     "pokedex_number": pokemon.pokedex_number,
+                    "image": pokemon.image,
                     "selected": known and pokemon.name.casefold() == value.casefold(),
                 }
                 for pokemon in pokemon_options
@@ -804,6 +805,7 @@ def team_builder(request):
                 {
                     "name": pokemon.name,
                     "pokedex_number": pokemon.pokedex_number,
+                    "image": pokemon.image,
                     "selected": known and pokemon.name.casefold() == value.casefold(),
                 }
                 for pokemon in pokemon_options

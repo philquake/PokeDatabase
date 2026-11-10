@@ -29,11 +29,11 @@
         {% for slot in team_slots %}
           <div class="list-field">
             <label for="team-member-{{ forloop.counter }}">Team slot {{ forloop.counter }}</label>
-            <select id="team-member-{{ forloop.counter }}" name="p" aria-describedby="team-help">
+            <select data-pokemon-picker id="team-member-{{ forloop.counter }}" name="p" aria-describedby="team-help">
               <option value="">Open slot</option>
               {% if slot.unknown %}<option value="{{ slot.value }}" selected>{{ slot.value }} (not found)</option>{% endif %}
               {% for option in slot.options %}
-                <option value="{{ option.name }}"{% if option.selected %} selected{% endif %}>#{{ option.pokedex_number|stringformat:"03d" }} {{ option.name }}</option>
+                <option value="{{ option.name }}" data-image="{{ option.image }}"{% if option.selected %} selected{% endif %}>#{{ option.pokedex_number|stringformat:"03d" }} {{ option.name }}</option>
               {% endfor %}
             </select>
           </div>

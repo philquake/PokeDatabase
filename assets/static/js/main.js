@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initLazyMovePanels();
   initCompetitiveDropdown();
   initCompetitiveNavigation();
+  initPokemonPickers();
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduceMotion) return;
@@ -70,6 +71,208 @@ function initCompetitiveDropdown() {
   });
   document.addEventListener('click', (event) => {
     if (!dropdown.contains(event.target)) setOpen(false);
+  });
+}
+
+/* Pokémon pickers (Compare / Team builder): a native <select> can't show images in its options, so each
+   select[data-pokemon-picker] is enhanced with a searchable list. The select stays as the form control
+   (it still submits and works without JS). */
+function initPokemonPickers() {
+  document.querySelectorAll('select[data-pokemon-picker]').forEach((select) => {
+    const options = [...select.options].map((o) => ({
+      text: o.textContent.trim(),
+      image: o.dataset.image || '',
+    }));
+    const label = select.labels[0];
+    if (label && !label.id) label.id = `${select.id}-label`;
+    const wrap = document.createElement('div');
+    const button = document.createElement('button');
+    const popup = document.createElement('div');
+    const search = document.createElement('input');
+    const list = document.createElement('ul');
+    const status = document.createElement('p');
+    let activeRows = [];
+    let active = -1;
+    let rows = [];
+
+    wrap.className = 'picker';
+    button.type = 'button';
+    button.className = 'picker-button';
+    button.setAttribute('aria-haspopup', 'listbox');
+    button.setAttribute('aria-expanded', 'false');
+    button.setAttribute('aria-controls', `${select.id}-popup`);
+    if (label) button.setAttribute('aria-labelledby', label.id);
+
+    popup.id = `${select.id}-popup`;
+    popup.className = 'picker-popup';
+    popup.hidden = true;
+    search.type = 'search';
+    search.className = 'picker-search';
+    search.placeholder = 'Type a Pokémon name...';
+    search.autocomplete = 'off';
+    search.setAttribute('role', 'combobox');
+    search.setAttribute('aria-label', 'Search Pokémon by name');
+    search.setAttribute('aria-autocomplete', 'list');
+    search.setAttribute('aria-haspopup', 'listbox');
+    search.setAttribute('aria-expanded', 'false');
+    search.setAttribute('aria-controls', `${select.id}-list`);
+    list.id = `${select.id}-list`;
+    list.className = 'picker-list';
+    list.setAttribute('role', 'listbox');
+    status.className = 'picker-no-results';
+    status.setAttribute('role', 'status');
+    status.hidden = true;
+    select.classList.add('picker-native');
+    select.tabIndex = -1;
+    select.setAttribute('aria-hidden', 'true');
+    select.after(wrap);
+    popup.append(search, list, status);
+    wrap.append(select, button, popup);
+
+    const content = (o, classes) => {
+      const frag = document.createDocumentFragment();
+      if (o.image) {
+        const img = new Image(36, 36);
+        img.alt = '';
+        img.loading = 'lazy';
+        img.src = o.image;
+        frag.append(img);
+      }
+      const text = document.createElement('span');
+      text.textContent = o.text;
+      if (classes) text.className = classes;
+      frag.append(text);
+      return frag;
+    };
+    const showSelected = () => {
+      const o = options[select.selectedIndex];
+      button.replaceChildren(content(o, select.value ? '' : 'picker-placeholder'));
+    };
+    const setActive = (i) => {
+      if (!activeRows.length) return;
+      active = Math.max(0, Math.min(activeRows.length - 1, i));
+      rows.forEach((row) => row.classList.toggle('is-active', row === activeRows[active]));
+      search.setAttribute('aria-activedescendant', activeRows[active].id);
+      activeRows[active].scrollIntoView({ block: 'nearest' });
+    };
+    const filterOptions = () => {
+      const query = search.value.trim().toLocaleLowerCase();
+      activeRows = [];
+      rows.forEach((row) => {
+        const option = options[Number(row.dataset.index)];
+        const name = option.text.replace(/^#\d+\s*/, '').toLocaleLowerCase();
+        const matches = !query || name.includes(query);
+        row.hidden = !matches;
+        if (matches) activeRows.push(row);
+      });
+      status.hidden = activeRows.length > 0;
+      status.textContent = activeRows.length ? '' : `No Pokémon found for "${search.value}".`;
+      search.removeAttribute('aria-activedescendant');
+      active = -1;
+      const selectedRow = activeRows.findIndex(
+        (row) => Number(row.dataset.index) === select.selectedIndex,
+      );
+      if (activeRows.length) setActive(selectedRow >= 0 ? selectedRow : 0);
+    };
+    const buildRows = () => {
+      if (!rows.length) {
+        options.forEach((o, i) => {
+          const li = document.createElement('li');
+          li.id = `${select.id}-opt-${i}`;
+          li.setAttribute('role', 'option');
+          li.setAttribute('aria-selected', String(i === select.selectedIndex));
+          li.dataset.index = i;
+          li.append(content(o));
+          list.append(li);
+          rows.push(li);
+        });
+      }
+    };
+    const positionPopup = () => {
+      const rect = button.getBoundingClientRect();
+      const gap = 4;
+      const edge = 8;
+      const below = Math.max(0, window.innerHeight - rect.bottom - gap - edge);
+      const above = Math.max(0, rect.top - gap - edge);
+      const placeAbove = below < 280 && above > below;
+      const available = placeAbove ? above : below;
+      const height = Math.min(384, available);
+      const width = Math.min(rect.width, window.innerWidth - edge * 2);
+
+      popup.style.left = `${Math.max(edge, Math.min(rect.left, window.innerWidth - width - edge))}px`;
+      popup.style.top = `${placeAbove ? rect.top - gap - height : rect.bottom + gap}px`;
+      popup.style.width = `${width}px`;
+      popup.style.maxHeight = `${height}px`;
+    };
+    const open = (query = '') => {
+      buildRows();
+      popup.hidden = false;
+      document.body.append(popup);
+      positionPopup();
+      button.setAttribute('aria-expanded', 'true');
+      search.setAttribute('aria-expanded', 'true');
+      search.value = query;
+      filterOptions();
+      search.focus();
+    };
+    const close = () => {
+      popup.hidden = true;
+      wrap.append(popup);
+      button.setAttribute('aria-expanded', 'false');
+      search.setAttribute('aria-expanded', 'false');
+      search.removeAttribute('aria-activedescendant');
+    };
+    const choose = (i) => {
+      if (i < 0 || i >= options.length) return;
+      select.selectedIndex = i;
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+      rows.forEach((row, n) => row.setAttribute('aria-selected', String(n === i)));
+      showSelected();
+      close();
+    };
+
+    showSelected();
+    select.addEventListener('focus', () => button.focus()); // label clicks and required-field errors land here
+    button.addEventListener('click', () => (popup.hidden ? open() : close()));
+    search.addEventListener('input', filterOptions);
+    list.addEventListener('mousedown', (e) => e.preventDefault()); // keep focus on the search field
+    list.addEventListener('click', (e) => {
+      const row = e.target.closest('li');
+      if (row && !row.hidden) choose(Number(row.dataset.index));
+    });
+    button.addEventListener('keydown', (e) => {
+      if (e.key.length === 1 && e.key !== ' ' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        open(e.key);
+      }
+    });
+    search.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        setActive(active + (e.key === 'ArrowDown' ? 1 : -1));
+      } else if (e.key === 'Home' || e.key === 'End') {
+        e.preventDefault();
+        setActive(e.key === 'Home' ? 0 : activeRows.length - 1);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (active >= 0) choose(Number(activeRows[active].dataset.index));
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        close();
+        button.focus();
+      } else if (e.key === 'Tab') {
+        close();
+      }
+    });
+    document.addEventListener('click', (e) => {
+      if (!wrap.contains(e.target) && !popup.contains(e.target)) close();
+    });
+    window.addEventListener('resize', () => {
+      if (!popup.hidden) positionPopup();
+    });
+    window.addEventListener('scroll', () => {
+      if (!popup.hidden) positionPopup();
+    }, true);
   });
 }
 
