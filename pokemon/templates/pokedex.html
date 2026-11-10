@@ -15,11 +15,37 @@
     <p class="list-eyebrow">The complete National Dex</p>
     <h1 class="list-title">The Pokédex</h1>
     <p class="list-subtitle">
-      {{ pokemon_data|length }} Pokémon catalogued
+      Showing {{ pokemon_count }} of {{ stored_count }} Pokémon catalogued
       {% if form_count %}&middot; <a class="inline-link" href="{% url 'forms' %}">{{ form_count }} alternate form{{ form_count|pluralize }}</a>{% endif %}
     </p>
   </header>
 
+  <form class="pokedex-filters" method="get" action="{% url 'pokedex' %}" aria-label="Filter Pokémon">
+    <div class="pokedex-filter-field">
+      <label for="pokedex-region">Region</label>
+      <select id="pokedex-region" name="region">
+        <option value="">All regions</option>
+        {% for region in regions %}
+          <option value="{{ region }}"{% if selected_region == region %} selected{% endif %}>{{ region }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="pokedex-filter-field">
+      <label for="pokedex-type">Type</label>
+      <select id="pokedex-type" name="type">
+        <option value="">All types</option>
+        {% for type_name in types %}
+          <option value="{{ type_name|lower }}"{% if selected_type == type_name|lower %} selected{% endif %}>{{ type_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="pokedex-filter-actions">
+      <button class="btn btn-primary" type="submit">Apply</button>
+      {% if filtering %}<a class="pokedex-filter-reset" href="{% url 'pokedex' %}">Clear</a>{% endif %}
+    </div>
+  </form>
+
+  {% if pokemon_data %}
   <div class="pokemon-grid">
     {% for pokemon in pokemon_data %}
       <a class="pokemon-card" href="{% url 'pokemon_detail' name=pokemon.name %}">
@@ -38,5 +64,11 @@
       </a>
     {% endfor %}
   </div>
+  {% else %}
+    <div class="list-empty">
+      <h2>No Pokémon match these filters</h2>
+      <p>Try a different region or type, or <a href="{% url 'pokedex' %}">clear the filters</a>.</p>
+    </div>
+  {% endif %}
 </section>
 {% endblock %}

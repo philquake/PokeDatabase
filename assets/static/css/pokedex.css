@@ -1,6 +1,41 @@
 /* Pokédex grid. Same navy / yellow / Poké-red theme as the rest of the site; type colours come from styles.css. */
 .pokedex-page { max-width: 1200px; }
 
+.pokedex-filters {
+  position: sticky;
+  top: 72px;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 12px;
+  margin: 0 0 18px;
+  padding: 12px;
+  background: rgba(27, 34, 68, 0.96);
+  border: 1px solid var(--color-panel-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(12px);
+}
+
+.pokedex-filter-field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.pokedex-filter-field label { color: var(--color-text-muted); font-size: var(--text-xs); font-weight: 600; }
+.pokedex-filter-field select {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  color: var(--color-white);
+  background: var(--color-bg-hero-bottom);
+  border: 1px solid var(--color-panel-border);
+  border-radius: var(--radius-sm);
+  font: inherit;
+}
+.pokedex-filter-field select:focus-visible { outline: 2px solid var(--color-yellow); outline-offset: 2px; }
+.pokedex-filter-actions { display: flex; align-items: center; gap: 12px; }
+.pokedex-filter-actions .btn { min-height: 44px; }
+.pokedex-filter-reset { color: var(--color-text-muted); text-decoration: underline; }
+.pokedex-filter-reset:hover { color: var(--color-white); }
+
 .pokemon-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
@@ -82,6 +117,11 @@
 @media (max-width: 480px) {
   .pokemon-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .pokemon-card { padding: 12px 10px 14px; }
+}
+
+@media (max-width: 600px) {
+  .pokedex-filters { top: 62px; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px; }
+  .pokedex-filter-actions { grid-column: 1 / -1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
