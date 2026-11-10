@@ -113,3 +113,14 @@ All development so far happened in 2026 (Aug 6 – Sep 9); see "2026 timeline" b
 
 ## Roadmap (not built; the browse pages from the README are done)
 Per-move and per-item detail pages; richer per-Pokémon data (form encounters/locations, forms in rankings and type pages); competitive tools (team builder, coverage, comparisons); user accounts/favorites/teams; REST API (`/api/pokemon/`, `/api/types/`, …).
+
++### Feature ideas (competitive players)
++Standout pick: **team builder with type-coverage analysis**. Reuses `services/types.py` (`defense_cells`, `TYPE_CHART`) and `Move` types, needs no new data. Team lives in the URL (`/team/?p=pikachu,gyarados,…`) so it's shareable without accounts. Shows shared weaknesses, offensive coverage gaps (from members' move types) and suggested Pokémon to cover them.
++
++Other ideas, roughly by fit with existing code:
++1. **Damage calculator** (recommended next): attacker + move + defender, with level, EVs, nature, item, weather; outputs damage range as % HP and hits to KO. Inputs already exist (base stats, `calculate_stat_range`, move power/type, type chart).
++2. **Speed tiers**: sortable final Speed at Lv50/100 for common spreads (max, neutral, uninvested, +Speed nature, Choice Scarf). Extends `competitive`; quick win and a good first step.
++3. **Pokémon comparison**: 2–4 Pokémon side by side (stats, typing, weaknesses, movepool overlap).
++4. **Move/ability search by effect**: who learns move X / has ability Y, filtered by type or stat (e.g. Fake Out users, Intimidate holders). Needs the per-move and per-ability detail pages above.
++5. **Nature and EV spread calculator**: final stats from nature + EVs; feeds the damage calculator and speed tiers.
++6. **Format/tier data** (OU, UU, VGC, usage stats): most valuable but hardest — PokéAPI has no tier data, so it needs a new source (Smogon/Pikalytics) kept up to date.
