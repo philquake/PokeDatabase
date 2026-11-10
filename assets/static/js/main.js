@@ -9,6 +9,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   hexChart(); 
   initLazyMovePanels();
+  initCompetitiveNavigation();
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduceMotion) return;
@@ -318,5 +319,82 @@ function initLazyMovePanels() {
       // Active AND on screen: every generation has an "active" first game, but only the shown generation's is visible.
       if (el.closest('.tab-pane').classList.contains('active') && el.offsetParent !== null) loadPane(el);
     });
+  });
+}
+
+/* -----------------------------------------------------------
+   Competitive rankings — update same-page filters, sorting,
+   and pagination without a full document navigation.
+----------------------------------------------------------- */
+function initCompetitiveNavigation() {
+  let activeRequest = null;
+
+  const navigate = async (url, addHistoryEntry = true) => {
+    if (activeRequest) activeRequest.abort();
+    const controller = new AbortController();
+    activeRequest = controller;
+    const currentPage = document.querySelector('[data-async-page="competitive"]');
+    const status = document.querySelector('[data-navigation-status]');
+    if (!currentPage) return;
+
+    currentPage.setAttribute('aria-busy', 'true');
+    if (status) status.textContent = 'Updating rankings…';
+
+    try {
+      const response = await fetch(url, {
+        headers: { 'X-Requested-With': 'fetch' },
+        signal: controller.signal,
+      });
+      if (!response.ok) throw new Error(`Rankings request failed (${response.status})`);
+      const html = await response.text();
+      const documentFromResponse = new DOMParser().parseFromString(html, 'text/html');
+      const nextPage = documentFromResponse.querySelector('[data-async-page="competitive"]');
+      if (!nextPage) throw new Error('Rankings content was missing from the response');
+
+      if (activeRequest !== controller) return;
+      currentPage.replaceWith(nextPage);
+      if (status) status.textContent = 'Rankings updated.';
+      if (addHistoryEntry) {
+        window.history.pushState({}, '', url);
+      }
+    } catch (error) {
+      if (error.name === 'AbortError' || activeRequest !== controller) return;
+      console.error('Could not update competitive rankings:', error);
+      if (status) status.textContent = 'Rankings could not update in place. Loading the selected view instead.';
+      window.location.assign(url);
+    } finally {
+      if (activeRequest === controller) {
+        activeRequest = null;
+        const page = document.querySelector('[data-async-page="competitive"]');
+        if (page) page.removeAttribute('aria-busy');
+      }
+    }
+  };
+
+  document.addEventListener('click', (event) => {
+    const link = event.target.closest('[data-async-page="competitive"] a');
+    if (!link || event.defaultPrevented || event.button !== 0 ||
+        event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+    const url = new URL(link.href, window.location.href);
+    if (url.origin !== window.location.origin || url.pathname !== window.location.pathname) return;
+    event.preventDefault();
+    navigate(url);
+  });
+
+  document.addEventListener('submit', (event) => {
+    const form = event.target.closest('[data-async-page="competitive"] .filters-rank');
+    if (!form) return;
+    event.preventDefault();
+
+    const url = new URL(form.action, window.location.href);
+    url.search = new URLSearchParams(new FormData(form)).toString();
+    navigate(url);
+  });
+
+  window.addEventListener('popstate', () => {
+    if (document.querySelector('[data-async-page="competitive"]')) {
+      navigate(new URL(window.location.href), false);
+    }
   });
 }

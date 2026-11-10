@@ -229,11 +229,19 @@
 .rank-mon a { display: inline-flex; align-items: center; gap: 10px; font-weight: 600; color: var(--color-white); }
 .rank-mon a:hover { color: var(--color-yellow); }
 .rank-mon img { width: 40px; height: 40px; object-fit: contain; }
+.rank-form-tag { color: var(--color-text-muted); font-size: var(--text-xs); font-weight: 500; }
 .rank-bar { display: block; height: 4px; margin-top: 4px; border-radius: 4px; background: rgba(255, 255, 255, 0.07); }
 .rank-bar > span { display: block; height: 100%; border-radius: 4px; background: var(--color-yellow); }
 .rank-table .col-stat { width: 3.6rem; }
 .rank-table .is-sorted { color: var(--color-yellow); font-weight: 700; }
 .rank-table .rank-total { font-weight: 700; }
+.rank-speed-note { line-height: 1.5; }
+.rank-table-scroll { overflow-x: auto; }
+.rank-table-scroll:focus-visible { outline: 2px solid var(--color-yellow); outline-offset: 3px; }
+.speed-table { min-width: 900px; }
+.speed-table .speed-level { text-align: center; color: var(--color-yellow); }
+.speed-table .speed-value { white-space: nowrap; }
+.speed-table th a { display: inline-flex; min-height: 44px; align-items: center; }
 
 @media (max-width: 900px) {
   .rank-table .col-types { display: none; }

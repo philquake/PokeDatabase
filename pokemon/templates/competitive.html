@@ -9,11 +9,12 @@
 {% block title %}Competitive rankings{% endblock %}
 
 {% block content %}
-<section class="list-page">
+<p class="visually-hidden" data-navigation-status role="status" aria-live="polite"></p>
+<section class="list-page" data-async-page="competitive">
   <header class="list-header">
     <p class="list-eyebrow">Competitive</p>
     <h1 class="list-title">Rankings</h1>
-    <p class="list-subtitle">The strongest Pokémon by base stats. Pick a stat to rank by, and optionally narrow to one type. Base stats are a starting point: moves, abilities and held items decide real battles.</p>
+    <p class="list-subtitle">Rank base Pokémon and alternate forms by their base stats or final Speed, and optionally narrow to one type. Forms are separate candidates; the base Pokédex count remains the species count. Base stats are a starting point: moves, abilities and held items decide real battles.</p>
   </header>
 
   {% if not stored_count %}
@@ -27,10 +28,15 @@
       {% for link in stat_links %}
         <a href="?{{ link.query }}" class="stat-tab{% if link.active %} active{% endif %}"{% if link.active %} aria-current="page"{% endif %}>{{ link.label }}</a>
       {% endfor %}
+      <a href="?{{ speed_query }}" class="stat-tab{% if speed_mode %} active{% endif %}"{% if speed_mode %} aria-current="page"{% endif %}>Speed tiers</a>
     </nav>
 
     <form class="list-filters filters-rank" method="get" action="{% url 'competitive' %}">
       <input type="hidden" name="stat" value="{{ stat.slug }}">
+      {% if speed_mode %}
+        <input type="hidden" name="sort" value="{{ speed_sort }}">
+        <input type="hidden" name="dir" value="{{ speed_direction }}">
+      {% endif %}
       <div class="list-field">
         <label for="rk-type">Type</label>
         <select id="rk-type" name="type">
@@ -40,53 +46,105 @@
           {% endfor %}
         </select>
       </div>
+      <div class="list-field rank-forms-toggle">
+        <label for="rk-forms"><input id="rk-forms" type="checkbox" name="forms" value="1"{% if include_forms %} checked{% endif %}> Include alternate forms</label>
+      </div>
       <div class="list-actions">
         <button type="submit" class="btn btn-primary">Apply</button>
-        {% if selected_type %}<a class="list-reset" href="?stat={{ stat.slug }}">Reset</a>{% endif %}
+        {% if selected_type %}<a class="list-reset" href="?{% if speed_mode %}sort={{ speed_sort }}&amp;dir={{ speed_direction }}{% else %}stat={{ stat.slug }}{% endif %}{% if include_forms %}&amp;forms=1{% endif %}">Reset type</a>{% endif %}
       </div>
     </form>
 
     {% if page_obj %}
-      <p class="rank-summary">Ranked by <strong>{{ stat.label }}</strong>{% if selected_type %} &middot; {{ selected_type }} type{% endif %} &middot; {{ total }} Pokémon</p>
-      <div class="list-card">
-        <table class="list-table rank-table">
-          <thead>
-            <tr>
-              <th scope="col" class="num rank-col">#</th>
-              <th scope="col">Pokémon</th>
-              <th scope="col" class="col-types">Types</th>
-              {% for label, key in stat_columns %}
-                <th scope="col" class="num col-stat{% if stat.label == label %} is-sorted{% endif %}">{{ label }}</th>
-              {% endfor %}
-              <th scope="col" class="num col-stat{% if stat.slug == 'total' %} is-sorted{% endif %}">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for row in page_obj %}
-              <tr>
-                <td class="num rank-col"><span class="rank-badge rank-{{ row.rank }}">{{ row.rank }}</span></td>
-                <td class="rank-mon">
-                  <a href="{% url 'pokemon_detail' row.name %}">
-                    <img src="{{ row.image }}" alt="" width="40" height="40" loading="lazy">
-                    <span>{{ row.name }}</span>
-                  </a>
-                  <span class="rank-bar" aria-hidden="true"><span style="width:{{ row.bar }}%"></span></span>
-                </td>
-                <td class="col-types"><span class="chip-row">{% for t in row.types %}<span class="chip type-{{ t|lower }}">{{ t }}</span>{% endfor %}</span></td>
-                {% for label, key in stat_columns %}
-                  <td class="num col-stat{% if stat.label == label %} is-sorted{% endif %}">{{ row.stats|get_item:key }}</td>
+      <p class="rank-summary">Ranked by <strong>{% if speed_mode %}{{ speed_label }}{% else %}{{ stat.label }}{% endif %}</strong>{% if selected_type %} &middot; {{ selected_type }} type{% endif %} &middot; {{ base_count }} base Pokémon + {{ form_count }} forms ({{ total }} candidates)</p>
+      {% if speed_mode %}
+        <div class="list-notice rank-speed-note">
+          All calculations use 31 IVs. Max: 252 EVs and a +Speed nature; Neutral: 252 EVs and a neutral nature; Uninvested: 0 EVs and a neutral nature; +Speed nature: 0 EVs. Choice Scarf is 1.5× Max Speed, rounded down. No other battle modifiers are included.
+        </div>
+        <div class="list-card rank-card">
+          <div class="rank-table-scroll" role="region" aria-label="Sortable Speed tier rankings" tabindex="0">
+            <table class="list-table rank-table speed-table">
+              <thead>
+                <tr>
+                  <th scope="col" class="num rank-col" rowspan="2">#</th>
+                  <th scope="col" rowspan="2">Pokémon</th>
+                  <th scope="col" class="col-types" rowspan="2">Types</th>
+                  {% for group in speed_groups %}
+                    <th scope="colgroup" class="num speed-level" colspan="5">Level {{ group.level }}</th>
+                  {% endfor %}
+                </tr>
+                <tr>
+                  {% for group in speed_groups %}
+                    {% for column in group.columns %}
+                      <th scope="col" class="num speed-value{% if column.active %} is-sorted{% endif %}"{% if column.active %} aria-sort="{% if column.direction == 'asc' %}ascending{% else %}descending{% endif %}"{% endif %}><a href="?{{ column.query }}">{{ column.label }}</a></th>
+                    {% endfor %}
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in page_obj %}
+                  <tr>
+                    <td class="num rank-col"><span class="rank-badge rank-{{ row.rank }}">{{ row.rank }}</span></td>
+                    <td class="rank-mon">
+                      <a href="{% url 'pokemon_detail' row.name %}{% if row.is_form %}?form={{ row.form_slug }}{% endif %}">
+                        <img src="{{ row.image }}" alt="" width="40" height="40" loading="lazy">
+                        <span>{{ row.display_name }}{% if row.is_form %} <span class="rank-form-tag">Form</span>{% endif %}</span>
+                      </a>
+                      <span class="rank-bar" aria-hidden="true"><span style="width:{{ row.bar }}%"></span></span>
+                    </td>
+                    <td class="col-types"><span class="chip-row">{% for t in row.types %}<span class="chip type-{{ t|lower }}">{{ t }}</span>{% endfor %}</span></td>
+                    {% for group in speed_groups %}
+                      {% for column in group.columns %}
+                        <td class="num speed-value{% if column.active %} is-sorted{% endif %}">{{ row.speed_tiers|get_item:column.key }}</td>
+                      {% endfor %}
+                    {% endfor %}
+                  </tr>
                 {% endfor %}
-                <td class="num col-stat rank-total{% if stat.slug == 'total' %} is-sorted{% endif %}">{{ row.total }}</td>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      {% else %}
+        <div class="list-card">
+          <table class="list-table rank-table">
+            <thead>
+              <tr>
+                <th scope="col" class="num rank-col">#</th>
+                <th scope="col">Pokémon</th>
+                <th scope="col" class="col-types">Types</th>
+                {% for label, key in stat_columns %}
+                  <th scope="col" class="num col-stat{% if stat.label == label %} is-sorted{% endif %}">{{ label }}</th>
+                {% endfor %}
+                <th scope="col" class="num col-stat{% if stat.slug == 'total' %} is-sorted{% endif %}">Total</th>
               </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {% for row in page_obj %}
+                <tr>
+                  <td class="num rank-col"><span class="rank-badge rank-{{ row.rank }}">{{ row.rank }}</span></td>
+                  <td class="rank-mon">
+                    <a href="{% url 'pokemon_detail' row.name %}{% if row.is_form %}?form={{ row.form_slug }}{% endif %}">
+                      <img src="{{ row.image }}" alt="" width="40" height="40" loading="lazy">
+                      <span>{{ row.display_name }}{% if row.is_form %} <span class="rank-form-tag">Form</span>{% endif %}</span>
+                    </a>
+                    <span class="rank-bar" aria-hidden="true"><span style="width:{{ row.bar }}%"></span></span>
+                  </td>
+                  <td class="col-types"><span class="chip-row">{% for t in row.types %}<span class="chip type-{{ t|lower }}">{{ t }}</span>{% endfor %}</span></td>
+                  {% for label, key in stat_columns %}
+                    <td class="num col-stat{% if stat.label == label %} is-sorted{% endif %}">{{ row.stats|get_item:key }}</td>
+                  {% endfor %}
+                  <td class="num col-stat rank-total{% if stat.slug == 'total' %} is-sorted{% endif %}">{{ row.total }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
       {% include "partials/pagination.html" %}
     {% else %}
       <div class="list-empty">
-        <h2>No Pokémon match</h2>
-        <p>None of the stored Pokémon have the {{ selected_type }} type. <a href="?stat={{ stat.slug }}">Show all types</a>.</p>
+        <h2>No Pokémon or forms match</h2>
+        <p>None of the stored candidates have the {{ selected_type }} type. <a href="?{% if speed_mode %}sort={{ speed_sort }}&amp;dir={{ speed_direction }}{% else %}stat={{ stat.slug }}{% endif %}{% if include_forms %}&amp;forms=1{% endif %}">Show all types</a>.</p>
       </div>
     {% endif %}
 

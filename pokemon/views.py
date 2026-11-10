@@ -13,6 +13,12 @@ from pokemon.services.data import MOVE_FIELDS, form_to_dict, get_move_info, get_
 from pokemon.services.forms import FORM_KINDS
 from pokemon.services.types import TYPES, defense_cells, effectiveness, type_matchups
 from pokemon.services.pokelance_client import sync_pokemon_data, PokelanceAPIError
+from pokemon.services.stats import (
+    SPEED_LEVELS,
+    SPEED_SPREADS,
+    calculate_speed_tiers,
+    calculate_stat_range,
+)
 from pokemon.services.versions import (
     GENERATION_DEX_RANGES,
     GENERATION_GAMES,
@@ -80,6 +86,14 @@ def _select_form(request, forms):
     raise Http404(f"No form '{slug}'")
 
 
+def _apply_form_overrides(pokemon, form):
+    """Return a base Pokémon dict with the fields that vary by form replaced."""
+    pokemon = pokemon.copy()
+    form_data = form_to_dict(form)
+    pokemon.update({key: form_data[key] for key in FORM_OVERRIDES})
+    return pokemon
+
+
 def pokemon_detail(request, name):
     if not name.strip():
         messages.error(request, "Pokémon name required")
@@ -122,8 +136,7 @@ def pokemon_detail(request, name):
     if active_form is not None:
         # Species-level data (category, gender, egg groups, evolution ...) stays the base Pokémon's;
         # what differs per form is overlaid. PokéAPI doesn't give encounters for forms, so none are shown.
-        form_data = form_to_dict(active_form)
-        pokemon.update({k: form_data[k] for k in FORM_OVERRIDES})
+        pokemon = _apply_form_overrides(pokemon, active_form)
         pokemon["locations"] = []
         display_name = active_form.label
         own_moves = list(active_form.moves.values(*MOVE_FIELDS))
@@ -171,24 +184,6 @@ def group_hm_tm_moves(moves):
     learnt_tm = [m for m in machine_moves if m["name"] not in HM_NAMES]
     
     return learnt_hm, learnt_tm
-
-def calculate_stat_range(base_stats):
-    """
-    Level 100 min/max for each stat, using the standard formula:
-    - Min: IV 0, EV 0, hindering nature (×0.9, HP unaffected)
-    - Max: IV 31, EV 252, beneficial nature (×1.1, HP unaffected)
-    """
-    level = 100
-    ranges = {}
-    for stat_name, base in base_stats.items():
-        if stat_name == "HP":
-            min_val = ((2 * base) * level) // 100 + level + 10
-            max_val = ((2 * base + 31 + 63) * level) // 100 + level + 10
-        else:
-            min_val = int((((2 * base) * level) // 100 + 5) * 0.9)
-            max_val = int((((2 * base + 31 + 63) * level) // 100 + 5) * 1.1)
-        ranges[stat_name] = {"min": min_val, "max": max_val}
-    return ranges
 
 def search(request):
     pokemon_name = request.GET.get("search", "").strip()
@@ -539,50 +534,142 @@ COMPETITIVE_STATS = [
 
 
 def competitive(request):
-    """Rank every stored Pokémon by base stat total, or by any single base stat."""
+    """Rank base Pokémon and alternate forms by base stats or calculated Speed tiers."""
     stat_slug, stat_label, stat_key = next(
         (s for s in COMPETITIVE_STATS if s[0] == request.GET.get("stat")), COMPETITIVE_STATS[0]
     )
     type_name = request.GET.get("type", "")
     if type_name not in {name for name, _ in TYPE_DEFENSE_ORDER}:
         type_name = ""
+    include_forms = request.GET.get("forms") == "1"
+    speed_sort = request.GET.get("sort", "")
+    speed_keys = {
+        f"{spread_slug}-{level}"
+        for level in SPEED_LEVELS
+        for spread_slug, _, _, _ in SPEED_SPREADS
+    }
+    if speed_sort not in speed_keys:
+        speed_sort = ""
+    speed_direction = request.GET.get("dir", "desc")
+    if speed_direction not in {"asc", "desc"}:
+        speed_direction = "desc"
 
     rows = [
         {
             "pokedex_number": p["pokedex_number"], "name": p["name"], "image": p["image"],
+            "display_name": p["name"], "is_form": False, "form_slug": "",
+            "form_order": 0,
             "types": p["types"], "stats": p["base_stats"],
             "total": p["stat_total"],
             "value": p["stat_total"] if stat_key is None else p["base_stats"].get(stat_key, 0),
+            "speed_tiers": calculate_speed_tiers(p["base_stats"].get("Speed", 0)),
         }
         for p in Pokemon.objects.values("pokedex_number", "name", "image", "types", "base_stats", "stat_total")
     ]
     stored_count = len(rows)
     if type_name:
         rows = [r for r in rows if type_name in r["types"]]
+    base_count = len(rows)
 
-    rows.sort(key=lambda r: (-r["value"], r["pokedex_number"]))
-    top = rows[0]["value"] if rows else 0
+    if include_forms:
+        for form in PokemonForm.objects.select_related("pokemon").order_by(
+            "pokemon__pokedex_number", "pokeapi_id"
+        ):
+            base = pokemon_to_dict(form.pokemon)
+            data = _apply_form_overrides(base, form)
+            if type_name and type_name not in data["types"]:
+                continue
+            value = data["stat_total"] if stat_key is None else data["base_stats"].get(stat_key, 0)
+            rows.append({
+                "pokedex_number": data["pokedex_number"],
+                "name": data["name"],
+                "display_name": form.label,
+                "image": data["image"],
+                "is_form": True,
+                "form_slug": form.slug,
+                "form_order": form.pokeapi_id,
+                "types": data["types"],
+                "stats": data["base_stats"],
+                "total": data["stat_total"],
+                "value": value,
+                "speed_tiers": calculate_speed_tiers(data["base_stats"].get("Speed", 0)),
+            })
+        form_count = len(rows) - base_count
+    else:
+        form_count = 0
+
+    speed_labels = {
+        f"{spread_slug}-{level}": f"{label} Speed (Lv. {level})"
+        for level in SPEED_LEVELS
+        for spread_slug, label, _, _ in SPEED_SPREADS
+    }
+    for row in rows:
+        if speed_sort:
+            row["value"] = row["speed_tiers"][speed_sort]
+
+    direction = 1 if speed_sort and speed_direction == "asc" else -1
+    rows.sort(key=lambda r: (
+        direction * r["value"], r["pokedex_number"], r["is_form"], r["form_order"],
+    ))
+    top = max((row["value"] for row in rows), default=0)
     for index, row in enumerate(rows):
         # Competition ranking: ties share a rank and the next rank skips (1, 2, 2, 4).
         row["rank"] = rows[index - 1]["rank"] if index and row["value"] == rows[index - 1]["value"] else index + 1
         row["bar"] = round(row["value"] / top * 100) if top else 0
 
     filters = {"type": type_name} if type_name else {}
+    if include_forms:
+        filters["forms"] = "1"
     stat_links = [
-        {"slug": slug, "label": label, "active": slug == stat_slug, "query": urlencode({"stat": slug, **filters})}
+        {
+            "slug": slug,
+            "label": label,
+            "active": not speed_sort and slug == stat_slug,
+            "query": urlencode({"stat": slug, **filters}),
+        }
         for slug, label, _ in COMPETITIVE_STATS
     ]
+    speed_groups = []
+    for level in SPEED_LEVELS:
+        columns = []
+        for spread_slug, label, _, _ in SPEED_SPREADS:
+            key = f"{spread_slug}-{level}"
+            active = key == speed_sort
+            next_direction = "asc" if active and speed_direction == "desc" else "desc"
+            columns.append({
+                "key": key,
+                "label": label,
+                "active": active,
+                "direction": speed_direction if active else "",
+                "query": urlencode({"sort": key, "dir": next_direction, **filters}),
+            })
+        speed_groups.append({"level": level, "columns": columns})
+
+    query = (
+        urlencode({"sort": speed_sort, "dir": speed_direction, **filters})
+        if speed_sort else
+        urlencode({"stat": stat_slug, **filters})
+    )
     page_obj = Paginator(rows, 50).get_page(request.GET.get("page"))
     return render(request, "competitive.html", {
         "page_obj": page_obj,
         "total": len(rows),
         "stored_count": stored_count,
+        "base_count": base_count,
+        "form_count": form_count,
+        "include_forms": include_forms,
         "stat": {"slug": stat_slug, "label": stat_label},
         "stat_links": stat_links,
+        "speed_mode": bool(speed_sort),
+        "speed_sort": speed_sort,
+        "speed_direction": speed_direction,
+        "speed_label": speed_labels.get(speed_sort, ""),
+        "speed_groups": speed_groups,
+        "speed_query": urlencode({"sort": "max-50", **filters}),
         "selected_type": type_name,
         "type_names": [name for name, _ in TYPE_DEFENSE_ORDER],
         "stat_columns": [(label, key) for slug, label, key in COMPETITIVE_STATS if key],
-        "query": urlencode({"stat": stat_slug, **filters}),
+        "query": query,
     })
 
 
