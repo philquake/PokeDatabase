@@ -99,10 +99,11 @@
   border-radius: var(--radius-sm);
 }
 .team-coverage.is-gap { border-color: rgba(226, 73, 44, 0.48); }
-.team-coverage > strong { color: var(--color-red-strong); font-size: var(--text-xs); text-transform: uppercase; }
+.team-coverage > strong { color: var(--color-white); font-size: var(--text-xs); text-transform: uppercase; } /* red-strong on navy is only ~2:1; the red border already marks the gap */
+.team-actions .list-reset { display: inline-flex; align-items: center; min-height: 44px; }
 .team-coverage-types { display: flex; flex-wrap: wrap; gap: 4px; }
 .team-coverage-types .chip,
-.team-suggestion-covers .chip { font-size: 0.65rem; }
+.team-suggestion-covers .chip { font-size: 0.75rem; }
 .team-data-warning {
   margin: 0 0 12px;
   padding: 10px 12px;

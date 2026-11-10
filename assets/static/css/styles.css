@@ -250,9 +250,12 @@ img {
   background: var(--color-panel);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
 }
-.site-navbar .nav-dropdown:hover:not(.is-dismissed) > .nav-dropdown-menu,
-.site-navbar .nav-dropdown:focus-within:not(.is-dismissed) > .nav-dropdown-menu,
 .site-navbar .nav-dropdown.is-open > .nav-dropdown-menu { display: flex; flex-direction: column; }
+/* hover/focus open it without JS, but only on desktop mice: touch "sticky hover" and focus would keep it stuck open */
+@media (min-width: 992px) and (hover: hover) {
+  .site-navbar .nav-dropdown:hover:not(.is-dismissed) > .nav-dropdown-menu,
+  .site-navbar .nav-dropdown:focus-within:not(.is-dismissed) > .nav-dropdown-menu { display: flex; flex-direction: column; }
+}
 .nav-dropdown-menu a {
   min-height: 44px;
   display: flex;
@@ -338,6 +341,16 @@ img {
   .navbar-toggler:focus {
     box-shadow: none;
   }
+  .navbar-toggler:focus-visible { outline: 2px solid var(--color-yellow); outline-offset: 2px; }
+  .navbar-toggler { min-width: 44px; min-height: 44px; }
+  /* Bootstrap only defines the icon image inside .navbar (this header isn't one), so draw it here in light ink */
+  .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%23cbd5f5' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+  }
+
+  /* closed search = just the icon button; the pill (padding + gap) only appears when open */
+  .search-form-nav { padding: 2px; gap: 0; }
+  .search-form-nav.search-open { padding: 6px 8px 6px 16px; gap: 6px; }
 
   .site-navbar .navbar-collapse {
     order: 4;
@@ -372,7 +385,6 @@ img {
     background: transparent;
     box-shadow: none;
   }
-  .site-navbar .nav-dropdown:not(.is-open):not(:focus-within) .nav-dropdown-menu { display: none; }
   .site-navbar .nav-dropdown.is-open .nav-dropdown-menu { display: flex; }
 
   .search-nav {

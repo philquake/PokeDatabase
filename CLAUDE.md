@@ -110,17 +110,15 @@ All development so far happened in 2026 (Aug 6 – Sep 9); see "2026 timeline" b
 - **Oct 30** — Built the remaining home-page sections: Types (list + chart + per-type page), Region (list + per-region page), Abilities (model, `sync_abilities`, list + detail), Competitive (stat rankings), Items (model, `sync_items`, browse page); Items added to the navbar.
 - **Oct 30** — Design pass (ui-ux-pro-max audit → Theme A): self-hosted Fredoka/Inter/DM Mono (Poppins was declared but never loaded), type-scale tokens, one AA-contrast type-colour set, Pokédex page restyled to the dark theme with Poké-red dex tags, flash messages moved under the header and styled, navbar search no longer clipped.
 - **Nov 9** — Alternate forms: `PokemonForm`/`FormMove` models, sync of PokéAPI varieties (regional variants, Megas, Gigantamax, others), `?form=` switcher on the detail page (types/stats/abilities/artwork/moves per form), `/pokemon/forms/` browse page.
+- **Nov 9** — Competitive tools: shareable team builder with type-coverage analysis and Pokémon suggestions, plus a 2–4 Pokémon comparison page with stat/type/weakness and move-overlap views.
 
-## Roadmap (not built; the browse pages from the README are done)
-Per-move and per-item detail pages; richer per-Pokémon data (form encounters/locations, forms in rankings and type pages); competitive tools (team builder, coverage, comparisons); user accounts/favorites/teams; REST API (`/api/pokemon/`, `/api/types/`, …).
+## Completed roadmap features
+- **Team builder and type coverage** — Shareable team selection in the URL, team defensive weaknesses, offensive move-type coverage gaps, and Pokémon suggestions; no account required.
+- **Pokémon comparison** — Compare 2–4 Pokémon side by side, including stats, typing, weaknesses, and shared move learnsets.
 
-+### Feature ideas (competitive players)
-+Standout pick: **team builder with type-coverage analysis**. Reuses `services/types.py` (`defense_cells`, `TYPE_CHART`) and `Move` types, needs no new data. Team lives in the URL (`/team/?p=pikachu,gyarados,…`) so it's shareable without accounts. Shows shared weaknesses, offensive coverage gaps (from members' move types) and suggested Pokémon to cover them.
-+
-+Other ideas, roughly by fit with existing code:
-+1. **Damage calculator** (recommended next): attacker + move + defender, with level, EVs, nature, item, weather; outputs damage range as % HP and hits to KO. Inputs already exist (base stats, `calculate_stat_range`, move power/type, type chart).
-+2. **Speed tiers**: sortable final Speed at Lv50/100 for common spreads (max, neutral, uninvested, +Speed nature, Choice Scarf). Extends `competitive`; quick win and a good first step.
-+3. **Pokémon comparison**: 2–4 Pokémon side by side (stats, typing, weaknesses, movepool overlap).
-+4. **Move/ability search by effect**: who learns move X / has ability Y, filtered by type or stat (e.g. Fake Out users, Intimidate holders). Needs the per-move and per-ability detail pages above.
-+5. **Nature and EV spread calculator**: final stats from nature + EVs; feeds the damage calculator and speed tiers.
-+6. **Format/tier data** (OU, UU, VGC, usage stats): most valuable but hardest — PokéAPI has no tier data, so it needs a new source (Smogon/Pikalytics) kept up to date.
+## Roadmap (remaining)
+- Per-move and per-item detail pages.
+- Richer form data: form-specific encounters/locations, and alternate forms in rankings and type pages.
+- Competitive tools: damage calculator; speed tiers; nature and EV spread calculator; move/ability search by effect; format/tier data (OU, UU, VGC, usage). PokéAPI does not provide tier data, so this needs a separate maintained source.
+- User accounts, favorites, and saved teams (the team builder currently works without accounts).
+- Read-only REST API (for example, `/api/pokemon/` and `/api/types/`).

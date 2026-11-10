@@ -61,7 +61,7 @@
     <section class="comparison-results" aria-labelledby="comparison-results-title">
       <div class="comparison-share">
         <span>Shareable comparison URL</span>
-        <code>{{ share_url }}</code>
+        <a href="{{ share_url }}">{{ request.scheme }}://{{ request.get_host }}{{ share_url }}</a>
       </div>
 
       <h2 class="list-section-title" id="comparison-results-title">At a glance</h2>
@@ -121,7 +121,7 @@
           <h3>Known by all {{ comparison_pokemon|length }}</h3>
           <ul class="comparison-moves">
             {% for move in shared_moves %}
-              <li><strong>{{ move.name }}</strong><span>Known by {{ move.owners|join:", " }}</span></li>
+              <li><strong>{{ move.name }}</strong></li>
             {% endfor %}
           </ul>
         {% else %}

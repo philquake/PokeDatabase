@@ -36,7 +36,9 @@
   background: var(--color-panel);
 }
 .comparison-share span { color: var(--color-text-muted); font-size: var(--text-sm); font-weight: 600; }
-.comparison-share code { color: var(--color-yellow); overflow-wrap: anywhere; }
+.comparison-share a { color: var(--color-yellow); overflow-wrap: anywhere; }
+.comparison-share a:focus-visible { outline: 2px solid var(--color-yellow); outline-offset: 3px; border-radius: 4px; }
+.comparison-actions .list-reset { display: inline-flex; align-items: center; min-height: 44px; }
 .comparison-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: 16px; }
 .comparison-card {
   min-width: 0;

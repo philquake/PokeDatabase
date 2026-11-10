@@ -51,9 +51,15 @@ function initCompetitiveDropdown() {
   dropdown.addEventListener('focusout', (event) => {
     if (!dropdown.contains(event.relatedTarget)) setOpen(false);
   });
-  toggle.addEventListener('click', () => {
-    dropdown.classList.remove('is-dismissed');
-    setOpen(true);
+  // A tap focuses the button (opening the menu) before the click fires, so remember the state from pointerdown;
+  // tapping an already-open menu closes it. Mouse clicks never close it (hover already opened it).
+  let wasOpen = false;
+  toggle.addEventListener('pointerdown', () => { wasOpen = dropdown.classList.contains('is-open'); });
+  toggle.addEventListener('click', (event) => {
+    const close = wasOpen && event.pointerType !== 'mouse';
+    wasOpen = false;
+    dropdown.classList.toggle('is-dismissed', close);
+    setOpen(!close);
   });
   dropdown.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && dropdown.classList.contains('is-open')) {
