@@ -78,15 +78,15 @@ class NavbarTest(TestCase):
     def test_navbar_links_to_every_section(self):
         response = self.client.get(reverse("home"))
 
-        for name in ("types", "region", "abilities", "moves", "competitive", "items"):
+        for name in ("abilities", "moves", "competitive", "items"):
             self.assertContains(response, f'href="{reverse(name)}"')
 
-    def test_detail_pages_highlight_their_section(self):
+    def test_type_and_region_pages_are_not_top_level_navigation_items(self):
         response = self.client.get(reverse("type_detail", args=["fire"]))
-        self.assertContains(response, 'class=" types active"')
+        self.assertNotContains(response, 'class=" types active"')
 
         response = self.client.get(reverse("region_detail", args=["kanto"]))
-        self.assertContains(response, 'class=" region active"')
+        self.assertNotContains(response, 'class=" region active"')
 
         response = self.client.get(reverse("forms"))
         self.assertContains(response, 'class=" pokedex active"')

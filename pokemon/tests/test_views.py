@@ -916,6 +916,43 @@ class AdminSyncViewTest(TestCase):
         self.assertEqual(response.context["sync_error"], "upstream API unavailable")
         self.assertNotIn("sync_success", response.context)
           
+class PokedexFilterViewTest(PokemonDataTestCase):
+
+    def test_pokedex_filter_controls_are_rendered_and_region_type_can_combine(self):
+        response = self.client.get(reverse("pokedex"), {"region": "Kanto", "type": "fire"})
+
+        self.assertEqual(
+            [pokemon.name for pokemon in response.context["pokemon_data"]],
+            ["Charmander", "Charmeleon", "Charizard"],
+        )
+        self.assertEqual(response.context["pokemon_count"], 3)
+        self.assertEqual(response.context["stored_count"], 12)
+        self.assertEqual(response.context["selected_region"], "Kanto")
+        self.assertEqual(response.context["selected_type"], "fire")
+        self.assertContains(response, 'class="pokedex-filters"')
+        self.assertContains(response, 'value="Kanto" selected')
+        self.assertContains(response, 'value="fire" selected')
+
+    def test_type_filter_is_case_insensitive(self):
+        response = self.client.get(reverse("pokedex"), {"type": "FIRE"})
+
+        self.assertEqual(response.context["selected_type"], "fire")
+        self.assertEqual(response.context["pokemon_count"], 3)
+
+    def test_invalid_filters_are_ignored(self):
+        response = self.client.get(reverse("pokedex"), {"region": "Unknown", "type": "unknown"})
+
+        self.assertEqual(response.context["pokemon_count"], 12)
+        self.assertFalse(response.context["filtering"])
+
+    def test_empty_filter_result_has_clear_guidance(self):
+        response = self.client.get(reverse("pokedex"), {"type": "fairy"})
+
+        self.assertEqual(response.context["pokemon_count"], 0)
+        self.assertContains(response, "No Pokémon match these filters")
+        self.assertContains(response, f'href="{reverse("pokedex")}"')
+
+
 class TypesViewTest(PokemonDataTestCase):
 
     def test_types_view_returns_200(self):

@@ -255,11 +255,31 @@ def type_detail(request, name):
     })
 
 def pokedex(request):
-    pokemon_data = Pokemon.objects.all()
+    stored = list(Pokemon.objects.all())
+    stored_count = len(stored)
+    regions = list(GENERATION_REGIONS.values())
+    selected_region = request.GET.get("region", "")
+    if selected_region not in regions:
+        selected_region = ""
+    selected_type = request.GET.get("type", "").strip().lower()
+    if selected_type not in TYPES:
+        selected_type = ""
 
+    pokemon_data = [
+        pokemon for pokemon in stored
+        if (not selected_region or pokemon.region == selected_region)
+        and (not selected_type or selected_type in (t.lower() for t in pokemon.types))
+    ]
     return render(request, "pokedex.html", {
         "pokemon_data": pokemon_data,
+        "pokemon_count": len(pokemon_data),
+        "stored_count": stored_count,
         "form_count": PokemonForm.objects.count(),
+        "regions": regions,
+        "selected_region": selected_region,
+        "types": [type_name.title() for type_name in TYPES],
+        "selected_type": selected_type,
+        "filtering": bool(selected_region or selected_type),
     })
 
 

@@ -20,7 +20,7 @@ class Navigation_Links(LiveServerTestCase):
         self.browser.get(self.live_server_url + "/")
         nav_links = self.browser.find_elements(By.CSS_SELECTOR, "nav a")
         link_texts = [link.text for link in nav_links]
-        expected_links = ["PokeDatabase", "Home", "Pokédex", "Types", "Region", "Abilities", "Moves", "Competitive"]
+        expected_links = ["PokeDatabase", "Home", "Pokédex", "Abilities", "Moves", "Competitive", "Items"]
         self.assertEqual(link_texts, expected_links)
 
     def test_navigation_links_redirect(self):
