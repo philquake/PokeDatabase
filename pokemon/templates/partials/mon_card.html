@@ -1,7 +1,7 @@
-{# Small Pokémon card. Needs: p (dict with name, pokedex_number, image). Optional: note. #}
-<a class="mon-card" href="{% url 'pokemon_detail' p.name %}">
+{# Small Pokémon card. Needs: p (dict with name, pokedex_number, image). Optional: form_slug, display_name, note. #}
+<a class="mon-card" href="{% url 'pokemon_detail' p.name %}{% if form_slug %}?form={{ form_slug }}{% endif %}">
   <img src="{{ p.image }}" alt="" loading="lazy" width="96" height="96">
   <span class="mon-card-num">#{{ p.pokedex_number|stringformat:"03d" }}</span>
-  <span class="mon-card-name">{{ p.name }}</span>
+  <span class="mon-card-name">{{ display_name|default:p.name }}</span>
   {% if note %}<span class="mon-card-note">{{ note }}</span>{% endif %}
 </a>

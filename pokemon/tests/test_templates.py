@@ -77,9 +77,18 @@ class NavbarTest(TestCase):
 
     def test_navbar_links_to_every_section(self):
         response = self.client.get(reverse("home"))
+        navbar = response.content.decode().split("</nav>", 1)[0]
 
-        for name in ("abilities", "moves", "competitive", "items"):
-            self.assertContains(response, f'href="{reverse(name)}"')
+        for name in ("abilities", "moves", "competitive", "comparison", "team", "items"):
+            self.assertIn(f'href="{reverse(name)}"', navbar)
+        self.assertNotIn(f'href="{reverse("types")}"', navbar)
+        self.assertNotIn(f'href="{reverse("region")}"', navbar)
+
+    def test_homepage_browse_card_links_to_team_builder_as_builder(self):
+        response = self.client.get(reverse("home"))
+
+        self.assertContains(response, f'href="{reverse("team")}"')
+        self.assertContains(response, "Builder")
 
     def test_type_and_region_pages_are_not_top_level_navigation_items(self):
         response = self.client.get(reverse("type_detail", args=["fire"]))

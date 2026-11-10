@@ -15,7 +15,7 @@
     <p class="list-eyebrow">Type</p>
     <h1 class="list-title"><span class="chip chip-lg type-{{ type_slug }}">{{ type_name }}</span></h1>
     <p class="list-subtitle">
-      {{ pokemon|length }} Pokémon &middot;
+      {{ pokemon|length }} base Pokémon &middot; {{ forms|length }} alternate form{{ forms|length|pluralize }} &middot;
       <a class="inline-link" href="{% url 'moves' %}?type={{ type_name }}">{{ move_count }} move{{ move_count|pluralize }}</a>
     </p>
   </header>
@@ -47,8 +47,19 @@
     <div class="mon-grid">
       {% for p in pokemon %}{% include "partials/mon_card.html" %}{% endfor %}
     </div>
-  {% else %}
+  {% elif not forms %}
     <div class="list-empty"><h2>No {{ type_name }}-type Pokémon yet</h2><p>None of the Pokémon stored so far have this type.</p></div>
+  {% else %}
+    <p class="list-subtitle">No base Pokémon of this type are stored yet.</p>
+  {% endif %}
+
+  {% if forms %}
+    <h2 class="list-section-title">{{ type_name }}-type alternate forms</h2>
+    <div class="mon-grid">
+      {% for form in forms %}
+        {% include "partials/mon_card.html" with p=form form_slug=form.slug display_name=form.label %}
+      {% endfor %}
+    </div>
   {% endif %}
 </section>
 {% endblock %}

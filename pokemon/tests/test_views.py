@@ -915,7 +915,8 @@ class AdminSyncViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["sync_error"], "upstream API unavailable")
         self.assertNotIn("sync_success", response.context)
-          
+
+
 class PokedexFilterViewTest(PokemonDataTestCase):
 
     def test_pokedex_filter_controls_are_rendered_and_region_type_can_combine(self):
@@ -967,8 +968,10 @@ class TypesViewTest(PokemonDataTestCase):
 
         self.assertEqual(len(tiles), 18)
         self.assertEqual(tiles["fire"]["pokemon_count"], 3)   # Charmander, Charmeleon, Charizard
+        self.assertEqual(tiles["fire"]["form_count"], 3)
         self.assertEqual(tiles["fire"]["move_count"], 3)      # Ember, Flamethrower, Fire Blast
         self.assertEqual(tiles["fairy"]["pokemon_count"], 0)
+        self.assertEqual(tiles["fairy"]["form_count"], 0)
         self.assertContains(response, reverse("type_detail", args=["fire"]))
 
     def test_chart_has_a_row_per_attacking_type(self):
@@ -1010,6 +1013,32 @@ class TypeDetailViewTest(PokemonDataTestCase):
     def test_includes_dual_types(self):
         response = self.client.get(reverse("type_detail", args=["flying"]))
         self.assertEqual([p["name"] for p in response.context["pokemon"]], ["Charizard"])
+
+    def test_lists_matching_forms_separately_from_base_pokemon(self):
+        response = self.client.get(reverse("type_detail", args=["dragon"]))
+
+        self.assertEqual(response.context["pokemon"], [])
+        form = response.context["forms"][0]
+        self.assertEqual(
+            (form["name"], form["pokedex_number"], form["slug"], form["label"], form["types"]),
+            ("Charizard", 6, "mega-x", "Mega Charizard X", ["Fire", "Dragon"]),
+        )
+        self.assertTrue(form["image"])
+        self.assertContains(response, "Mega Charizard X")
+        self.assertContains(response, f'{reverse("pokemon_detail", args=["Charizard"])}?form=mega-x')
+
+    def test_form_cards_follow_pokeapi_order_after_base_species(self):
+        response = self.client.get(reverse("type_detail", args=["fire"]))
+
+        self.assertEqual(
+            [form["label"] for form in response.context["forms"]],
+            ["Mega Charizard X", "Mega Charizard Y", "Gigantamax Charizard"],
+        )
+
+    def test_pokemon_without_forms_does_not_get_a_form_entry(self):
+        response = self.client.get(reverse("type_detail", args=["grass"]))
+
+        self.assertNotIn("Bulbasaur", [form["name"] for form in response.context["forms"]])
 
     def test_name_is_case_insensitive(self):
         self.assertEqual(self.client.get(reverse("type_detail", args=["FIRE"])).status_code, 200)
@@ -1187,22 +1216,27 @@ class CompetitiveViewTest(PokemonDataTestCase):
         self.assertContains(response, 'data-async-page="competitive"')
         self.assertContains(response, 'aria-live="polite"')
 
-    def test_ranks_by_base_stat_total_by_default(self):
+    def test_ranks_base_pokemon_and_forms_by_total_by_default(self):
         response = self.client.get(reverse("competitive"))
         rows = self.rows(response)
 
-        self.assertEqual([r["name"] for r in rows[:4]], ["Charizard", "Venusaur", "Gengar", "Kangaskhan"])
-        self.assertEqual(rows[0]["value"], 534)
+        self.assertEqual([r["display_name"] for r in rows[:2]], ["Mega Charizard X", "Mega Charizard Y"])
+        self.assertEqual(rows[0]["value"], 634)
         self.assertEqual(response.context["stat"]["slug"], "total")
+        self.assertEqual(response.context["stored_count"], 12)
+        self.assertEqual(response.context["base_count"], 12)
+        self.assertEqual(response.context["form_count"], 5)
+        self.assertEqual(response.context["total"], 17)
+        self.assertNotContains(response, 'name="forms"')
 
     def test_tied_pokemon_share_a_rank(self):
         rows = self.rows(self.client.get(reverse("competitive")))
         by_name = {r["name"]: r["rank"] for r in rows}
 
-        self.assertEqual(by_name["Ivysaur"], 5)
-        self.assertEqual(by_name["Haunter"], 5)
-        self.assertEqual(by_name["Charmeleon"], 5)
-        self.assertEqual(by_name["Onix"], 8)    # next rank skips the tie
+        self.assertEqual(by_name["Ivysaur"], 9)
+        self.assertEqual(by_name["Haunter"], 9)
+        self.assertEqual(by_name["Charmeleon"], 9)
+        self.assertEqual(by_name["Onix"], 12)    # next rank skips the tie
 
     def test_ranks_by_a_single_stat(self):
         response = self.client.get(reverse("competitive"), {"stat": "speed"})
@@ -1215,23 +1249,23 @@ class CompetitiveViewTest(PokemonDataTestCase):
     def test_rows_carry_every_stat_and_a_bar_width(self):
         response = self.client.get(reverse("competitive"))
         rows = self.rows(response)
-        row = rows[0]
+        row = next(row for row in rows if row["name"] == "Charizard" and not row["is_form"])
 
-        self.assertEqual(response.context["total"], 12)
         self.assertEqual(row["stats"]["Attack"], 84)
         self.assertEqual(row["types"], ["Fire", "Flying"])
         self.assertEqual(row["display_name"], "Charizard")
         self.assertFalse(row["is_form"])
-        self.assertEqual(row["bar"], 100)           # the top Pokémon fills the bar
-        self.assertTrue(0 < rows[-1]["bar"] < 100)
+        self.assertLess(row["bar"], 100)
+        self.assertEqual(rows[0]["bar"], 100)
 
-    def test_forms_are_opt_in_candidates_and_keep_base_species_count(self):
-        response = self.client.get(reverse("competitive"), {"forms": "1"})
+    def test_forms_are_ranked_by_default_and_keep_base_species_count(self):
+        response = self.client.get(reverse("competitive"))
         rows = self.rows(response)
         charizard_forms = [row for row in rows if row["name"] == "Charizard" and row["is_form"]]
 
-        self.assertTrue(response.context["include_forms"])
         self.assertEqual(response.context["stored_count"], 12)
+        self.assertEqual(response.context["base_count"], 12)
+        self.assertEqual(response.context["form_count"], 5)
         self.assertEqual(response.context["total"], 17)
         self.assertEqual(
             [(row["display_name"], row["form_slug"], row["types"]) for row in charizard_forms],
@@ -1247,7 +1281,7 @@ class CompetitiveViewTest(PokemonDataTestCase):
         )
 
     def test_form_rankings_sort_by_value_then_species_and_form_order(self):
-        rows = self.rows(self.client.get(reverse("competitive"), {"forms": "1"}))
+        rows = self.rows(self.client.get(reverse("competitive")))
 
         self.assertEqual([row["display_name"] for row in rows[:2]], [
             "Mega Charizard X", "Mega Charizard Y",
@@ -1258,8 +1292,8 @@ class CompetitiveViewTest(PokemonDataTestCase):
             ["Bulbasaur"],
         )
 
-    def test_speed_tiers_include_forms_and_keep_the_forms_filter_on_sort_links(self):
-        response = self.client.get(reverse("competitive"), {"sort": "max-50", "forms": "1"})
+    def test_speed_tiers_include_forms_by_default(self):
+        response = self.client.get(reverse("competitive"), {"sort": "max-50"})
         charizard_x = next(
             row for row in self.rows(response)
             if row["name"] == "Charizard" and row["form_slug"] == "mega-x"
@@ -1267,8 +1301,8 @@ class CompetitiveViewTest(PokemonDataTestCase):
 
         self.assertEqual(charizard_x["speed_tiers"]["max-50"], 167)
         self.assertEqual(response.context["total"], 17)
-        self.assertContains(response, "sort=max-100&amp;dir=desc&amp;forms=1")
-        self.assertContains(response, "sort=max-50&amp;dir=asc&amp;forms=1")
+        self.assertContains(response, "sort=max-100&amp;dir=desc")
+        self.assertContains(response, "sort=max-50&amp;dir=asc")
 
     def test_filters_by_type(self):
         response = self.client.get(reverse("competitive"), {"type": "Ghost"})
@@ -1279,14 +1313,14 @@ class CompetitiveViewTest(PokemonDataTestCase):
         response = self.client.get(reverse("competitive"), {"stat": "luck", "type": "Banana"})
 
         self.assertEqual(response.context["stat"]["slug"], "total")
-        self.assertEqual(response.context["total"], 12)
+        self.assertEqual(response.context["total"], 17)
 
     def test_every_stat_has_a_link_that_keeps_the_type_filter(self):
         response = self.client.get(reverse("competitive"), {"type": "Fire"})
         self.assertContains(response, "stat=speed&amp;type=Fire")
 
     def test_no_matches_message(self):
-        response = self.client.get(reverse("competitive"), {"type": "Dragon"})
+        response = self.client.get(reverse("competitive"), {"type": "Fairy"})
         self.assertContains(response, "No Pok")
 
 

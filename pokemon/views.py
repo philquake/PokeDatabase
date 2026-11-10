@@ -8,6 +8,7 @@ from django.core.paginator import Paginator
 from django.db.models import Count, F, Q
 from django.http import Http404
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from pokemon.models import GENERATION_REGIONS, Ability, Item, Move, Pokemon, PokemonForm, PokemonMove
 from pokemon.services.data import MOVE_FIELDS, form_to_dict, get_move_info, get_pokemon_by_name, pokemon_to_dict
 from pokemon.services.forms import FORM_KINDS
@@ -19,6 +20,7 @@ from pokemon.services.stats import (
     calculate_speed_tiers,
     calculate_stat_range,
 )
+from pokemon.services.team_builder import analyze_team
 from pokemon.services.versions import (
     GENERATION_DEX_RANGES,
     GENERATION_GAMES,
@@ -205,6 +207,10 @@ def types(request):
     for type_list in Pokemon.objects.values_list("types", flat=True):
         for type_name in type_list:
             pokemon_counts[type_name.lower()] = pokemon_counts.get(type_name.lower(), 0) + 1
+    form_counts = {}
+    for type_list in PokemonForm.objects.values_list("types", flat=True):
+        for type_name in type_list:
+            form_counts[type_name.lower()] = form_counts.get(type_name.lower(), 0) + 1
     move_counts = {
         row["type"].lower(): row["n"] for row in Move.objects.values("type").annotate(n=Count("id"))
     }
@@ -213,6 +219,7 @@ def types(request):
         {
             "slug": slug, "name": slug.title(),
             "pokemon_count": pokemon_counts.get(slug, 0),
+            "form_count": form_counts.get(slug, 0),
             "move_count": move_counts.get(slug, 0),
         }
         for slug in TYPES
@@ -246,11 +253,27 @@ def type_detail(request, name):
         row for row in Pokemon.objects.values("pokedex_number", "name", "image", "types")
         if slug in (t.lower() for t in row["types"])
     ]
+    forms = []
+    for form in PokemonForm.objects.select_related("pokemon").order_by(
+        "pokemon__pokedex_number", "pokeapi_id"
+    ):
+        base = pokemon_to_dict(form.pokemon)
+        data = _apply_form_overrides(base, form)
+        if slug in (type_name.lower() for type_name in data["types"]):
+            forms.append({
+                "name": data["name"],
+                "pokedex_number": data["pokedex_number"],
+                "slug": form.slug,
+                "label": form.label,
+                "image": data["image"],
+                "types": data["types"],
+            })
     return render(request, "type_detail.html", {
         "type_slug": slug,
         "type_name": slug.title(),
         "matchups": type_matchups(slug),
         "pokemon": pokemon,
+        "forms": forms,
         "move_count": Move.objects.filter(type=slug.title()).count(),
     })
 
@@ -553,6 +576,250 @@ COMPETITIVE_STATS = [
 ]
 
 
+COMPARISON_STATS = (
+    ("HP", "HP"),
+    ("Attack", "Attack"),
+    ("Defense", "Defense"),
+    ("Sp. Atk", "Special Attack"),
+    ("Sp. Def", "Special Defense"),
+    ("Speed", "Speed"),
+)
+
+
+def comparison(request):
+    """Compare 2–4 base Pokémon using repeatable ?p=<name> query parameters."""
+    pokemon_options = list(Pokemon.objects.order_by("pokedex_number"))
+    pokemon_by_name = {pokemon.name.casefold(): pokemon for pokemon in pokemon_options}
+    submitted = "p" in request.GET
+    selected_values = [value.strip() for value in request.GET.getlist("p")]
+    selected_names = [value for value in selected_values if value]
+    errors = []
+    slot_errors = [[] for _ in range(4)]
+    comparison_pokemon = []
+
+    def add_error(message, slot_index):
+        errors.append({
+            "message": message,
+            "field_id": f"compare-pokemon-{slot_index + 1}",
+        })
+
+    if submitted:
+        if len(selected_names) < 2:
+            missing_slots = max(0, 2 - len(selected_names))
+            for index in range(4):
+                if missing_slots and (
+                    index >= len(selected_values) or not selected_values[index]
+                ):
+                    slot_errors[index].append("Select a Pokémon.")
+                    missing_slots -= 1
+            add_error("Choose at least two Pokémon.", next(
+                (index for index, field_errors in enumerate(slot_errors) if field_errors),
+                0,
+            ))
+        if len(selected_names) > 4:
+            slot_errors[3].append("Remove a selection; no more than four are allowed.")
+            add_error("Choose no more than four Pokémon.", 3)
+
+        seen_names = set()
+        duplicate_index = None
+        for index, name in enumerate(selected_values[:4]):
+            if name and name.casefold() in seen_names:
+                slot_errors[index].append("Choose a different Pokémon.")
+                duplicate_index = index
+            elif name:
+                seen_names.add(name.casefold())
+        if duplicate_index is not None:
+            add_error("Each Pokémon can only be selected once.", duplicate_index)
+
+        unknown_names = []
+        unknown_keys = set()
+        unknown_index = None
+        for index, name in enumerate(selected_values):
+            if not name:
+                continue
+            if name.casefold() not in pokemon_by_name and name.casefold() not in unknown_keys:
+                unknown_names.append(name)
+                unknown_keys.add(name.casefold())
+                unknown_index = index if index < 4 else 3
+                slot_errors[unknown_index].append("This Pokémon was not found.")
+        if unknown_names:
+            add_error(f"Unknown Pokémon: {', '.join(unknown_names)}.", unknown_index)
+
+        if not errors:
+            comparison_pokemon = [
+                pokemon_by_name[name.casefold()] for name in selected_names
+            ]
+
+    comparison_data = []
+    shared_moves = []
+    partial_moves = []
+    share_url = ""
+    if comparison_pokemon:
+        move_names_by_pokemon = {pokemon.pk: {} for pokemon in comparison_pokemon}
+        move_rows = (
+            PokemonMove.objects.filter(
+                pokemon_id__in=move_names_by_pokemon,
+            )
+            .order_by()
+            .values_list("pokemon_id", "name")
+            .distinct()
+        )
+        move_owners = {}
+        for pokemon_id, move_name in move_rows:
+            key = move_name.casefold()
+            move_names_by_pokemon[pokemon_id].setdefault(key, move_name)
+
+        for pokemon in comparison_pokemon:
+            for key, move_name in move_names_by_pokemon[pokemon.pk].items():
+                move_owners.setdefault(key, {"name": move_name, "owners": []})[
+                    "owners"
+                ].append(pokemon.name)
+
+            data = pokemon_to_dict(pokemon)
+            data["stat_ranges"] = calculate_stat_range(data["base_stats"])
+            data["type_defenses"] = defense_cells(data["types"])
+            data["weaknesses"] = [
+                cell for cell in data["type_defenses"] if cell["multiplier"] > 1
+            ]
+            data["moves_known_count"] = len(move_names_by_pokemon[pokemon.pk])
+            data["stats"] = []
+
+            for label, key in COMPARISON_STATS:
+                value = data["base_stats"].get(key)
+                highest = max(
+                    (p.base_stats.get(key, 0) for p in comparison_pokemon),
+                    default=0,
+                )
+                stat_range = data["stat_ranges"].get(key, {})
+                data["stats"].append({
+                    "label": label,
+                    "value": value,
+                    "minimum": stat_range.get("min"),
+                    "maximum": stat_range.get("max"),
+                    "bar": round(value / highest * 100)
+                    if value is not None and highest
+                    else 0,
+                })
+            comparison_data.append(data)
+
+        overlap = sorted(move_owners.values(), key=lambda move: move["name"].casefold())
+        shared_moves = [
+            move for move in overlap if len(move["owners"]) == len(comparison_pokemon)
+        ]
+        partial_moves = [
+            move for move in overlap if 2 <= len(move["owners"]) < len(comparison_pokemon)
+        ]
+        share_url = f"{reverse('comparison')}?{urlencode([('p', p.name) for p in comparison_pokemon])}"
+
+    slots = []
+    for index in range(4):
+        value = selected_values[index] if index < len(selected_values) else ""
+        known = bool(value and value.casefold() in pokemon_by_name)
+        slots.append({
+            "value": value,
+            "unknown": bool(value and not known),
+            "errors": slot_errors[index],
+            "options": [
+                {
+                    "name": pokemon.name,
+                    "pokedex_number": pokemon.pokedex_number,
+                    "selected": known and pokemon.name.casefold() == value.casefold(),
+                }
+                for pokemon in pokemon_options
+            ],
+        })
+
+    return render(request, "comparison.html", {
+        "comparison_pokemon": comparison_data,
+        "comparison_slots": slots,
+        "errors": errors,
+        "shared_moves": shared_moves,
+        "partial_moves": partial_moves,
+        "share_url": share_url,
+        "pokemon_count": len(pokemon_options),
+    })
+
+
+def team_builder(request):
+    """Build a six-member team with a canonical comma-separated query-string state."""
+    pokemon_options = list(Pokemon.objects.order_by("pokedex_number"))
+    pokemon_by_name = {pokemon.name.casefold(): pokemon for pokemon in pokemon_options}
+    submitted = "p" in request.GET
+    raw_values = request.GET.getlist("p")
+    selected_values = []
+    malformed = False
+
+    for raw_value in raw_values:
+        if not raw_value.strip():
+            continue
+        parts = raw_value.split(",")
+        if any(not part.strip() for part in parts):
+            malformed = True
+        selected_values.extend(part.strip() for part in parts if part.strip())
+
+    errors = []
+    if malformed:
+        errors.append("Team members cannot be blank.")
+    if len(selected_values) > 6:
+        errors.append("Choose no more than six Pokémon.")
+    if len({name.casefold() for name in selected_values}) != len(selected_values):
+        errors.append("Each Pokémon can only be selected once.")
+
+    unknown_names = []
+    unknown_keys = set()
+    for name in selected_values:
+        if name.casefold() not in pokemon_by_name and name.casefold() not in unknown_keys:
+            unknown_names.append(name)
+            unknown_keys.add(name.casefold())
+    if unknown_names:
+        errors.append(f"Unknown Pokémon: {', '.join(unknown_names)}.")
+
+    team = []
+    if submitted and not errors and selected_values:
+        team = [pokemon_by_name[name.casefold()] for name in selected_values]
+        if len(raw_values) > 1:
+            canonical_url = (
+                f"{reverse('team')}?"
+                f"{urlencode({'p': ','.join(pokemon.name for pokemon in team)}, safe=',')}"
+            )
+            return redirect(canonical_url)
+
+    team_data = [pokemon_to_dict(pokemon) for pokemon in team]
+    analysis = analyze_team(team) if team else {}
+    share_url = ""
+    if team:
+        share_url = (
+            f"{reverse('team')}?"
+            f"{urlencode({'p': ','.join(pokemon.name for pokemon in team)}, safe=',')}"
+        )
+
+    slots = []
+    for index in range(6):
+        value = selected_values[index] if index < len(selected_values) else ""
+        known = bool(value and value.casefold() in pokemon_by_name)
+        slots.append({
+            "value": value,
+            "unknown": bool(value and not known),
+            "options": [
+                {
+                    "name": pokemon.name,
+                    "pokedex_number": pokemon.pokedex_number,
+                    "selected": known and pokemon.name.casefold() == value.casefold(),
+                }
+                for pokemon in pokemon_options
+            ],
+        })
+
+    return render(request, "team_builder.html", {
+        "team_pokemon": team_data,
+        "team_slots": slots,
+        "errors": errors,
+        "share_url": share_url,
+        "pokemon_count": len(pokemon_options),
+        **analysis,
+    })
+
+
 def competitive(request):
     """Rank base Pokémon and alternate forms by base stats or calculated Speed tiers."""
     stat_slug, stat_label, stat_key = next(
@@ -561,7 +828,6 @@ def competitive(request):
     type_name = request.GET.get("type", "")
     if type_name not in {name for name, _ in TYPE_DEFENSE_ORDER}:
         type_name = ""
-    include_forms = request.GET.get("forms") == "1"
     speed_sort = request.GET.get("sort", "")
     speed_keys = {
         f"{spread_slug}-{level}"
@@ -591,32 +857,29 @@ def competitive(request):
         rows = [r for r in rows if type_name in r["types"]]
     base_count = len(rows)
 
-    if include_forms:
-        for form in PokemonForm.objects.select_related("pokemon").order_by(
-            "pokemon__pokedex_number", "pokeapi_id"
-        ):
-            base = pokemon_to_dict(form.pokemon)
-            data = _apply_form_overrides(base, form)
-            if type_name and type_name not in data["types"]:
-                continue
-            value = data["stat_total"] if stat_key is None else data["base_stats"].get(stat_key, 0)
-            rows.append({
-                "pokedex_number": data["pokedex_number"],
-                "name": data["name"],
-                "display_name": form.label,
-                "image": data["image"],
-                "is_form": True,
-                "form_slug": form.slug,
-                "form_order": form.pokeapi_id,
-                "types": data["types"],
-                "stats": data["base_stats"],
-                "total": data["stat_total"],
-                "value": value,
-                "speed_tiers": calculate_speed_tiers(data["base_stats"].get("Speed", 0)),
-            })
-        form_count = len(rows) - base_count
-    else:
-        form_count = 0
+    for form in PokemonForm.objects.select_related("pokemon").order_by(
+        "pokemon__pokedex_number", "pokeapi_id"
+    ):
+        base = pokemon_to_dict(form.pokemon)
+        data = _apply_form_overrides(base, form)
+        if type_name and type_name not in data["types"]:
+            continue
+        value = data["stat_total"] if stat_key is None else data["base_stats"].get(stat_key, 0)
+        rows.append({
+            "pokedex_number": data["pokedex_number"],
+            "name": data["name"],
+            "display_name": form.label,
+            "image": data["image"],
+            "is_form": True,
+            "form_slug": form.slug,
+            "form_order": form.pokeapi_id,
+            "types": data["types"],
+            "stats": data["base_stats"],
+            "total": data["stat_total"],
+            "value": value,
+            "speed_tiers": calculate_speed_tiers(data["base_stats"].get("Speed", 0)),
+        })
+    form_count = len(rows) - base_count
 
     speed_labels = {
         f"{spread_slug}-{level}": f"{label} Speed (Lv. {level})"
@@ -638,8 +901,6 @@ def competitive(request):
         row["bar"] = round(row["value"] / top * 100) if top else 0
 
     filters = {"type": type_name} if type_name else {}
-    if include_forms:
-        filters["forms"] = "1"
     stat_links = [
         {
             "slug": slug,
@@ -677,7 +938,6 @@ def competitive(request):
         "stored_count": stored_count,
         "base_count": base_count,
         "form_count": form_count,
-        "include_forms": include_forms,
         "stat": {"slug": stat_slug, "label": stat_label},
         "stat_links": stat_links,
         "speed_mode": bool(speed_sort),

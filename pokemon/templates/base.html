@@ -37,8 +37,15 @@
           class="abilities {% if request.resolver_match.url_name == 'abilities' or request.resolver_match.url_name == 'ability_detail' %}active{% endif %}">Abilities</a>
           <a href="{% url 'moves' %}"
           class="moves {% if request.resolver_match.url_name == 'moves' %}active{% endif %}">Moves</a>
-          <a href="{% url 'competitive' %}"
-          class="competitive {% if request.resolver_match.url_name == 'competitive' %}active{% endif %}">Competitive</a>
+          <div class="nav-dropdown">
+            <button class="competitive {% if request.resolver_match.url_name == 'competitive' or request.resolver_match.url_name == 'comparison' or request.resolver_match.url_name == 'team' %}active{% endif %}"
+                    type="button" aria-expanded="false" aria-controls="competitiveMenu">Competitive</button>
+            <div class="nav-dropdown-menu" id="competitiveMenu" role="group" aria-label="Competitive tools">
+              <a href="{% url 'competitive' %}"{% if request.resolver_match.url_name == 'competitive' %} aria-current="page"{% endif %}>Rankings</a>
+              <a href="{% url 'comparison' %}"{% if request.resolver_match.url_name == 'comparison' %} aria-current="page"{% endif %}>Compare Pokémon</a>
+              <a href="{% url 'team' %}"{% if request.resolver_match.url_name == 'team' %} aria-current="page"{% endif %}>Team builder</a>
+            </div>
+          </div>
           <a href="{% url 'items' %}"
           class="items {% if request.resolver_match.url_name == 'items' %}active{% endif %}">Items</a>
       </div>

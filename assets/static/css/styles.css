@@ -179,39 +179,96 @@ img {
   color: var(--color-white);
 }
 
-/* nav links (Home / Pokédex / Types / Region / Abilities / Moves / Competitive / Items) */
+/* nav links (Home / Pokédex / Abilities / Moves / Competitive / Items) */
 .site-navbar a.home,
 .site-navbar a.pokedex,
-.site-navbar a.types,
-.site-navbar a.region,
 .site-navbar a.abilities,
 .site-navbar a.moves,
-.site-navbar a.competitive,
+.site-navbar .nav-dropdown > button.competitive,
 .site-navbar a.items {
+  display: block;
   padding: 8px 14px;
   border-radius: var(--radius-sm);
+  border: 0;
+  background: transparent;
   color: var(--color-text-muted);
+  font-family: var(--font-body);
   font-size: var(--text-base);
   font-weight: 500;
+  text-align: left;
+  cursor: pointer;
   transition: background var(--transition-fast), color var(--transition-fast);
 }
 
 .site-navbar a.home:hover,
 .site-navbar a.pokedex:hover,
-.site-navbar a.types:hover,
-.site-navbar a.region:hover,
 .site-navbar a.abilities:hover,
 .site-navbar a.moves:hover,
-.site-navbar a.competitive:hover,
+.site-navbar .nav-dropdown > button.competitive:hover,
 .site-navbar a.items:hover {
   color: var(--color-white);
   background: rgba(255, 255, 255, 0.05);
 }
 
-.site-navbar a.active {
+.site-navbar a.active,
+.site-navbar .nav-dropdown > button.active {
   color: var(--color-yellow);
   background: rgba(244, 196, 48, 0.1);
 }
+
+.site-navbar .nav-dropdown { position: relative; }
+.site-navbar .nav-dropdown > button.competitive {
+  white-space: nowrap;
+}
+.site-navbar .nav-dropdown > button.competitive::after {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin: 0 0 3px 8px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform var(--transition-fast);
+}
+.site-navbar .nav-dropdown.is-open > button.competitive::after { transform: translateY(3px) rotate(225deg); }
+.site-navbar .nav-dropdown > button:focus-visible {
+  outline: 2px solid var(--color-yellow);
+  outline-offset: 2px;
+}
+.site-navbar .nav-dropdown > .nav-dropdown-menu { display: none; }
+.nav-dropdown-menu {
+  position: absolute;
+  z-index: 1030;
+  top: 100%;
+  left: 0;
+  display: none;
+  min-width: 190px;
+  padding: 6px;
+  border: 1px solid var(--color-panel-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-panel);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+}
+.site-navbar .nav-dropdown:hover:not(.is-dismissed) > .nav-dropdown-menu,
+.site-navbar .nav-dropdown:focus-within:not(.is-dismissed) > .nav-dropdown-menu,
+.site-navbar .nav-dropdown.is-open > .nav-dropdown-menu { display: flex; flex-direction: column; }
+.nav-dropdown-menu a {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+.nav-dropdown-menu a:hover,
+.nav-dropdown-menu a:focus-visible {
+  color: var(--color-white);
+  background: rgba(255, 255, 255, 0.06);
+}
+.nav-dropdown-menu a:focus-visible { outline: 2px solid var(--color-yellow); outline-offset: 1px; }
+.nav-dropdown-menu a[aria-current="page"] { color: var(--color-yellow); background: rgba(244, 196, 48, 0.1); }
 
 /* push search to the far right */
 .search-nav {
@@ -285,6 +342,8 @@ img {
   .site-navbar .navbar-collapse {
     order: 4;
     width: 100%;
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .navbar-collapse:not(.show) {
@@ -293,14 +352,28 @@ img {
 
   .site-navbar a.home,
   .site-navbar a.pokedex,
-  .site-navbar a.types,
-  .site-navbar a.region,
   .site-navbar a.abilities,
   .site-navbar a.moves,
-  .site-navbar a.competitive {
+  .site-navbar .nav-dropdown > button.competitive,
+  .site-navbar a.items {
     display: block;
     padding: 10px 14px;
   }
+
+  .site-navbar .nav-dropdown { width: 100%; }
+  .site-navbar .nav-dropdown-menu {
+    position: static;
+    min-width: 0;
+    margin: 0 0 4px 12px;
+    padding: 4px;
+    border: 0;
+    border-left: 1px solid var(--color-panel-border);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  .site-navbar .nav-dropdown:not(.is-open):not(:focus-within) .nav-dropdown-menu { display: none; }
+  .site-navbar .nav-dropdown.is-open .nav-dropdown-menu { display: flex; }
 
   .search-nav {
     order: 3;
@@ -975,11 +1048,12 @@ footer {
   .search-nav { min-width: 0; flex: 0 1 auto; }
   .search-input-nav { width: clamp(8rem, 12vw, 13.75rem); min-width: 0; }
 }
-/* Narrow desktops: the eight links need every pixel; tighten them, and below 1150px drop the wordmark (the logo stays). */
+/* Narrow desktops: tighten the nav links, and below 1150px drop the wordmark (the logo stays). */
 @media (min-width: 992px) and (max-width: 1279px) {
   .site-navbar { padding-inline: 16px; gap: 2px; }
-  .site-navbar a.home, .site-navbar a.pokedex, .site-navbar a.types, .site-navbar a.region,
-  .site-navbar a.abilities, .site-navbar a.moves, .site-navbar a.competitive, .site-navbar a.items { padding: 8px 8px; }
+  .site-navbar a.home, .site-navbar a.pokedex, .site-navbar a.abilities,
+  .site-navbar a.moves, .site-navbar .nav-dropdown > button.competitive,
+  .site-navbar a.items { padding: 8px 8px; }
 }
 @media (min-width: 992px) and (max-width: 1149px) {
   .logo-text { display: none; }

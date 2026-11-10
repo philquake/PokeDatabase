@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+    <link href="{% static 'css/listing.css' %}" rel="stylesheet">
+    <link href="{% static 'css/comparison.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block title %}Pokémon comparison{% endblock %}
+
+{% block content %}
+<section class="list-page comparison-page">
+  <header class="list-header">
+    <p class="list-eyebrow">Battle reference</p>
+    <h1 class="list-title">Compare Pokémon</h1>
+    <p class="list-subtitle">Compare base stats, defensive typing and known move overlap for two to four Pokémon.</p>
+  </header>
+
+  {% if errors %}
+    <div class="comparison-errors" role="alert" tabindex="-1" autofocus aria-labelledby="comparison-errors-title">
+      <h2 id="comparison-errors-title">Check your selections</h2>
+      <ul>
+        {% for error in errors %}<li><a href="#{{ error.field_id }}">{{ error.message }}</a></li>{% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  {% if pokemon_count %}
+    <form class="comparison-picker" method="get" action="{% url 'comparison' %}">
+      <p class="comparison-help" id="compare-help">Choose at least two Pokémon. Leave unused slots blank; each selection must be unique.</p>
+      <div class="comparison-fields">
+        {% for slot in comparison_slots %}
+          <div class="list-field">
+            <label for="compare-pokemon-{{ forloop.counter }}">Pokémon {{ forloop.counter }}{% if forloop.counter < 3 %} <span aria-hidden="true">*</span>{% endif %}</label>
+            <select id="compare-pokemon-{{ forloop.counter }}" name="p"{% if forloop.counter < 3 %} required{% endif %}{% if slot.errors %} aria-invalid="true" aria-describedby="compare-help compare-pokemon-error-{{ forloop.counter }}"{% else %} aria-describedby="compare-help"{% endif %}>
+              <option value="">Choose a Pokémon</option>
+              {% if slot.unknown %}<option value="{{ slot.value }}" selected>{{ slot.value }} (not found)</option>{% endif %}
+              {% for option in slot.options %}
+                <option value="{{ option.name }}"{% if option.selected %} selected{% endif %}>#{{ option.pokedex_number|stringformat:"03d" }} {{ option.name }}</option>
+              {% endfor %}
+            </select>
+            {% if slot.errors %}
+              <p class="comparison-field-error" id="compare-pokemon-error-{{ forloop.counter }}">{% for error in slot.errors %}{{ error }}{% if not forloop.last %} {% endif %}{% endfor %}</p>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+      <div class="comparison-actions">
+        <button type="submit" class="btn btn-primary">Compare</button>
+        {% if comparison_pokemon %}<a class="list-reset" href="{% url 'comparison' %}">Clear selection</a>{% endif %}
+      </div>
+    </form>
+  {% else %}
+    <div class="list-empty">
+      <h2>No Pokémon are stored yet</h2>
+      <p>Run <code>python manage.py migrate &amp;&amp; python manage.py import_pokemon_json</code> to load the Pokédex before comparing.</p>
+    </div>
+  {% endif %}
+
+  {% if comparison_pokemon %}
+    <section class="comparison-results" aria-labelledby="comparison-results-title">
+      <div class="comparison-share">
+        <span>Shareable comparison URL</span>
+        <code>{{ share_url }}</code>
+      </div>
+
+      <h2 class="list-section-title" id="comparison-results-title">At a glance</h2>
+      <div class="comparison-grid">
+        {% for pokemon in comparison_pokemon %}
+          <article class="comparison-card">
+            <header class="comparison-card-header">
+              <img src="{{ pokemon.image }}" alt="" width="80" height="80">
+              <div>
+                <p class="comparison-dex">#{{ pokemon.pokedex_number|stringformat:"03d" }}</p>
+                <h3><a href="{% url 'pokemon_detail' pokemon.name %}">{{ pokemon.name }}</a></h3>
+                <div class="chip-row">
+                  {% for type in pokemon.types %}
+                    <a class="chip type-{{ type|lower }}" href="{% url 'type_detail' type|lower %}">{{ type }}</a>
+                  {% endfor %}
+                </div>
+              </div>
+            </header>
+            <p class="comparison-total">Base stat total <strong>{{ pokemon.stat_total }}</strong></p>
+
+            <h4>Base stats</h4>
+            <ul class="comparison-stats">
+              {% for stat in pokemon.stats %}
+                <li>
+                  <span class="comparison-stat-label">{{ stat.label }}</span>
+                  <strong class="comparison-stat-value">{{ stat.value|default_if_none:"—" }}</strong>
+                  <span class="comparison-stat-range">Lv. 100: {{ stat.minimum|default_if_none:"—" }}–{{ stat.maximum|default_if_none:"—" }}</span>
+                  <span class="comparison-stat-track" aria-hidden="true"><span style="width:{{ stat.bar }}%"></span></span>
+                </li>
+              {% endfor %}
+            </ul>
+
+            <h4>Weaknesses</h4>
+            {% if not pokemon.types %}
+              <p class="comparison-muted">No type data stored.</p>
+            {% elif pokemon.weaknesses %}
+              <ul class="comparison-weaknesses">
+                {% for weakness in pokemon.weaknesses %}
+                  <li>
+                    <a class="chip type-{{ weakness.slug }}" href="{% url 'type_detail' weakness.slug %}">{{ weakness.name }}</a>
+                    <span class="mult mult-{{ weakness.state }}">{{ weakness.label }}</span>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p class="comparison-muted">No type weaknesses.</p>
+            {% endif %}
+            <p class="comparison-move-count">{{ pokemon.moves_known_count }} distinct moves in stored data</p>
+          </article>
+        {% endfor %}
+      </div>
+
+      <section class="comparison-overlap" aria-labelledby="comparison-overlap-title">
+        <h2 class="list-section-title" id="comparison-overlap-title">Movepool overlap</h2>
+        <p class="comparison-muted">This uses move rows currently stored in the database. Pokémon whose move data has not been synced may show fewer known moves.</p>
+        {% if shared_moves %}
+          <h3>Known by all {{ comparison_pokemon|length }}</h3>
+          <ul class="comparison-moves">
+            {% for move in shared_moves %}
+              <li><strong>{{ move.name }}</strong><span>Known by {{ move.owners|join:", " }}</span></li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="comparison-muted">No moves are recorded as shared by every selected Pokémon.</p>
+        {% endif %}
+
+        {% if partial_moves %}
+          <details class="comparison-partial">
+            <summary>Also shared by some selected Pokémon ({{ partial_moves|length }})</summary>
+            <ul class="comparison-moves">
+              {% for move in partial_moves %}
+                <li><strong>{{ move.name }}</strong><span>Known by {{ move.owners|join:", " }}</span></li>
+              {% endfor %}
+            </ul>
+          </details>
+        {% endif %}
+      </section>
+    </section>
+  {% endif %}
+</section>
+{% endblock %}

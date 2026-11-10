@@ -24,13 +24,15 @@ The app is designed as a practical Django project with an emphasis on data handl
 - Featured home page with random Pokémon highlights
 - Evolution chain rendering
 - Stats and type information
+- Shareable comparisons for 2–4 Pokémon, including stats, weaknesses, and stored move overlap
 - SQLite-backed data models (Pokémon, moves, encounters) with Django admin
 - Staff sync UI for refreshing Pokémon data
+- Anonymous, shareable team builder at `/team/` with defensive weaknesses, stored move-type coverage, and coverage suggestions
 - Django test suite for application and view-level validation
 
 ### Current project status
 
-The app is in active development. Some routes, such as type, region, ability, move, competitive, and item pages, are scaffolded or intentionally placeholder-based while the core experience continues to evolve.
+The app is in active development. Type, region, ability, move, competitive, and item browse pages are implemented. The comparison page accepts two to four stored Pokémon and encodes the selection in repeatable query parameters for sharing.
 
 ## Tech Stack
 
@@ -179,6 +181,10 @@ Each detail page includes:
 - evolution chain
 - moves and encounters
 - related navigation to previous/next Pokémon
+
+### Team builder
+
+Choose up to six stored Pokémon at `/team/`. The selected team lives in the URL as `?p=bulbasaur,charizard`, so teams can be shared without an account. The analysis summarizes team-wide defensive weaknesses, super-effective coverage from stored damaging move types, and stored Pokémon suggestions that cover gaps. Move coverage depends on move data being present; run `python manage.py sync_moves` to populate it.
 
 ### Staff sync
 
@@ -342,7 +348,6 @@ A future version could provide tools for competitive players:
 
 * Team building
 * Type coverage
-* Stat comparisons
 * Nature information
 * Ability analysis
 * Move sets
@@ -357,7 +362,6 @@ Users could eventually:
 * Save favorite Pokémon
 * Build Pokémon teams
 * Save custom searches
-* Compare Pokémon
 * Track competitive builds
 
 ### API

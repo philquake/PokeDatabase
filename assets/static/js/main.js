@@ -9,6 +9,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   hexChart(); 
   initLazyMovePanels();
+  initCompetitiveDropdown();
   initCompetitiveNavigation();
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -21,6 +22,50 @@ document.addEventListener('DOMContentLoaded', () => {
   initCardEntrance();
   
 });
+
+function initCompetitiveDropdown() {
+  const dropdown = document.querySelector('.nav-dropdown');
+  if (!dropdown) return;
+
+  const toggle = dropdown.querySelector('button.competitive');
+  const setOpen = (open) => {
+    dropdown.classList.toggle('is-open', open);
+    toggle.setAttribute('aria-expanded', String(open));
+  };
+
+  dropdown.addEventListener('pointerenter', (event) => {
+    if (event.pointerType === 'mouse') {
+      dropdown.classList.remove('is-dismissed');
+      setOpen(true);
+    }
+  });
+  dropdown.addEventListener('pointerleave', (event) => {
+    if (event.pointerType === 'mouse' && !dropdown.contains(event.relatedTarget)) {
+      setOpen(false);
+    }
+  });
+  dropdown.addEventListener('focusin', () => {
+    dropdown.classList.remove('is-dismissed');
+    setOpen(true);
+  });
+  dropdown.addEventListener('focusout', (event) => {
+    if (!dropdown.contains(event.relatedTarget)) setOpen(false);
+  });
+  toggle.addEventListener('click', () => {
+    dropdown.classList.remove('is-dismissed');
+    setOpen(true);
+  });
+  dropdown.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && dropdown.classList.contains('is-open')) {
+      toggle.focus();
+      dropdown.classList.add('is-dismissed');
+      setOpen(false);
+    }
+  });
+  document.addEventListener('click', (event) => {
+    if (!dropdown.contains(event.target)) setOpen(false);
+  });
+}
 
 /* -----------------------------------------------------------
    1. Hero entrance — staggered fade/slide-up on page load.

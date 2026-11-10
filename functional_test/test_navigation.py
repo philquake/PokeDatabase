@@ -1,5 +1,6 @@
 from django.test import LiveServerTestCase
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium import webdriver
 from django.urls import reverse
 from django.test import override_settings
@@ -18,10 +19,27 @@ class Navigation_Links(LiveServerTestCase):
         
     def test_navigation_bar_links(self):
         self.browser.get(self.live_server_url + "/")
-        nav_links = self.browser.find_elements(By.CSS_SELECTOR, "nav a")
+        nav_links = self.browser.find_elements(
+            By.CSS_SELECTOR, "#navbarLinks > a, #navbarLinks > .nav-dropdown > button"
+        )
         link_texts = [link.text for link in nav_links]
-        expected_links = ["PokeDatabase", "Home", "Pokédex", "Abilities", "Moves", "Competitive", "Items"]
+        expected_links = ["Home", "Pokédex", "Abilities", "Moves", "Competitive", "Items"]
         self.assertEqual(link_texts, expected_links)
+
+    def test_competitive_dropdown_opens_on_hover_and_links_to_compare(self):
+        self.browser.get(self.live_server_url + reverse("home"))
+        competitive = self.browser.find_element(
+            By.CSS_SELECTOR, "#navbarLinks button.competitive"
+        )
+        ActionChains(self.browser).move_to_element(competitive).perform()
+
+        compare = self.browser.find_element(By.LINK_TEXT, "Compare Pokémon")
+        self.assertTrue(compare.is_displayed())
+        compare.click()
+        self.assertEqual(
+            self.browser.current_url,
+            self.live_server_url + reverse("comparison"),
+        )
 
     def test_navigation_links_redirect(self):
 
@@ -71,5 +89,3 @@ class Navigation_Links(LiveServerTestCase):
         home.click()
 
         self.assertEqual(self.browser.current_url, self.live_server_url + reverse("home") )
-
-

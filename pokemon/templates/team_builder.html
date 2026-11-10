@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+    <link href="{% static 'css/listing.css' %}" rel="stylesheet">
+    <link href="{% static 'css/team_builder.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block title %}Team builder{% endblock %}
+
+{% block content %}
+<section class="list-page team-page">
+  <header class="list-header">
+    <p class="list-eyebrow">Competitive tools</p>
+    <h1 class="list-title">Team builder</h1>
+    <p class="list-subtitle">Build a shareable team of up to six stored Pokémon. Check shared weaknesses, known damaging move coverage, and suggestions that patch uncovered types.</p>
+  </header>
+
+  {% if errors %}
+    <ul class="team-errors" role="alert">
+      {% for error in errors %}<li>{{ error }}</li>{% endfor %}
+    </ul>
+  {% endif %}
+
+  {% if pokemon_count %}
+    <form class="team-picker" method="get" action="{% url 'team' %}">
+      <p class="team-help" id="team-help">Choose up to six different Pokémon. Your selections are saved in the page URL and need no account.</p>
+      <div class="team-picker-grid">
+        {% for slot in team_slots %}
+          <div class="list-field">
+            <label for="team-member-{{ forloop.counter }}">Team slot {{ forloop.counter }}</label>
+            <select id="team-member-{{ forloop.counter }}" name="p" aria-describedby="team-help">
+              <option value="">Open slot</option>
+              {% if slot.unknown %}<option value="{{ slot.value }}" selected>{{ slot.value }} (not found)</option>{% endif %}
+              {% for option in slot.options %}
+                <option value="{{ option.name }}"{% if option.selected %} selected{% endif %}>#{{ option.pokedex_number|stringformat:"03d" }} {{ option.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        {% endfor %}
+      </div>
+      <div class="team-actions">
+        <button type="submit" class="btn btn-primary">Analyze team</button>
+        {% if team_pokemon %}<a class="list-reset" href="{% url 'team' %}">Clear team</a>{% endif %}
+      </div>
+    </form>
+  {% else %}
+    <div class="list-empty">
+      <h2>No Pokémon are stored yet</h2>
+      <p>Run <code>python manage.py migrate &amp;&amp; python manage.py import_pokemon_json</code> to load the Pokédex before building a team.</p>
+    </div>
+  {% endif %}
+
+  {% if team_pokemon %}
+    <section class="team-results" aria-labelledby="team-results-title">
+      <div class="team-share">
+        <span>Shareable team URL</span>
+        <a href="{{ share_url }}">{{ request.scheme }}://{{ request.get_host }}{{ share_url }}</a>
+      </div>
+
+      <h2 class="list-section-title" id="team-results-title">Your team</h2>
+      <div class="team-member-grid">
+        {% for pokemon in team_pokemon %}
+          <article class="team-member">
+            <img src="{{ pokemon.image }}" alt="" width="80" height="80">
+            <div class="team-member-info">
+              <p class="team-dex">#{{ pokemon.pokedex_number|stringformat:"03d" }}</p>
+              <h3><a href="{% url 'pokemon_detail' pokemon.name %}">{{ pokemon.name }}</a></h3>
+              <div class="chip-row">
+                {% for type in pokemon.types %}
+                  <a class="chip type-{{ type|lower }}" href="{% url 'type_detail' type|lower %}">{{ type }}</a>
+                {% endfor %}
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+
+      <section class="team-analysis" aria-labelledby="team-defense-title">
+        <h2 class="list-section-title" id="team-defense-title">Shared defensive weaknesses</h2>
+        <p class="team-note">Each row shows how many teammates are weak to that attacking type. Individual multipliers distinguish a standard weakness from a 4× weakness.</p>
+        {% if defensive_weaknesses %}
+          <ul class="team-weakness-list">
+            {% for row in defensive_weaknesses %}
+              <li class="team-weakness">
+                <div class="team-weakness-heading">
+                  <span class="chip type-{{ row.slug }}">{{ row.name }}</span>
+                  <strong>{{ row.weak_count }} of {{ team_pokemon|length }} weak</strong>
+                </div>
+                <ul class="team-member-matchups">
+                  {% for member in row.weak_members %}
+                    <li>{{ member.name }} <span class="mult mult-{% if member.multiplier >= 4 %}x4{% else %}x2{% endif %}">{{ member.label }}</span></li>
+                  {% endfor %}
+                </ul>
+                {% if row.resist_members or row.immune_members %}
+                  <p class="team-mitigation">
+                    {% if row.resist_members %}Resists: {% for member in row.resist_members %}{{ member.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}
+                    {% if row.immune_members %}{% if row.resist_members %} &middot; {% endif %}Immune: {% for member in row.immune_members %}{{ member.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}
+                  </p>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="team-note">No selected Pokémon are weak to any attacking type.</p>
+        {% endif %}
+      </section>
+
+      <section class="team-analysis" aria-labelledby="team-coverage-title">
+        <h2 class="list-section-title" id="team-coverage-title">Offensive type coverage</h2>
+        <p class="team-note">A type is covered when at least one stored damaging move type hits it super effectively. {{ known_move_count }} known damaging move{{ known_move_count|pluralize }} found across the team; coverage reflects only move data currently in the database.</p>
+        {% if team_without_move_data %}
+          <p class="team-data-warning">No stored damaging move types were found for: {{ team_without_move_data|join:", " }}. Run <code>python manage.py sync_moves</code> to fill move data.</p>
+        {% endif %}
+        <ul class="team-coverage-grid">
+          {% for row in offensive_coverage %}
+            <li class="team-coverage{% if not row.covered %} is-gap{% endif %}">
+              <span class="chip type-{{ row.slug }}">{{ row.name }}</span>
+              {% if row.covered %}
+                <span class="team-coverage-types" aria-label="Super-effective move types">
+                  {% for move_type in row.move_types %}<span class="chip type-{{ move_type }}">{{ move_type }}</span>{% endfor %}
+                </span>
+              {% else %}
+                <strong>Gap</strong>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+
+      <section class="team-analysis" aria-labelledby="team-suggestions-title">
+        <h2 class="list-section-title" id="team-suggestions-title">Suggestions to cover gaps</h2>
+        <p class="team-note">Stored Pokémon are ranked by how many currently uncovered types their known damaging moves can hit super effectively.</p>
+        {% if team_suggestions %}
+          <div class="team-suggestion-grid">
+            {% for suggestion in team_suggestions %}
+              <article class="team-suggestion">
+                <img src="{{ suggestion.image }}" alt="" width="72" height="72">
+                <div class="team-suggestion-info">
+                  <p class="team-dex">#{{ suggestion.pokedex_number|stringformat:"03d" }} &middot; Covers {{ suggestion.gap_count }} gap{{ suggestion.gap_count|pluralize }}</p>
+                  <h3><a href="{% url 'pokemon_detail' suggestion.name %}">{{ suggestion.name }}</a></h3>
+                  <div class="chip-row">
+                    {% for type in suggestion.types %}
+                      <span class="chip type-{{ type|lower }}">{{ type }}</span>
+                    {% endfor %}
+                  </div>
+                  <p class="team-suggestion-covers">Coverage: {% for type in suggestion.covers %}<span class="chip type-{{ type }}">{{ type }}</span>{% if not forloop.last %} {% endif %}{% endfor %}</p>
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="team-note">No stored Pokémon with known damaging move types can fill the current coverage gaps.</p>
+        {% endif %}
+      </section>
+    </section>
+  {% endif %}
+</section>
+{% endblock %}

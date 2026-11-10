@@ -13,14 +13,14 @@
   <header class="list-header">
     <p class="list-eyebrow">Battle reference</p>
     <h1 class="list-title">Types</h1>
-    <p class="list-subtitle">Every Pokémon has one or two of 18 types. Pick a type to see what it beats, what beats it, and which Pokémon have it.</p>
+    <p class="list-subtitle">Pick a type to see what it beats, what beats it, and which base Pokémon and alternate forms have it. Counts keep forms separate from Pokédex species.</p>
   </header>
 
   <div class="tile-grid">
     {% for tile in type_tiles %}
       <a class="tile" href="{% url 'type_detail' tile.slug %}">
         <span class="chip type-{{ tile.slug }}">{{ tile.name }}</span>
-        <span class="tile-meta">{{ tile.pokemon_count }} Pokémon &middot; {{ tile.move_count }} move{{ tile.move_count|pluralize }}</span>
+        <span class="tile-meta">{{ tile.pokemon_count }} Pokémon &middot; {{ tile.form_count }} form{{ tile.form_count|pluralize }} &middot; {{ tile.move_count }} move{{ tile.move_count|pluralize }}</span>
       </a>
     {% endfor %}
   </div>

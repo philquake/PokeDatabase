@@ -46,17 +46,14 @@
           {% endfor %}
         </select>
       </div>
-      <div class="list-field rank-forms-toggle">
-        <label for="rk-forms"><input id="rk-forms" type="checkbox" name="forms" value="1"{% if include_forms %} checked{% endif %}> Include alternate forms</label>
-      </div>
       <div class="list-actions">
         <button type="submit" class="btn btn-primary">Apply</button>
-        {% if selected_type %}<a class="list-reset" href="?{% if speed_mode %}sort={{ speed_sort }}&amp;dir={{ speed_direction }}{% else %}stat={{ stat.slug }}{% endif %}{% if include_forms %}&amp;forms=1{% endif %}">Reset type</a>{% endif %}
+        {% if selected_type %}<a class="list-reset" href="?{% if speed_mode %}sort={{ speed_sort }}&amp;dir={{ speed_direction }}{% else %}stat={{ stat.slug }}{% endif %}">Reset type</a>{% endif %}
       </div>
     </form>
 
     {% if page_obj %}
-      <p class="rank-summary">Ranked by <strong>{% if speed_mode %}{{ speed_label }}{% else %}{{ stat.label }}{% endif %}</strong>{% if selected_type %} &middot; {{ selected_type }} type{% endif %} &middot; {{ base_count }} base Pokémon{% if include_forms %} + {{ form_count }} forms ({{ total }} candidates){% endif %}</p>
+      <p class="rank-summary">Ranked by <strong>{% if speed_mode %}{{ speed_label }}{% else %}{{ stat.label }}{% endif %}</strong>{% if selected_type %} &middot; {{ selected_type }} type{% endif %} &middot; {{ base_count }} base Pokémon + {{ form_count }} forms ({{ total }} candidates)</p>
       {% if speed_mode %}
         <div class="list-notice rank-speed-note">
           All calculations use 31 IVs. Max: 252 EVs and a +Speed nature; Neutral: 252 EVs and a neutral nature; Uninvested: 0 EVs and a neutral nature; +Speed nature: 0 EVs. Choice Scarf is 1.5× Max Speed, rounded down. No other battle modifiers are included.
@@ -144,7 +141,7 @@
     {% else %}
       <div class="list-empty">
         <h2>No Pokémon or forms match</h2>
-        <p>None of the stored candidates have the {{ selected_type }} type. <a href="?{% if speed_mode %}sort={{ speed_sort }}&amp;dir={{ speed_direction }}{% else %}stat={{ stat.slug }}{% endif %}{% if include_forms %}&amp;forms=1{% endif %}">Show all types</a>.</p>
+        <p>None of the stored candidates have the {{ selected_type }} type. <a href="?stat={{ stat.slug }}">Show all types</a>.</p>
       </div>
     {% endif %}
 
