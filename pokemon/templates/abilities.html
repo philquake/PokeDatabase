@@ -61,7 +61,26 @@
             {% for ability in page_obj %}
               <tr>
                 <td class="ability-name"><a href="{% url 'ability_detail' ability.slug %}">{{ ability.name }}</a></td>
-                <td class="num ability-count">{{ ability.pokemon_count }}</td>
+                <td class="num ability-count">
+                  {% if ability.pokemon_count %}
+                    <span class="ability-count-preview">
+                      <a class="ability-count-trigger" href="{{ ability.pokedex_url }}" aria-describedby="ability-preview-{{ forloop.counter }}" aria-label="View {{ ability.pokemon_count }} Pokémon with {{ ability.name }} in the Pokédex">
+                        {{ ability.pokemon_count }}
+                      </a>
+                      <span class="ability-count-tooltip" id="ability-preview-{{ forloop.counter }}" role="tooltip">
+                        <span class="ability-preview-heading">Pokémon with {{ ability.name }}</span>
+                        <span class="ability-preview-pokemon">
+                          {% for pokemon in ability.pokemon_preview %}
+                            <img src="{{ pokemon.image }}" alt="{{ pokemon.name }}" title="{{ pokemon.name }}" width="48" height="48" loading="lazy">
+                          {% endfor %}
+                        </span>
+                        {% if ability.pokemon_count > 3 %}<span class="ability-preview-more">+{{ ability.pokemon_count|add:"-3" }} more</span>{% endif %}
+                      </span>
+                    </span>
+                  {% else %}
+                    {{ ability.pokemon_count }}
+                  {% endif %}
+                </td>
                 <td class="col-effect">{{ ability.effect }}</td>
               </tr>
             {% endfor %}

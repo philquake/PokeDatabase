@@ -934,11 +934,31 @@ class PokedexFilterViewTest(PokemonDataTestCase):
         self.assertContains(response, 'value="Kanto" selected')
         self.assertContains(response, 'value="fire" selected')
 
+    def test_ability_filter_lists_matching_pokemon_and_composes_with_other_filters(self):
+        response = self.client.get(
+            reverse("pokedex"),
+            {"ability": "blaze", "region": "Kanto", "type": "fire"},
+        )
+
+        self.assertEqual(
+            [pokemon.name for pokemon in response.context["pokemon_data"]],
+            ["Charmander", "Charmeleon", "Charizard"],
+        )
+        self.assertEqual(response.context["selected_ability"], "Blaze")
+        self.assertTrue(response.context["filtering"])
+        self.assertContains(response, 'value="Blaze" selected')
+
     def test_type_filter_is_case_insensitive(self):
         response = self.client.get(reverse("pokedex"), {"type": "FIRE"})
 
         self.assertEqual(response.context["selected_type"], "fire")
         self.assertEqual(response.context["pokemon_count"], 3)
+
+    def test_unknown_ability_filter_is_ignored(self):
+        response = self.client.get(reverse("pokedex"), {"ability": "Missing Ability"})
+
+        self.assertEqual(response.context["pokemon_count"], 12)
+        self.assertEqual(response.context["selected_ability"], "")
 
     def test_invalid_filters_are_ignored(self):
         response = self.client.get(reverse("pokedex"), {"region": "Unknown", "type": "unknown"})
@@ -1129,10 +1149,21 @@ class AbilitiesViewTest(PokemonDataTestCase):
         self.assertEqual(response.context["total"], 15)
         self.assertEqual(rows["Blaze"]["pokemon_count"], 3)
         self.assertEqual(rows["Solar Power"]["pokemon_count"], 3)
+        blaze_holders = [
+            {"name": pokemon.name, "image": pokemon.image}
+            for pokemon in Pokemon.objects.all()
+            if any(ability["name"] == "Blaze" for ability in pokemon.abilities)
+        ]
+        self.assertEqual(rows["Blaze"]["pokemon_preview"], blaze_holders[:3])
         self.assertEqual(rows["Blaze"]["effect"], "Strengthens fire moves to inflict 1.5\u00d7 damage at 1/3 max HP or less.")
         self.assertEqual(rows["Blaze"]["slug"], "blaze")
         self.assertEqual(rows["Rock Head"]["effect"], "")      # no stored effect text
         self.assertContains(response, reverse("ability_detail", args=["solar-power"]))
+        self.assertContains(response, 'href="/pokemon/pokedex/?ability=Blaze"')
+        self.assertContains(response, 'aria-label="View 3 Pokémon with Blaze in the Pokédex"')
+        self.assertContains(response, 'role="tooltip"')
+        self.assertContains(response, f'alt="{blaze_holders[0]["name"]}"')
+        self.assertContains(response, f'src="{blaze_holders[0]["image"]}"')
 
     def test_default_order_is_by_name(self):
         names = [r["name"] for r in self.client.get(reverse("abilities")).context["page_obj"]]

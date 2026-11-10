@@ -242,6 +242,62 @@
 .ability-table .ability-name a { color: var(--color-white); }
 .ability-table .ability-name a:hover { color: var(--color-yellow); }
 .ability-table .col-effect { color: var(--hex-muted); line-height: 1.4; }
+.ability-count-preview { position: relative; display: inline-flex; z-index: 1; }
+.ability-count-preview:hover,
+.ability-count-preview:focus-within { z-index: 10; }
+.ability-count-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 4px 8px;
+  color: var(--color-yellow);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: help;
+}
+.ability-count-trigger:hover { color: var(--color-yellow-hover); }
+.ability-count-trigger:focus-visible { outline: 2px solid var(--color-yellow); outline-offset: 1px; }
+.ability-count-tooltip {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  z-index: 20;
+  display: grid;
+  gap: 5px;
+  width: max-content;
+  max-width: min(18rem, calc(100vw - 32px));
+  padding: 10px 12px;
+  color: var(--color-white);
+  background: var(--color-panel);
+  border: 1px solid var(--color-panel-border);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+  text-align: left;
+  white-space: normal;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(4px);
+  transition: opacity var(--transition-fast), transform var(--transition-fast), visibility var(--transition-fast);
+}
+.ability-count-preview:hover .ability-count-tooltip,
+.ability-count-trigger:focus-visible + .ability-count-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.ability-preview-heading { color: var(--color-yellow); font-weight: 700; }
+.ability-preview-pokemon { display: flex; flex-wrap: wrap; gap: 6px; }
+.ability-preview-pokemon img { width: 48px; height: 48px; object-fit: contain; }
+.ability-preview-more { color: var(--color-text-muted); font-size: var(--text-xs); }
 
 @media (max-width: 767px) {
   .filters-abilities { grid-template-columns: 1fr 1fr; }

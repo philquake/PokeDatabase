@@ -39,6 +39,15 @@
         {% endfor %}
       </select>
     </div>
+    <div class="pokedex-filter-field">
+      <label for="pokedex-ability">Ability</label>
+      <select id="pokedex-ability" name="ability">
+        <option value="">All abilities</option>
+        {% for ability in abilities %}
+          <option value="{{ ability }}"{% if selected_ability == ability %} selected{% endif %}>{{ ability }}</option>
+        {% endfor %}
+      </select>
+    </div>
     <div class="pokedex-filter-actions">
       <button class="btn btn-primary" type="submit">Apply</button>
       {% if filtering %}<a class="pokedex-filter-reset" href="{% url 'pokedex' %}">Clear</a>{% endif %}

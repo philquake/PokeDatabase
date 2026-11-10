@@ -281,17 +281,31 @@ def pokedex(request):
     stored = list(Pokemon.objects.all())
     stored_count = len(stored)
     regions = list(GENERATION_REGIONS.values())
+    abilities = sorted({
+        ability["name"]
+        for pokemon in stored
+        for ability in pokemon.abilities
+    }, key=str.casefold)
     selected_region = request.GET.get("region", "")
     if selected_region not in regions:
         selected_region = ""
     selected_type = request.GET.get("type", "").strip().lower()
     if selected_type not in TYPES:
         selected_type = ""
+    ability_lookup = {name.casefold(): name for name in abilities}
+    selected_ability = ability_lookup.get(request.GET.get("ability", "").strip().casefold(), "")
 
     pokemon_data = [
         pokemon for pokemon in stored
         if (not selected_region or pokemon.region == selected_region)
         and (not selected_type or selected_type in (t.lower() for t in pokemon.types))
+        and (
+            not selected_ability
+            or any(
+                ability["name"].casefold() == selected_ability.casefold()
+                for ability in pokemon.abilities
+            )
+        )
     ]
     return render(request, "pokedex.html", {
         "pokemon_data": pokemon_data,
@@ -299,10 +313,12 @@ def pokedex(request):
         "stored_count": stored_count,
         "form_count": PokemonForm.objects.count(),
         "regions": regions,
+        "abilities": abilities,
         "selected_region": selected_region,
         "types": [type_name.title() for type_name in TYPES],
         "selected_type": selected_type,
-        "filtering": bool(selected_region or selected_type),
+        "selected_ability": selected_ability,
+        "filtering": bool(selected_region or selected_type or selected_ability),
     })
 
 
@@ -417,6 +433,11 @@ def abilities(request):
             "name": name,
             "slug": _slugify(name),
             "pokemon_count": len(holders.get(name, [])),
+            "pokedex_url": f"{reverse('pokedex')}?{urlencode({'ability': name})}",
+            "pokemon_preview": [
+                {"name": pokemon["name"], "image": pokemon["image"]}
+                for pokemon, _ in holders.get(name, [])[:3]
+            ],
             "effect": info[name].effect if name in info else "",
             "generation": info[name].generation if name in info else None,
         }
