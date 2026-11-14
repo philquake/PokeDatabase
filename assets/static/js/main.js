@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initCompetitiveDropdown();
   initCompetitiveNavigation();
   initPokemonPickers();
+  initNavSearch();
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduceMotion) return;
@@ -23,6 +24,40 @@ document.addEventListener('DOMContentLoaded', () => {
   initCardEntrance();
   
 });
+
+/* Navbar search. Below 992px the input is collapsed to just the icon button (CSS hides it until the form has
+   .search-open): the button opens and focuses it; with text typed it submits; empty, it collapses again.
+   On desktop the input is always visible, so the button simply submits (or focuses an empty input). */
+function initNavSearch() {
+  const form = document.querySelector('.search-form-nav');
+  const toggle = document.getElementById('searchToggle');
+  const input = form && form.querySelector('.search-input-nav');
+  if (!form || !toggle || !input) return;
+
+  const collapsible = window.matchMedia('(max-width: 991.98px)');
+  const setOpen = (open) => {
+    form.classList.toggle('search-open', open);
+    toggle.setAttribute('aria-expanded', String(open));
+  };
+  setOpen(false);
+
+  toggle.addEventListener('click', () => {
+    if (input.value.trim()) {
+      form.submit();
+    } else if (collapsible.matches && form.classList.contains('search-open')) {
+      setOpen(false);
+    } else {
+      setOpen(true);
+      input.focus();
+    }
+  });
+  input.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && collapsible.matches) {
+      setOpen(false);
+      toggle.focus();
+    }
+  });
+}
 
 function initCompetitiveDropdown() {
   const dropdown = document.querySelector('.nav-dropdown');
